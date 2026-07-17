@@ -1,4 +1,6 @@
+import AppLayout from "./AppLayout";
+
 const SupportLayout = () => {
-  return <div>SupportLayout</div>;
+  return <AppLayout section="Panel de apoyo" />;
 };
 export default SupportLayout;

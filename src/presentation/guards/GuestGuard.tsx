@@ -1,13 +1,18 @@
 import { useAuthStore } from "@/application/store/auth-store";
 import type { PropsWithChildren } from "react";
 import { Navigate } from "react-router-dom";
+import { roleBasedRedirection } from "@/shared/utils/roleBasedRedirection";
+import AuthLoadingScreen from "../components/AuthLoadingScreen";
 
 const GuestGuard = ({ children }: PropsWithChildren) => {
-  const { isAuth, user } = useAuthStore();
+  const { isAuth, status, user } = useAuthStore();
 
-  if (isAuth && user) {
-    // TODO: despues resa basado en roles
-    return <Navigate to="/" replace />;
+  if (status === "initializing") {
+    return <AuthLoadingScreen />;
+  }
+
+  if (status === "authenticated" && isAuth && user) {
+    return <Navigate to={roleBasedRedirection(user.role)} replace />;
   }
 
   return children;

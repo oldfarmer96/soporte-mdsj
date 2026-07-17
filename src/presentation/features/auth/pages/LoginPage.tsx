@@ -53,6 +53,9 @@ const LoginPage = () => {
               {...register("dni")}
               type="text"
               inputMode="numeric"
+              autoComplete="username"
+              aria-invalid={Boolean(errors.dni)}
+              aria-describedby={errors.dni ? "dni-error" : undefined}
               maxLength={8}
               placeholder="Ingresa tus 8 dígitos"
             />
@@ -72,12 +75,15 @@ const LoginPage = () => {
               id="password"
               {...register("password")}
               type={showPassword ? "text" : "password"}
+              autoComplete="current-password"
+              aria-invalid={Boolean(errors.password)}
+              aria-describedby={errors.password ? "password-error" : undefined}
               placeholder="Ingresa tu contraseña"
               className="grow"
             />
             <button
               type="button"
-              className="btn btn-circle btn-ghost btn-xs"
+              className="btn btn-circle btn-ghost btn-sm"
               onClick={() => setShowPassword((current) => !current)}
               aria-label={
                 showPassword ? "Ocultar contraseña" : "Ver contraseña"

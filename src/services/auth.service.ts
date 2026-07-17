@@ -3,8 +3,32 @@ import type { RegisterT } from "@/presentation/features/auth/schemas/register.sc
 import type { User } from "@/shared/interfaces/userAuthStore.interface";
 import { isValidRole } from "@/shared/utils/roles.validator";
 import { supabase } from "@/shared/utils/supabase";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 const getInstitutionalEmail = (dni: string) => `${dni}@mdsj.com`;
+
+const getProfile = async (authUser: SupabaseUser): Promise<User> => {
+  const { data: profile, error } = await supabase
+    .from("perfiles")
+    .select("dni, nombres, apellidos, telefono, rol, estado")
+    .eq("id", authUser.id)
+    .single();
+
+  if (error) throw error;
+  if (profile.estado !== "ACTIVO") throw new Error("Perfil inactivo");
+  if (!isValidRole(profile.rol)) {
+    throw new Error(`Rol inválido: ${profile.rol}`);
+  }
+
+  return {
+    dni: profile.dni,
+    name: profile.nombres,
+    lastName: profile.apellidos,
+    email: authUser.email ?? getInstitutionalEmail(profile.dni),
+    phone: profile.telefono,
+    role: profile.rol,
+  };
+};
 
 export const loginWithDni = async ({
   dni,
@@ -18,34 +42,12 @@ export const loginWithDni = async ({
 
   if (authError) throw authError;
 
-  const { data: profile, error: profileError } = await supabase
-    .from("perfiles")
-    .select("dni, nombres, apellidos, telefono, rol, estado")
-    .eq("id", authData.user.id)
-    .single();
-
-  if (profileError) {
+  try {
+    return await getProfile(authData.user);
+  } catch (error) {
     await supabase.auth.signOut();
-    throw profileError;
+    throw error;
   }
-
-  if (profile.estado !== "ACTIVO") {
-    await supabase.auth.signOut();
-    throw new Error("Perfil inactivo");
-  }
-
-  if (!isValidRole(profile.rol)) {
-    throw new Error(`Rol inválido: ${profile.rol}`);
-  }
-
-  return {
-    dni: profile.dni,
-    name: profile.nombres,
-    lastName: profile.apellidos,
-    email: authData.user.email ?? getInstitutionalEmail(profile.dni),
-    phone: profile.telefono,
-    role: profile.rol,
-  };
 };
 
 export const registerWithDni = async ({
@@ -53,10 +55,11 @@ export const registerWithDni = async ({
   nombres,
   apellidos,
   telefono,
+  password,
 }: RegisterT): Promise<User> => {
   const { data, error } = await supabase.auth.signUp({
     email: getInstitutionalEmail(dni),
-    password: dni,
+    password,
     options: {
       data: {
         dni,
@@ -73,34 +76,30 @@ export const registerWithDni = async ({
     throw new Error("Usuario ya registrado");
   }
 
-  const { data: profile, error: profileError } = await supabase
-    .from("perfiles")
-    .select("dni, nombres, apellidos, telefono, rol, estado")
-    .eq("id", data.user?.id)
-    .single();
+  if (!data.user || !data.session) {
+    throw new Error("Registro sin sesión activa");
+  }
 
-  if (profileError) {
+  try {
+    return await getProfile(data.user);
+  } catch (profileError) {
     await supabase.auth.signOut();
     throw profileError;
   }
+};
 
-  if (profile.estado !== "ACTIVO") {
-    await supabase.auth.signOut();
-    throw new Error("Perfil inactivo");
-  }
+export const getCurrentUserProfile = async (): Promise<User | null> => {
+  const { data, error } = await supabase.auth.getUser();
 
-  if (!isValidRole(profile.rol)) {
-    throw new Error(`Rol inválido: ${profile.rol}`);
-  }
+  if (error) throw error;
+  if (!data.user) return null;
 
-  return {
-    dni: profile.dni,
-    name: profile.nombres,
-    lastName: profile.apellidos,
-    email: data.user?.email ?? getInstitutionalEmail(profile.dni),
-    phone: profile.telefono,
-    role: profile.rol,
-  };
+  return getProfile(data.user);
+};
+
+export const logout = async () => {
+  const { error } = await supabase.auth.signOut();
+  if (error) throw error;
 };
 
 export const getAuthErrorMessage = (message: string) => {
@@ -110,7 +109,10 @@ export const getAuthErrorMessage = (message: string) => {
     return "El DNI o la contraseña son incorrectos.";
   }
 
-  if (normalizedMessage.includes("user already registered")) {
+  if (
+    normalizedMessage.includes("user already registered") ||
+    normalizedMessage.includes("usuario ya registrado")
+  ) {
     return "Ya existe una cuenta registrada con este DNI.";
   }
 
@@ -118,8 +120,15 @@ export const getAuthErrorMessage = (message: string) => {
     return "La cuenta todavía no está habilitada para iniciar sesión.";
   }
 
-  if (normalizedMessage.includes("inactive profile")) {
+  if (
+    normalizedMessage.includes("inactive profile") ||
+    normalizedMessage.includes("perfil inactivo")
+  ) {
     return "Tu cuenta está inactiva o bloqueada. Contacta con soporte.";
+  }
+
+  if (normalizedMessage.includes("registro sin sesión activa")) {
+    return "La cuenta fue creada, pero Supabase no inició la sesión. Desactiva la confirmación de correo para este flujo.";
   }
 
   return "No pudimos completar la solicitud. Inténtalo nuevamente.";

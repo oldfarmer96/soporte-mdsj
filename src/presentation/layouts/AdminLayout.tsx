@@ -1,4 +1,6 @@
+import AppLayout from "./AppLayout";
+
 const AdminLayout = () => {
-  return <div>AdminLayout</div>;
+  return <AppLayout section="Administración" />;
 };
 export default AdminLayout;

@@ -1,7 +1,7 @@
 import { useRegister } from "@/application/hooks/useAuth";
 import FieldInfo from "@/presentation/components/FieldInfo";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, IdCard, Phone, UserRound } from "lucide-react";
+import { ArrowLeft, IdCard, LockKeyhole, Phone, UserRound } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import { registerSchema, type RegisterT } from "../schemas/register.schema";
@@ -20,6 +20,8 @@ const RegisterPage = () => {
       nombres: "",
       apellidos: "",
       telefono: "",
+      password: "",
+      confirmPassword: "",
     },
   });
 
@@ -54,6 +56,8 @@ const RegisterPage = () => {
               type="text"
               inputMode="numeric"
               autoComplete="username"
+              aria-invalid={Boolean(errors.dni)}
+              aria-describedby={errors.dni ? "dni-error" : undefined}
               maxLength={8}
               placeholder="12345678"
             />
@@ -74,6 +78,9 @@ const RegisterPage = () => {
                 id="nombres"
                 {...register("nombres")}
                 type="text"
+                autoComplete="given-name"
+                aria-invalid={Boolean(errors.nombres)}
+                aria-describedby={errors.nombres ? "nombres-error" : undefined}
                 placeholder="Nombres"
               />
             </label>
@@ -92,6 +99,9 @@ const RegisterPage = () => {
                 id="apellidos"
                 {...register("apellidos")}
                 type="text"
+                autoComplete="family-name"
+                aria-invalid={Boolean(errors.apellidos)}
+                aria-describedby={errors.apellidos ? "apellidos-error" : undefined}
                 placeholder="Apellidos"
               />
             </label>
@@ -113,12 +123,68 @@ const RegisterPage = () => {
               type="tel"
               inputMode="tel"
               autoComplete="tel"
+              aria-invalid={Boolean(errors.telefono)}
+              aria-describedby={errors.telefono ? "telefono-error" : undefined}
               maxLength={15}
               placeholder="987654321"
             />
           </label>
           <FieldInfo id="telefono-error" error={errors.telefono} />
         </fieldset>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <fieldset className="fieldset">
+            <label className="label font-semibold" htmlFor="password">
+              Contraseña
+            </label>
+            <label
+              className={`input w-full ${errors.password ? "input-error" : ""}`}
+            >
+              <LockKeyhole className="size-4 opacity-45" aria-hidden="true" />
+              <input
+                id="password"
+                {...register("password")}
+                type="password"
+                autoComplete="new-password"
+                aria-invalid={Boolean(errors.password)}
+                aria-describedby={errors.password ? "register-password-error" : undefined}
+                placeholder="Mínimo 8 caracteres"
+              />
+            </label>
+            <FieldInfo id="register-password-error" error={errors.password} />
+          </fieldset>
+
+          <fieldset className="fieldset">
+            <label className="label font-semibold" htmlFor="confirmPassword">
+              Confirmar contraseña
+            </label>
+            <label
+              className={`input w-full ${errors.confirmPassword ? "input-error" : ""}`}
+            >
+              <LockKeyhole className="size-4 opacity-45" aria-hidden="true" />
+              <input
+                id="confirmPassword"
+                {...register("confirmPassword")}
+                type="password"
+                autoComplete="new-password"
+                aria-invalid={Boolean(errors.confirmPassword)}
+                aria-describedby={
+                  errors.confirmPassword ? "confirm-password-error" : undefined
+                }
+                placeholder="Repite tu contraseña"
+              />
+            </label>
+            <FieldInfo
+              id="confirm-password-error"
+              error={errors.confirmPassword}
+            />
+          </fieldset>
+        </div>
+
+        <p className="text-xs leading-relaxed text-base-content/60">
+          Guarda esta contraseña en un lugar seguro. Esta aplicación no tendrá
+          recuperación automática por correo.
+        </p>
 
         <button
           type="submit"

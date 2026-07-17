@@ -10,22 +10,24 @@ export const useAuthStore = create<AuthStore>()(
     (set) => ({
       user: null,
       isAuth: false,
+      status: "initializing",
       setUser: (user: User) =>
         set({
           user,
           isAuth: true,
+          status: "authenticated",
         }),
-      logOut: () => {
+      clearAuth: () => {
         set({
           user: null,
           isAuth: false,
+          status: "unauthenticated",
         });
-
-        localStorage.removeItem(STORAGE_NAME);
       },
     }),
     {
       name: STORAGE_NAME,
+      partialize: (state) => ({ user: state.user }),
     },
   ),
 );

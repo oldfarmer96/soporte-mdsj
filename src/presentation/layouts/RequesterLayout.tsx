@@ -1,15 +1,7 @@
-import { Outlet } from "react-router-dom";
-import ToggleTheme from "../components/ToggleTheme";
+import AppLayout from "./AppLayout";
 
 const RequesterLayout = () => {
-  return (
-    <>
-      <header className="flex justify-end items-end">
-        <ToggleTheme />
-      </header>
-      <Outlet />
-    </>
-  );
+  return <AppLayout section="Portal del solicitante" />;
 };
 
 export default RequesterLayout;

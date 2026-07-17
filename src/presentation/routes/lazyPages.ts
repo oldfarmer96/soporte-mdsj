@@ -12,6 +12,14 @@ export const RegisterPage = lazy(
   () => import("@/presentation/features/auth/pages/RegisterPage"),
 );
 
+export const SupportPage = lazy(
+  () => import("@/presentation/features/support/pages/SupportPage"),
+);
+
+export const AdminPage = lazy(
+  () => import("@/presentation/features/admin/pages/AdminPage"),
+);
+
 export const NotFoundPage = lazy(
   () => import("@/presentation/features/errors/pages/NotFoundPage"),
 );

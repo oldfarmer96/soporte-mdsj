@@ -3,9 +3,10 @@ import type { RegisterT } from "@/presentation/features/auth/schemas/register.sc
 import {
   getAuthErrorMessage,
   loginWithDni,
+  logout,
   registerWithDni,
 } from "@/services/auth.service";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useAuthStore } from "../store/auth-store";
 import { useNavigate } from "react-router-dom";
@@ -50,14 +51,7 @@ export const useRegister = () => {
       toast.success("Cuenta creada correctamente", {
         id: TOAST_IDS.register,
       });
-      setUser({
-        dni: data.dni,
-        name: data.name,
-        lastName: data.lastName,
-        email: data.email,
-        phone: data.phone || null,
-        role: data.role,
-      });
+      setUser(data);
 
       navigate(roleBasedRedirection(data.role), { replace: true });
     },
@@ -65,6 +59,30 @@ export const useRegister = () => {
       toast.error(getAuthErrorMessage(error.message), {
         id: TOAST_IDS.register,
       });
+    },
+  });
+};
+
+export const useLogout = () => {
+  const clearAuth = useAuthStore((state) => state.clearAuth);
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  return useMutation({
+    mutationKey: ["logout"],
+    mutationFn: logout,
+    onSuccess: () => {
+      toast.success("Sesión cerrada correctamente", { id: TOAST_IDS.logout });
+    },
+    onError: () => {
+      toast.error("La sesión local se cerró, pero no pudimos avisar al servidor.", {
+        id: TOAST_IDS.logout,
+      });
+    },
+    onSettled: () => {
+      clearAuth();
+      queryClient.clear();
+      navigate("/login", { replace: true });
     },
   });
 };
