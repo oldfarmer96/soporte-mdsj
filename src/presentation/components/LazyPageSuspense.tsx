@@ -1,5 +1,6 @@
 import { Headphones } from "lucide-react";
 import { Suspense, type PropsWithChildren } from "react";
+import PageSkeleton from "./PageSkeleton";
 
 const PageFallback = () => (
   <div className="grid min-h-screen place-items-center bg-base-200 px-6 text-base-content">
@@ -15,8 +16,17 @@ const PageFallback = () => (
   </div>
 );
 
-const LazyPageSuspense = ({ children }: PropsWithChildren) => (
-  <Suspense fallback={<PageFallback />}>{children}</Suspense>
+interface LazyPageSuspenseProps extends PropsWithChildren {
+  fullScreen?: boolean;
+}
+
+const LazyPageSuspense = ({
+  children,
+  fullScreen = false,
+}: LazyPageSuspenseProps) => (
+  <Suspense fallback={fullScreen ? <PageFallback /> : <PageSkeleton />}>
+    {children}
+  </Suspense>
 );
 
 export default LazyPageSuspense;

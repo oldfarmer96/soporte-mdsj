@@ -2,7 +2,7 @@
 
 > Documento vivo para organizar el desarrollo de la aplicación módulo por módulo.
 >
-> Última revisión del código y de la carpeta `db`: 16 de julio de 2026.
+> Última revisión del código y de la carpeta `db`: 18 de julio de 2026.
 
 ## 1. Objetivo de la aplicación
 
@@ -51,10 +51,10 @@ La aplicación se desarrollará con enfoque **mobile-first**. La versión móvil
 
 ### 2.3 Funcionalidad que todavía es placeholder
 
-- Las páginas iniciales por rol ya existen, pero todavía no contienen los módulos de negocio.
-- Los layouts autenticados ya comparten un header responsive.
+- Las páginas iniciales por rol y todos los destinos del app shell ya existen, pero todavía no contienen los módulos de negocio.
+- Los layouts autenticados comparten header, sidebar de escritorio y drawer móvil.
 - `RoleGuard` ya protege solicitante, apoyo y administración.
-- Ya existen rutas funcionales `/`, `/apoyo` y `/admin`.
+- Ya existen las rutas funcionales iniciales de solicitante, apoyo y administración.
 - No existe interfaz para tickets, archivos, resoluciones, historial o catálogos.
 
 ### 2.4 ¿El módulo Auth está casi listo?
@@ -86,8 +86,8 @@ La sesión de Supabase es ahora la fuente de verdad. Zustand mantiene el perfil 
 
 - Login, registro y 404 tienen una base responsive con clases `sm:` y `lg:`.
 - Los formularios parten de una sola columna y el registro pasa a dos columnas en pantallas mayores.
-- Los tres layouts autenticados ya comparten un header responsive y `UserMenu`.
-- Todavía faltan navegación de módulos, tarjetas de ticket, tablas adaptativas y filtros responsive.
+- Los tres layouts autenticados comparten app shell, header, sidebar, drawer móvil y `UserMenu`.
+- Todavía faltan tarjetas de ticket, tablas adaptativas y filtros responsive de los módulos de negocio.
 
 ---
 
@@ -368,16 +368,16 @@ No se comenzará por dashboards decorativos. El orden sigue las dependencias del
 
 ### Paso a paso
 
-- [ ] Diseñar `AppShell`, `AppHeader`, `Sidebar`, `MobileNavigation` y `UserMenu`.
-- [ ] Mostrar nombre, rol y estado de sesión.
-- [ ] Integrar cambio de tema y logout dentro del shell.
-- [ ] Crear navegación específica por rol.
-- [ ] Añadir estado activo, títulos de página y breadcrumbs donde aporten contexto.
-- [ ] Crear `PageContainer`, `PageHeader`, `EmptyState`, `ErrorState` y skeletons cuando aparezca su primer uso real.
-- [ ] Implementar `RequesterLayout`.
-- [ ] Implementar `SupportLayout`.
-- [ ] Implementar `AdminLayout`.
-- [ ] Mantener el shell mientras se cargan páginas lazy internas.
+- [x] Diseñar `AppShell`, `AppHeader`, `Sidebar`, navegación móvil y `UserMenu`.
+- [x] Mostrar nombre, rol y estado de sesión.
+- [x] Integrar cambio de tema y logout dentro del shell.
+- [x] Crear navegación específica por rol.
+- [x] Añadir estado activo, títulos de página y breadcrumbs donde aporten contexto.
+- [x] Crear `PageContainer`, `PageHeader`, `EmptyState`, `ErrorState` y skeletons.
+- [x] Implementar `RequesterLayout`.
+- [x] Implementar `SupportLayout`.
+- [x] Implementar `AdminLayout`.
+- [x] Mantener el shell mientras se cargan páginas lazy internas.
 
 ### Navegación inicial por rol
 
@@ -926,7 +926,7 @@ Actualizar esta tabla al finalizar cada bloque.
 | ------------------------------ | ----------- | ------------------------------------------------------------------ |
 | 0. Conexión Supabase           | En progreso | La base se administrará únicamente desde SQL Editor                |
 | 1. Auth y sesión               | En progreso | Sesión, logout y roles implementados; falta cambio de contraseña   |
-| 2. App shell responsive        | En progreso | Header y UserMenu creados; falta navegación de módulos             |
+| 2. App shell responsive        | Completado  | Navegación por rol, sidebar, drawer móvil y estados compartidos     |
 | 3. Catálogos de lectura        | Pendiente   | Datos y RLS existen en SQL                                         |
 | 4. Creación de tickets         | Pendiente   | Contrato existe en SQL                                             |
 | 5. Mis tickets y detalle       | Pendiente   | Contrato existe en SQL                                             |

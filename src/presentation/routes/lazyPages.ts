@@ -23,3 +23,11 @@ export const AdminPage = lazy(
 export const NotFoundPage = lazy(
   () => import("@/presentation/features/errors/pages/NotFoundPage"),
 );
+
+export const ModulePendingPage = lazy(
+  () => import("@/presentation/features/shared/pages/ModulePendingPage"),
+);
+
+export const ProfilePage = lazy(
+  () => import("@/presentation/features/shared/pages/ProfilePage"),
+);
