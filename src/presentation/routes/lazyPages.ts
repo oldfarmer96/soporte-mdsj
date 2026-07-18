@@ -63,3 +63,7 @@ export const SupportTicketsPage = lazy(
 export const SupportTicketDetailPage = lazy(
   () => import("@/presentation/features/support/pages/SupportTicketDetailPage"),
 );
+
+export const ProfilesPage = lazy(
+  () => import("@/presentation/features/admin/pages/ProfilesPage"),
+);

@@ -1,10 +1,5 @@
-import RoleHomePage from "../../shared/pages/RoleHomePage";
+import DashboardPage from "../../dashboard/pages/DashboardPage";
 
-const AdminPage = () => (
-  <RoleHomePage
-    role="ADMIN"
-    description="Consulta los accesos de administración, tickets y catálogos desde una navegación protegida y organizada por función."
-  />
-);
+const AdminPage = () => <DashboardPage role="ADMIN" />;
 
 export default AdminPage;

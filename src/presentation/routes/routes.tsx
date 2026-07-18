@@ -10,6 +10,7 @@ import {
   NotFoundPage,
   ProfilePage,
   ProblemTypesPage,
+  ProfilesPage,
   RegisterPage,
   RequesterPage,
   SupportPage,
@@ -28,7 +29,6 @@ import AdminLayout from "../layouts/AdminLayout";
 import RouteErrorPage from "../features/errors/pages/RouteErrorPage";
 import {
   FolderKanban,
-  UsersRound,
 } from "lucide-react";
 
 export const routes = createBrowserRouter([
@@ -206,12 +206,7 @@ export const routes = createBrowserRouter([
         errorElement: <RouteErrorPage />,
         element: (
           <LazyPageSuspense>
-            <ModulePendingPage
-              title="Usuarios"
-              description="Consulta los perfiles y sus condiciones de acceso al sistema."
-              section="Administración"
-              icon={UsersRound}
-            />
+            <ProfilesPage />
           </LazyPageSuspense>
         ),
       },

@@ -1,10 +1,5 @@
-import RoleHomePage from "../../shared/pages/RoleHomePage";
+import DashboardPage from "../../dashboard/pages/DashboardPage";
 
-const SupportPage = () => (
-  <RoleHomePage
-    role="APOYO"
-    description="Accede a la cola operativa y a los tickets bajo tu responsabilidad sin perder las herramientas esenciales en dispositivos móviles."
-  />
-);
+const SupportPage = () => <DashboardPage role="APOYO" />;
 
 export default SupportPage;
