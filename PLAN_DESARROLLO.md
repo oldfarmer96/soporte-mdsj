@@ -403,15 +403,15 @@ No se comenzará por dashboards decorativos. El orden sigue las dependencias del
 
 ### Paso a paso
 
-- [ ] Crear `catalog.service.ts`.
-- [ ] Crear query keys estables.
-- [ ] Consultar áreas activas ordenadas.
-- [ ] Consultar categorías activas ordenadas.
-- [ ] Consultar tipos activos por categoría.
-- [ ] Tipar respuestas con el esquema generado.
-- [ ] Implementar caché y reintento adecuados.
-- [ ] Crear estados de error y reintento.
-- [ ] Reiniciar el tipo de problema cuando cambie la categoría.
+- [x] Crear `catalog.service.ts`.
+- [x] Crear query keys estables.
+- [x] Consultar áreas activas ordenadas.
+- [x] Consultar categorías activas ordenadas.
+- [x] Consultar tipos activos por categoría.
+- [x] Tipar respuestas con interfaces alineadas manualmente al esquema actual.
+- [x] Implementar caché y reintento adecuados.
+- [x] Crear estados de error y reintento.
+- [x] Reiniciar el tipo de problema cuando cambie la categoría.
 
 ### Terminado cuando
 
@@ -927,7 +927,7 @@ Actualizar esta tabla al finalizar cada bloque.
 | 0. Conexión Supabase           | En progreso | La base se administrará únicamente desde SQL Editor                |
 | 1. Auth y sesión               | En progreso | Sesión, logout y roles implementados; falta cambio de contraseña   |
 | 2. App shell responsive        | Completado  | Navegación por rol, sidebar, drawer móvil y estados compartidos     |
-| 3. Catálogos de lectura        | Pendiente   | Datos y RLS existen en SQL                                         |
+| 3. Catálogos de lectura        | Completado  | Servicios, hooks y vistas de lectura responsive implementados      |
 | 4. Creación de tickets         | Pendiente   | Contrato existe en SQL                                             |
 | 5. Mis tickets y detalle       | Pendiente   | Contrato existe en SQL                                             |
 | 6. Cola de apoyo               | Pendiente   | RPC e índices existen en SQL                                       |

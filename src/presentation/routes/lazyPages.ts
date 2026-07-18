@@ -31,3 +31,15 @@ export const ModulePendingPage = lazy(
 export const ProfilePage = lazy(
   () => import("@/presentation/features/shared/pages/ProfilePage"),
 );
+
+export const AreasPage = lazy(
+  () => import("@/presentation/features/catalogs/pages/AreasPage"),
+);
+
+export const CategoriesPage = lazy(
+  () => import("@/presentation/features/catalogs/pages/CategoriesPage"),
+);
+
+export const ProblemTypesPage = lazy(
+  () => import("@/presentation/features/catalogs/pages/ProblemTypesPage"),
+);

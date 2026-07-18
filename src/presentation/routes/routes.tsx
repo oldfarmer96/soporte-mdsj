@@ -1,10 +1,13 @@
 import { createBrowserRouter } from "react-router-dom";
 import {
   AdminPage,
+  AreasPage,
+  CategoriesPage,
   LoginPage,
   ModulePendingPage,
   NotFoundPage,
   ProfilePage,
+  ProblemTypesPage,
   RegisterPage,
   RequesterPage,
   SupportPage,
@@ -21,10 +24,7 @@ import RouteErrorPage from "../features/errors/pages/RouteErrorPage";
 import {
   ClipboardCheck,
   FolderKanban,
-  ListTree,
-  MapPin,
   Plus,
-  Tags,
   UsersRound,
 } from "lucide-react";
 
@@ -219,12 +219,7 @@ export const routes = createBrowserRouter([
         errorElement: <RouteErrorPage />,
         element: (
           <LazyPageSuspense>
-            <ModulePendingPage
-              title="Áreas"
-              description="Administra las áreas y ubicaciones utilizadas para registrar tickets."
-              section="Administración"
-              icon={MapPin}
-            />
+            <AreasPage />
           </LazyPageSuspense>
         ),
       },
@@ -233,12 +228,7 @@ export const routes = createBrowserRouter([
         errorElement: <RouteErrorPage />,
         element: (
           <LazyPageSuspense>
-            <ModulePendingPage
-              title="Categorías"
-              description="Administra las categorías generales de las solicitudes de soporte."
-              section="Administración"
-              icon={Tags}
-            />
+            <CategoriesPage />
           </LazyPageSuspense>
         ),
       },
@@ -247,12 +237,7 @@ export const routes = createBrowserRouter([
         errorElement: <RouteErrorPage />,
         element: (
           <LazyPageSuspense>
-            <ModulePendingPage
-              title="Tipos de problema"
-              description="Administra la clasificación detallada y su prioridad base."
-              section="Administración"
-              icon={ListTree}
-            />
+            <ProblemTypesPage />
           </LazyPageSuspense>
         ),
       },
