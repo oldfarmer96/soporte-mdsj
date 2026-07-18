@@ -3,14 +3,19 @@ import {
   AdminPage,
   AreasPage,
   CategoriesPage,
+  CreateTicketPage,
   LoginPage,
   ModulePendingPage,
+  MyTicketsPage,
   NotFoundPage,
   ProfilePage,
   ProblemTypesPage,
   RegisterPage,
   RequesterPage,
   SupportPage,
+  SupportTicketDetailPage,
+  SupportTicketsPage,
+  TicketCreatedPage,
 } from "./lazyPages";
 import RequesterLayout from "../layouts/RequesterLayout";
 import AuthLayout from "../layouts/AuthLayout";
@@ -22,9 +27,7 @@ import SupportLayout from "../layouts/SupportLayout";
 import AdminLayout from "../layouts/AdminLayout";
 import RouteErrorPage from "../features/errors/pages/RouteErrorPage";
 import {
-  ClipboardCheck,
   FolderKanban,
-  Plus,
   UsersRound,
 } from "lucide-react";
 
@@ -77,12 +80,16 @@ export const routes = createBrowserRouter([
         errorElement: <RouteErrorPage />,
         element: (
           <LazyPageSuspense>
-            <ModulePendingPage
-              title="Nuevo ticket"
-              description="Registra una nueva incidencia para que el personal de apoyo pueda atenderla."
-              section="Solicitante"
-              icon={Plus}
-            />
+            <CreateTicketPage />
+          </LazyPageSuspense>
+        ),
+      },
+      {
+        path: "/tickets/:ticketId",
+        errorElement: <RouteErrorPage />,
+        element: (
+          <LazyPageSuspense>
+            <TicketCreatedPage />
           </LazyPageSuspense>
         ),
       },
@@ -91,12 +98,7 @@ export const routes = createBrowserRouter([
         errorElement: <RouteErrorPage />,
         element: (
           <LazyPageSuspense>
-            <ModulePendingPage
-              title="Mis tickets"
-              description="Consulta el estado y la atención de las solicitudes que registraste."
-              section="Solicitante"
-              icon={FolderKanban}
-            />
+            <MyTicketsPage />
           </LazyPageSuspense>
         ),
       },
@@ -134,12 +136,7 @@ export const routes = createBrowserRouter([
         errorElement: <RouteErrorPage />,
         element: (
           <LazyPageSuspense>
-            <ModulePendingPage
-              title="Cola de tickets"
-              description="Consulta y organiza las solicitudes pendientes de atención."
-              section="Personal de apoyo"
-              icon={FolderKanban}
-            />
+            <SupportTicketsPage mode="queue" />
           </LazyPageSuspense>
         ),
       },
@@ -148,12 +145,16 @@ export const routes = createBrowserRouter([
         errorElement: <RouteErrorPage />,
         element: (
           <LazyPageSuspense>
-            <ModulePendingPage
-              title="Mis asignados"
-              description="Revisa las solicitudes que se encuentran bajo tu responsabilidad."
-              section="Personal de apoyo"
-              icon={ClipboardCheck}
-            />
+            <SupportTicketsPage mode="mine" />
+          </LazyPageSuspense>
+        ),
+      },
+      {
+        path: "/apoyo/tickets/:ticketId",
+        errorElement: <RouteErrorPage />,
+        element: (
+          <LazyPageSuspense>
+            <SupportTicketDetailPage />
           </LazyPageSuspense>
         ),
       },

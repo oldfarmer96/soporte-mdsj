@@ -1303,6 +1303,23 @@ begin
     raise exception 'Debe iniciar sesión';
   end if;
 
+  if p_solucionado is null then
+    raise exception 'Debe confirmar o rechazar la solución';
+  end if;
+
+  if p_solucionado = false
+     and (
+       p_comentario is null
+       or char_length(trim(p_comentario)) < 5
+     ) then
+    raise exception 'Debe indicar por qué la solución no resolvió el problema';
+  end if;
+
+  if p_solucionado = false
+     and char_length(trim(p_comentario)) > 1000 then
+    raise exception 'El comentario es demasiado largo';
+  end if;
+
   select *
   into ticket_actual
   from public.tickets
@@ -1320,11 +1337,21 @@ begin
       'El ticket aún no está pendiente de confirmación';
   end if;
 
+  if not exists (
+    select 1
+    from public.ticket_resoluciones
+    where id_ticket = p_id_ticket
+  ) then
+    raise exception 'El ticket no tiene una solución registrada';
+  end if;
+
   update public.ticket_resoluciones
   set
     confirmado_por_solicitante = p_solucionado,
-    comentario_solicitante =
-      nullif(trim(p_comentario), '')
+    comentario_solicitante = case
+      when p_solucionado then null
+      else nullif(trim(p_comentario), '')
+    end
   where id_ticket = p_id_ticket;
 
   update public.tickets
@@ -1397,6 +1424,10 @@ begin
     raise exception 'Debe indicar el motivo de reapertura';
   end if;
 
+  if char_length(trim(p_motivo)) > 1000 then
+    raise exception 'El motivo de reapertura es demasiado largo';
+  end if;
+
   select *
   into ticket_actual
   from public.tickets
@@ -1438,6 +1469,13 @@ begin
     order by id desc
     limit 1
   );
+
+  update public.ticket_resoluciones
+  set
+    confirmado_por_solicitante = null,
+    comentario_solicitante = null,
+    updated_at = now()
+  where id_ticket = p_id_ticket;
 
   return resultado;
 end;
@@ -1872,6 +1910,26 @@ for select
 to authenticated
 using (
   bucket_id = 'ticket-archivos'
+  and exists (
+    select 1
+    from public.tickets
+    where id::text = split_part(name, '/', 2)
+      and (
+        id_solicitante = auth.uid()
+        or public.es_personal_apoyo()
+      )
+  )
+);
+
+-- Se usa únicamente para compensar una subida cuando falla el
+-- registro de metadatos. La interfaz no ofrece borrado de archivos.
+create policy "limpiar_subida_archivo_propia"
+on storage.objects
+for delete
+to authenticated
+using (
+  bucket_id = 'ticket-archivos'
+  and split_part(name, '/', 1) = auth.uid()::text
   and exists (
     select 1
     from public.tickets

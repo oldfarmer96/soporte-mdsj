@@ -43,3 +43,23 @@ export const CategoriesPage = lazy(
 export const ProblemTypesPage = lazy(
   () => import("@/presentation/features/catalogs/pages/ProblemTypesPage"),
 );
+
+export const CreateTicketPage = lazy(
+  () => import("@/presentation/features/tickets/pages/CreateTicketPage"),
+);
+
+export const TicketCreatedPage = lazy(
+  () => import("@/presentation/features/tickets/pages/TicketCreatedPage"),
+);
+
+export const MyTicketsPage = lazy(
+  () => import("@/presentation/features/tickets/pages/MyTicketsPage"),
+);
+
+export const SupportTicketsPage = lazy(
+  () => import("@/presentation/features/support/pages/SupportTicketsPage"),
+);
+
+export const SupportTicketDetailPage = lazy(
+  () => import("@/presentation/features/support/pages/SupportTicketDetailPage"),
+);
