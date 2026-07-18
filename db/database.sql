@@ -1303,6 +1303,23 @@ begin
     raise exception 'Debe iniciar sesión';
   end if;
 
+  if p_solucionado is null then
+    raise exception 'Debe confirmar o rechazar la solución';
+  end if;
+
+  if p_solucionado = false
+     and (
+       p_comentario is null
+       or char_length(trim(p_comentario)) < 5
+     ) then
+    raise exception 'Debe indicar por qué la solución no resolvió el problema';
+  end if;
+
+  if p_solucionado = false
+     and char_length(trim(p_comentario)) > 1000 then
+    raise exception 'El comentario es demasiado largo';
+  end if;
+
   select *
   into ticket_actual
   from public.tickets
@@ -1320,11 +1337,21 @@ begin
       'El ticket aún no está pendiente de confirmación';
   end if;
 
+  if not exists (
+    select 1
+    from public.ticket_resoluciones
+    where id_ticket = p_id_ticket
+  ) then
+    raise exception 'El ticket no tiene una solución registrada';
+  end if;
+
   update public.ticket_resoluciones
   set
     confirmado_por_solicitante = p_solucionado,
-    comentario_solicitante =
-      nullif(trim(p_comentario), '')
+    comentario_solicitante = case
+      when p_solucionado then null
+      else nullif(trim(p_comentario), '')
+    end
   where id_ticket = p_id_ticket;
 
   update public.tickets
@@ -1397,6 +1424,10 @@ begin
     raise exception 'Debe indicar el motivo de reapertura';
   end if;
 
+  if char_length(trim(p_motivo)) > 1000 then
+    raise exception 'El motivo de reapertura es demasiado largo';
+  end if;
+
   select *
   into ticket_actual
   from public.tickets
@@ -1438,6 +1469,221 @@ begin
     order by id desc
     limit 1
   );
+
+  update public.ticket_resoluciones
+  set
+    confirmado_por_solicitante = null,
+    comentario_solicitante = null,
+    updated_at = now()
+  where id_ticket = p_id_ticket;
+
+  return resultado;
+end;
+$$;
+
+
+-- ============================================================
+-- 25.1 RPC: MÉTRICAS OPERATIVAS DE SOPORTE
+-- ============================================================
+
+create or replace function public.obtener_metricas_soporte(
+  p_desde date,
+  p_hasta date
+)
+returns jsonb
+language plpgsql
+stable
+security invoker
+set search_path = ''
+as $$
+declare
+  limite_desde timestamptz;
+  limite_hasta timestamptz;
+  resultado jsonb;
+begin
+  if not public.es_personal_apoyo() then
+    raise exception 'No tiene permiso para consultar métricas';
+  end if;
+
+  if p_desde is null
+     or p_hasta is null
+     or p_desde > p_hasta then
+    raise exception 'El rango de fechas no es válido';
+  end if;
+
+  if p_hasta - p_desde > 365 then
+    raise exception 'El rango máximo permitido es de 366 días';
+  end if;
+
+  limite_desde := p_desde::timestamp
+    at time zone 'America/Lima';
+  limite_hasta := (p_hasta + 1)::timestamp
+    at time zone 'America/Lima';
+
+  with
+  tickets_periodo as materialized (
+    select
+      id,
+      estado,
+      prioridad,
+      id_area,
+      id_categoria,
+      created_at,
+      assigned_at,
+      resolved_at
+    from public.tickets
+    where created_at >= limite_desde
+      and created_at < limite_hasta
+  ),
+  resueltos_periodo as materialized (
+    select id, resolved_at
+    from public.tickets
+    where resolved_at >= limite_desde
+      and resolved_at < limite_hasta
+  ),
+  dias as (
+    select generate_series(
+      p_desde::timestamp,
+      p_hasta::timestamp,
+      interval '1 day'
+    )::date as dia
+  ),
+  creados_diarios as (
+    select
+      (created_at at time zone 'America/Lima')::date as dia,
+      count(*) as total
+    from tickets_periodo
+    group by 1
+  ),
+  resueltos_diarios as (
+    select
+      (resolved_at at time zone 'America/Lima')::date as dia,
+      count(*) as total
+    from resueltos_periodo
+    group by 1
+  )
+  select jsonb_build_object(
+    'period', jsonb_build_object(
+      'from', p_desde,
+      'to', p_hasta,
+      'timezone', 'America/Lima'
+    ),
+    'summary', jsonb_build_object(
+      'created', (select count(*) from tickets_periodo),
+      'resolved', (select count(*) from resueltos_periodo),
+      'active', (
+        select count(*)
+        from public.tickets
+        where estado in ('NUEVO', 'ASIGNADO', 'EN_CURSO', 'REABIERTO')
+      ),
+      'unassigned', (
+        select count(*)
+        from public.tickets
+        where asignado_a is null
+          and estado in ('NUEVO', 'REABIERTO')
+      ),
+      'avgAssignmentHours', coalesce((
+        select round(
+          avg(extract(epoch from (assigned_at - created_at)) / 3600)::numeric,
+          1
+        )
+        from tickets_periodo
+        where assigned_at is not null
+      ), 0),
+      'avgResolutionHours', coalesce((
+        select round(
+          avg(extract(epoch from (resolved_at - created_at)) / 3600)::numeric,
+          1
+        )
+        from tickets_periodo
+        where resolved_at is not null
+      ), 0)
+    ),
+    'byStatus', coalesce((
+      select jsonb_agg(
+        jsonb_build_object('key', estado::text, 'count', total)
+        order by estado
+      )
+      from (
+        select estado, count(*) as total
+        from tickets_periodo
+        group by estado
+      ) datos
+    ), '[]'::jsonb),
+    'byPriority', coalesce((
+      select jsonb_agg(
+        jsonb_build_object('key', prioridad::text, 'count', total)
+        order by prioridad desc
+      )
+      from (
+        select prioridad, count(*) as total
+        from tickets_periodo
+        group by prioridad
+      ) datos
+    ), '[]'::jsonb),
+    'byArea', coalesce((
+      select jsonb_agg(
+        jsonb_build_object('key', nombre, 'count', total)
+        order by total desc, nombre
+      )
+      from (
+        select area.nombre, count(*) as total
+        from tickets_periodo ticket
+        join public.areas area on area.id = ticket.id_area
+        group by area.id, area.nombre
+        order by total desc, area.nombre
+        limit 8
+      ) datos
+    ), '[]'::jsonb),
+    'byCategory', coalesce((
+      select jsonb_agg(
+        jsonb_build_object('key', nombre, 'count', total)
+        order by total desc, nombre
+      )
+      from (
+        select categoria.nombre, count(*) as total
+        from tickets_periodo ticket
+        join public.categorias categoria on categoria.id = ticket.id_categoria
+        group by categoria.id, categoria.nombre
+        order by total desc, categoria.nombre
+        limit 8
+      ) datos
+    ), '[]'::jsonb),
+    'workload', coalesce((
+      select jsonb_agg(
+        jsonb_build_object(
+          'agent', nombres || ' ' || apellidos,
+          'assigned', asignados,
+          'inProgress', en_curso
+        )
+        order by asignados desc, nombres, apellidos
+      )
+      from (
+        select
+          perfil.nombres,
+          perfil.apellidos,
+          count(*) as asignados,
+          count(*) filter (where ticket.estado = 'EN_CURSO') as en_curso
+        from public.tickets ticket
+        join public.perfiles perfil on perfil.id = ticket.asignado_a
+        where ticket.estado in ('ASIGNADO', 'EN_CURSO', 'REABIERTO')
+        group by perfil.id, perfil.nombres, perfil.apellidos
+      ) datos
+    ), '[]'::jsonb),
+    'daily', coalesce((
+      select jsonb_agg(
+        jsonb_build_object(
+          'date', dias.dia,
+          'created', coalesce(creados_diarios.total, 0),
+          'resolved', coalesce(resueltos_diarios.total, 0)
+        )
+        order by dias.dia
+      )
+      from dias
+      left join creados_diarios using (dia)
+      left join resueltos_diarios using (dia)
+    ), '[]'::jsonb)
+  ) into resultado;
 
   return resultado;
 end;
@@ -1809,6 +2055,12 @@ grant execute on function public.reabrir_ticket(
 )
 to authenticated;
 
+revoke all on function public.obtener_metricas_soporte(date, date)
+from public;
+
+grant execute on function public.obtener_metricas_soporte(date, date)
+to authenticated;
+
 
 -- ============================================================
 -- 37. BUCKET PRIVADO PARA FOTOS
@@ -1872,6 +2124,26 @@ for select
 to authenticated
 using (
   bucket_id = 'ticket-archivos'
+  and exists (
+    select 1
+    from public.tickets
+    where id::text = split_part(name, '/', 2)
+      and (
+        id_solicitante = auth.uid()
+        or public.es_personal_apoyo()
+      )
+  )
+);
+
+-- Se usa únicamente para compensar una subida cuando falla el
+-- registro de metadatos. La interfaz no ofrece borrado de archivos.
+create policy "limpiar_subida_archivo_propia"
+on storage.objects
+for delete
+to authenticated
+using (
+  bucket_id = 'ticket-archivos'
+  and split_part(name, '/', 1) = auth.uid()::text
   and exists (
     select 1
     from public.tickets

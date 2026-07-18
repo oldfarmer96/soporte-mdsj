@@ -1,11 +1,22 @@
 import { createBrowserRouter } from "react-router-dom";
 import {
   AdminPage,
+  AreasPage,
+  CategoriesPage,
+  CreateTicketPage,
   LoginPage,
+  ModulePendingPage,
+  MyTicketsPage,
   NotFoundPage,
+  ProfilePage,
+  ProblemTypesPage,
+  ProfilesPage,
   RegisterPage,
   RequesterPage,
   SupportPage,
+  SupportTicketDetailPage,
+  SupportTicketsPage,
+  TicketCreatedPage,
 } from "./lazyPages";
 import RequesterLayout from "../layouts/RequesterLayout";
 import AuthLayout from "../layouts/AuthLayout";
@@ -15,6 +26,10 @@ import LazyPageSuspense from "../components/LazyPageSuspense";
 import RoleGuard from "../guards/RoleGuard";
 import SupportLayout from "../layouts/SupportLayout";
 import AdminLayout from "../layouts/AdminLayout";
+import RouteErrorPage from "../features/errors/pages/RouteErrorPage";
+import {
+  FolderKanban,
+} from "lucide-react";
 
 export const routes = createBrowserRouter([
   {
@@ -27,7 +42,7 @@ export const routes = createBrowserRouter([
       {
         path: "/login",
         element: (
-          <LazyPageSuspense>
+          <LazyPageSuspense fullScreen>
             <LoginPage />
           </LazyPageSuspense>
         ),
@@ -35,7 +50,7 @@ export const routes = createBrowserRouter([
       {
         path: "/register",
         element: (
-          <LazyPageSuspense>
+          <LazyPageSuspense fullScreen>
             <RegisterPage />
           </LazyPageSuspense>
         ),
@@ -53,9 +68,46 @@ export const routes = createBrowserRouter([
     children: [
       {
         path: "/",
+        errorElement: <RouteErrorPage />,
         element: (
           <LazyPageSuspense>
             <RequesterPage />
+          </LazyPageSuspense>
+        ),
+      },
+      {
+        path: "/tickets/nuevo",
+        errorElement: <RouteErrorPage />,
+        element: (
+          <LazyPageSuspense>
+            <CreateTicketPage />
+          </LazyPageSuspense>
+        ),
+      },
+      {
+        path: "/tickets/:ticketId",
+        errorElement: <RouteErrorPage />,
+        element: (
+          <LazyPageSuspense>
+            <TicketCreatedPage />
+          </LazyPageSuspense>
+        ),
+      },
+      {
+        path: "/tickets",
+        errorElement: <RouteErrorPage />,
+        element: (
+          <LazyPageSuspense>
+            <MyTicketsPage />
+          </LazyPageSuspense>
+        ),
+      },
+      {
+        path: "/perfil",
+        errorElement: <RouteErrorPage />,
+        element: (
+          <LazyPageSuspense>
+            <ProfilePage />
           </LazyPageSuspense>
         ),
       },
@@ -72,9 +124,46 @@ export const routes = createBrowserRouter([
     children: [
       {
         path: "/apoyo",
+        errorElement: <RouteErrorPage />,
         element: (
           <LazyPageSuspense>
             <SupportPage />
+          </LazyPageSuspense>
+        ),
+      },
+      {
+        path: "/apoyo/tickets",
+        errorElement: <RouteErrorPage />,
+        element: (
+          <LazyPageSuspense>
+            <SupportTicketsPage mode="queue" />
+          </LazyPageSuspense>
+        ),
+      },
+      {
+        path: "/apoyo/asignados",
+        errorElement: <RouteErrorPage />,
+        element: (
+          <LazyPageSuspense>
+            <SupportTicketsPage mode="mine" />
+          </LazyPageSuspense>
+        ),
+      },
+      {
+        path: "/apoyo/tickets/:ticketId",
+        errorElement: <RouteErrorPage />,
+        element: (
+          <LazyPageSuspense>
+            <SupportTicketDetailPage />
+          </LazyPageSuspense>
+        ),
+      },
+      {
+        path: "/apoyo/perfil",
+        errorElement: <RouteErrorPage />,
+        element: (
+          <LazyPageSuspense>
+            <ProfilePage />
           </LazyPageSuspense>
         ),
       },
@@ -91,9 +180,69 @@ export const routes = createBrowserRouter([
     children: [
       {
         path: "/admin",
+        errorElement: <RouteErrorPage />,
         element: (
           <LazyPageSuspense>
             <AdminPage />
+          </LazyPageSuspense>
+        ),
+      },
+      {
+        path: "/admin/tickets",
+        errorElement: <RouteErrorPage />,
+        element: (
+          <LazyPageSuspense>
+            <ModulePendingPage
+              title="Tickets"
+              description="Consulta general de las solicitudes registradas en la mesa de soporte."
+              section="Administración"
+              icon={FolderKanban}
+            />
+          </LazyPageSuspense>
+        ),
+      },
+      {
+        path: "/admin/usuarios",
+        errorElement: <RouteErrorPage />,
+        element: (
+          <LazyPageSuspense>
+            <ProfilesPage />
+          </LazyPageSuspense>
+        ),
+      },
+      {
+        path: "/admin/areas",
+        errorElement: <RouteErrorPage />,
+        element: (
+          <LazyPageSuspense>
+            <AreasPage />
+          </LazyPageSuspense>
+        ),
+      },
+      {
+        path: "/admin/categorias",
+        errorElement: <RouteErrorPage />,
+        element: (
+          <LazyPageSuspense>
+            <CategoriesPage />
+          </LazyPageSuspense>
+        ),
+      },
+      {
+        path: "/admin/tipos-problema",
+        errorElement: <RouteErrorPage />,
+        element: (
+          <LazyPageSuspense>
+            <ProblemTypesPage />
+          </LazyPageSuspense>
+        ),
+      },
+      {
+        path: "/admin/perfil",
+        errorElement: <RouteErrorPage />,
+        element: (
+          <LazyPageSuspense>
+            <ProfilePage />
           </LazyPageSuspense>
         ),
       },
@@ -102,7 +251,7 @@ export const routes = createBrowserRouter([
   {
     path: "*",
     element: (
-      <LazyPageSuspense>
+      <LazyPageSuspense fullScreen>
         <NotFoundPage />
       </LazyPageSuspense>
     ),

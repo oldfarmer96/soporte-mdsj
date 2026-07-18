@@ -29,7 +29,7 @@ const ToggleTheme = () => {
     try {
       localStorage.setItem("app-theme", theme);
     } catch {
-      // ww
+      // The selected theme still applies when browser storage is unavailable.
     }
   };
 

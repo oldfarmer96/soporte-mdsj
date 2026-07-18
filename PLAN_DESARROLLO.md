@@ -2,7 +2,7 @@
 
 > Documento vivo para organizar el desarrollo de la aplicación módulo por módulo.
 >
-> Última revisión del código y de la carpeta `db`: 16 de julio de 2026.
+> Última revisión del código y de la carpeta `db`: 18 de julio de 2026.
 
 ## 1. Objetivo de la aplicación
 
@@ -51,34 +51,34 @@ La aplicación se desarrollará con enfoque **mobile-first**. La versión móvil
 
 ### 2.3 Funcionalidad que todavía es placeholder
 
-- Las páginas iniciales por rol ya existen, pero todavía no contienen los módulos de negocio.
-- Los layouts autenticados ya comparten un header responsive.
+- Las páginas iniciales por rol y todos los destinos del app shell ya existen, pero todavía no contienen los módulos de negocio.
+- Los layouts autenticados comparten header, sidebar de escritorio y drawer móvil.
 - `RoleGuard` ya protege solicitante, apoyo y administración.
-- Ya existen rutas funcionales `/`, `/apoyo` y `/admin`.
-- No existe interfaz para tickets, archivos, resoluciones, historial o catálogos.
+- Ya existen las rutas funcionales iniciales de solicitante, apoyo y administración.
+- Ya existen creación, listado y detalle del solicitante con historial, resolución y metadatos de archivos.
 
 ### 2.4 ¿El módulo Auth está casi listo?
 
 **La interfaz de login y registro está avanzada, pero el módulo Auth completo todavía no está listo para producción.**
 
-| Parte de Auth                             | Estado                     |
-| ----------------------------------------- | -------------------------- |
-| Formulario de login                       | Hecho                      |
-| Formulario de registro                    | Hecho                      |
-| Validaciones                              | Hecho                      |
-| Login con Supabase                        | Hecho                      |
-| Trigger para crear perfil                 | Hecho en SQL               |
-| Logout visual                             | Hecho en `UserMenu`        |
-| Logout real con `supabase.auth.signOut()` | Hecho                      |
-| Restauración y validación de sesión       | Hecho                      |
-| Listener `onAuthStateChange`              | Hecho                      |
-| Sincronización perfil/sesión              | Hecho                      |
-| Guard por rol                             | Hecho                      |
-| Rutas de apoyo y admin                    | Hechas                     |
-| Cambio de contraseña                      | Falta                      |
-| Recuperación de contraseña                | No se implementará         |
-| Contraseña elegida por el usuario         | Hecho                      |
-| Cierre ante perfil inválido               | Hecho                      |
+| Parte de Auth                             | Estado              |
+| ----------------------------------------- | ------------------- |
+| Formulario de login                       | Hecho               |
+| Formulario de registro                    | Hecho               |
+| Validaciones                              | Hecho               |
+| Login con Supabase                        | Hecho               |
+| Trigger para crear perfil                 | Hecho en SQL        |
+| Logout visual                             | Hecho en `UserMenu` |
+| Logout real con `supabase.auth.signOut()` | Hecho               |
+| Restauración y validación de sesión       | Hecho               |
+| Listener `onAuthStateChange`              | Hecho               |
+| Sincronización perfil/sesión              | Hecho               |
+| Guard por rol                             | Hecho               |
+| Rutas de apoyo y admin                    | Hechas              |
+| Cambio de contraseña                      | Falta               |
+| Recuperación de contraseña                | No se implementará  |
+| Contraseña elegida por el usuario         | Hecho               |
+| Cierre ante perfil inválido               | Hecho               |
 
 La sesión de Supabase es ahora la fuente de verdad. Zustand mantiene el perfil global para los componentes, pero solo se marca autenticado después de validar la sesión y consultar el perfil.
 
@@ -86,8 +86,8 @@ La sesión de Supabase es ahora la fuente de verdad. Zustand mantiene el perfil 
 
 - Login, registro y 404 tienen una base responsive con clases `sm:` y `lg:`.
 - Los formularios parten de una sola columna y el registro pasa a dos columnas en pantallas mayores.
-- Los tres layouts autenticados ya comparten un header responsive y `UserMenu`.
-- Todavía faltan navegación de módulos, tarjetas de ticket, tablas adaptativas y filtros responsive.
+- Los tres layouts autenticados comparten app shell, header, sidebar, drawer móvil y `UserMenu`.
+- Todavía faltan tarjetas de ticket, tablas adaptativas y filtros responsive de los módulos de negocio.
 
 ---
 
@@ -368,16 +368,16 @@ No se comenzará por dashboards decorativos. El orden sigue las dependencias del
 
 ### Paso a paso
 
-- [ ] Diseñar `AppShell`, `AppHeader`, `Sidebar`, `MobileNavigation` y `UserMenu`.
-- [ ] Mostrar nombre, rol y estado de sesión.
-- [ ] Integrar cambio de tema y logout dentro del shell.
-- [ ] Crear navegación específica por rol.
-- [ ] Añadir estado activo, títulos de página y breadcrumbs donde aporten contexto.
-- [ ] Crear `PageContainer`, `PageHeader`, `EmptyState`, `ErrorState` y skeletons cuando aparezca su primer uso real.
-- [ ] Implementar `RequesterLayout`.
-- [ ] Implementar `SupportLayout`.
-- [ ] Implementar `AdminLayout`.
-- [ ] Mantener el shell mientras se cargan páginas lazy internas.
+- [x] Diseñar `AppShell`, `AppHeader`, `Sidebar`, navegación móvil y `UserMenu`.
+- [x] Mostrar nombre, rol y estado de sesión.
+- [x] Integrar cambio de tema y logout dentro del shell.
+- [x] Crear navegación específica por rol.
+- [x] Añadir estado activo, títulos de página y breadcrumbs donde aporten contexto.
+- [x] Crear `PageContainer`, `PageHeader`, `EmptyState`, `ErrorState` y skeletons.
+- [x] Implementar `RequesterLayout`.
+- [x] Implementar `SupportLayout`.
+- [x] Implementar `AdminLayout`.
+- [x] Mantener el shell mientras se cargan páginas lazy internas.
 
 ### Navegación inicial por rol
 
@@ -403,15 +403,15 @@ No se comenzará por dashboards decorativos. El orden sigue las dependencias del
 
 ### Paso a paso
 
-- [ ] Crear `catalog.service.ts`.
-- [ ] Crear query keys estables.
-- [ ] Consultar áreas activas ordenadas.
-- [ ] Consultar categorías activas ordenadas.
-- [ ] Consultar tipos activos por categoría.
-- [ ] Tipar respuestas con el esquema generado.
-- [ ] Implementar caché y reintento adecuados.
-- [ ] Crear estados de error y reintento.
-- [ ] Reiniciar el tipo de problema cuando cambie la categoría.
+- [x] Crear `catalog.service.ts`.
+- [x] Crear query keys estables.
+- [x] Consultar áreas activas ordenadas.
+- [x] Consultar categorías activas ordenadas.
+- [x] Consultar tipos activos por categoría.
+- [x] Tipar respuestas con interfaces alineadas manualmente al esquema actual.
+- [x] Implementar caché y reintento adecuados.
+- [x] Crear estados de error y reintento.
+- [x] Reiniciar el tipo de problema cuando cambie la categoría.
 
 ### Terminado cuando
 
@@ -439,17 +439,17 @@ No se comenzará por dashboards decorativos. El orden sigue las dependencias del
 
 ### Paso a paso
 
-- [ ] Crear tipos/payload de inserción.
-- [ ] Crear schema Zod alineado con restricciones SQL.
-- [ ] Crear `ticket.service.ts`.
-- [ ] Crear hook de mutación `useCreateTicket`.
-- [ ] Diseñar formulario por secciones y con textos comprensibles.
-- [ ] Cargar catálogos del módulo 3.
-- [ ] Impedir doble envío.
-- [ ] Mostrar errores de dominio sin perder los datos escritos.
-- [ ] Mostrar confirmación con código, prioridad y estado resultantes.
-- [ ] Redirigir al detalle del ticket creado.
-- [ ] Dejar la carga de imágenes para el módulo de adjuntos o crear el ticket antes de subirlas.
+- [x] Crear tipos/payload de inserción.
+- [x] Crear schema Zod alineado con restricciones SQL.
+- [x] Crear `ticket.service.ts`.
+- [x] Crear hook de mutación `useCreateTicket`.
+- [x] Diseñar formulario por secciones y con textos comprensibles.
+- [x] Cargar catálogos del módulo 3.
+- [x] Impedir doble envío.
+- [x] Mostrar errores de dominio sin perder los datos escritos.
+- [x] Mostrar confirmación con código, prioridad y estado resultantes.
+- [x] Redirigir al detalle del ticket creado.
+- [x] Dejar la carga de imágenes para el módulo de adjuntos y crear primero el ticket.
 
 ### Ruta
 
@@ -491,15 +491,15 @@ No se comenzará por dashboards decorativos. El orden sigue las dependencias del
 
 ### Paso a paso
 
-- [ ] Crear query paginada de tickets propios.
-- [ ] Definir paginación estable; no cargar todos los tickets sin límite.
-- [ ] Crear `TicketCard` para móvil.
-- [ ] Crear lista/tabla más densa para escritorio.
-- [ ] Crear badges accesibles de estado y prioridad.
-- [ ] Crear página de detalle con consultas relacionadas.
-- [ ] Crear timeline del historial.
-- [ ] Resolver estados vacío, error, carga y acceso denegado.
-- [ ] Mantener filtros en URL cuando sea útil.
+- [x] Crear query paginada de tickets propios.
+- [x] Definir paginación estable; no cargar todos los tickets sin límite.
+- [x] Crear `TicketCard` para móvil.
+- [x] Crear lista/tabla más densa para escritorio.
+- [x] Crear badges accesibles de estado y prioridad.
+- [x] Crear página de detalle con consultas relacionadas.
+- [x] Crear timeline del historial.
+- [x] Resolver estados vacío, error, carga y acceso denegado.
+- [x] Mantener filtros en URL cuando sea útil.
 
 ### Rutas
 
@@ -538,18 +538,18 @@ No se comenzará por dashboards decorativos. El orden sigue las dependencias del
 
 ### Paso a paso
 
-- [ ] Crear rutas y páginas de apoyo.
-- [ ] Crear consultas paginadas con filtros por estado, prioridad, área, categoría, asignado y fecha.
-- [ ] Definir orden operativo, por ejemplo prioridad y antigüedad.
-- [ ] Crear selector de personal activo de apoyo.
-- [ ] Consumir `asignar_ticket`.
-- [ ] Consumir `cambiar_estado_ticket`.
-- [ ] Consumir `resolver_ticket`.
-- [ ] Mostrar solo acciones válidas para el estado actual.
-- [ ] Actualizar lista, detalle e historial después de cada mutación.
-- [ ] Manejar conflictos cuando otro usuario haya cambiado el ticket.
-- [ ] Añadir confirmación a acciones sensibles.
-- [ ] Definir con negocio si solo el asignado puede operar el ticket.
+- [x] Crear rutas y páginas de apoyo.
+- [x] Crear consultas paginadas con filtros por estado, prioridad, área, categoría, asignado y fecha.
+- [x] Definir orden operativo por prioridad descendente y antigüedad ascendente.
+- [x] Crear selector de personal activo de apoyo.
+- [x] Consumir `asignar_ticket`.
+- [x] Consumir `cambiar_estado_ticket`.
+- [x] Consumir `resolver_ticket`.
+- [x] Mostrar solo acciones válidas para el estado actual.
+- [x] Actualizar lista, detalle e historial después de cada mutación.
+- [x] Manejar conflictos cuando otro usuario haya cambiado el ticket.
+- [x] Añadir confirmación a acciones sensibles.
+- [x] Mantener el permiso actual del backend: cualquier `APOYO` puede operar; la asignación no limita las RPC.
 
 ### Rutas
 
@@ -589,14 +589,15 @@ No se comenzará por dashboards decorativos. El orden sigue las dependencias del
 
 ### Paso a paso
 
-- [ ] Corregir primero los casos nulos y reglas pendientes de las RPC.
-- [ ] Crear formulario de resolución.
-- [ ] Crear panel de confirmación para el solicitante.
-- [ ] Consumir `confirmar_solucion_ticket`.
-- [ ] Crear diálogo/formulario de reapertura.
-- [ ] Consumir `reabrir_ticket`.
-- [ ] Refrescar ticket, resolución e historial en conjunto.
-- [ ] Evitar envíos repetidos durante mutaciones.
+- [x] Corregir en `db/database.sql` los casos nulos y reglas pendientes de las RPC.
+- [x] Aplicar manualmente en Supabase SQL Editor las funciones corregidas del Módulo 7.
+- [x] Crear formulario de resolución.
+- [x] Crear panel de confirmación para el solicitante.
+- [x] Consumir `confirmar_solucion_ticket`.
+- [x] Crear diálogo/formulario de reapertura.
+- [x] Consumir `reabrir_ticket`.
+- [x] Refrescar ticket, resolución e historial en conjunto.
+- [x] Evitar envíos repetidos durante mutaciones.
 
 ### Terminado cuando
 
@@ -621,16 +622,17 @@ No se comenzará por dashboards decorativos. El orden sigue las dependencias del
 
 ### Paso a paso
 
-- [ ] Corregir/definir el contrato de borrado y sincronización Storage/tabla.
-- [ ] Crear `storage.service.ts`.
-- [ ] Validar tipo y tamaño antes de subir.
-- [ ] Permitir selección desde galería y cámara móvil.
-- [ ] Subir objeto al bucket privado.
-- [ ] Registrar metadata en `ticket_archivos`.
-- [ ] Compensar la operación si falla la subida o el registro de metadata.
-- [ ] Generar URLs firmadas al visualizar.
-- [ ] Crear preview, progreso, error por archivo y reintento.
-- [ ] Comprimir/redimensionar solo si se acuerda y sin degradar evidencia necesaria.
+- [x] Definir en `db/database.sql` una política `DELETE` limitada a compensar cargas propias.
+- [x] Aplicar manualmente la política de compensación en Supabase SQL Editor.
+- [x] Crear `storage.service.ts`.
+- [x] Validar tipo y tamaño antes de subir.
+- [x] Permitir selección desde galería y cámara móvil.
+- [x] Subir objeto al bucket privado.
+- [x] Registrar metadata en `ticket_archivos`.
+- [x] Compensar la operación si falla la subida o el registro de metadata.
+- [x] Generar URLs firmadas al visualizar.
+- [x] Crear preview, progreso, error por archivo y reintento.
+- [x] Mantener archivos originales sin compresión para no degradar evidencia.
 
 ### Terminado cuando
 
@@ -654,15 +656,15 @@ No se comenzará por dashboards decorativos. El orden sigue las dependencias del
 
 ### Paso a paso
 
-- [ ] Crear listados con búsqueda y estado activo/inactivo.
-- [ ] Crear formularios de alta y edición.
-- [ ] Gestionar piso y referencia de áreas.
-- [ ] Gestionar categoría crítica.
-- [ ] Gestionar prioridad base del tipo de problema.
-- [ ] Implementar activación/desactivación en lugar de borrado.
-- [ ] Invalidar cachés de catálogos después de cambios.
-- [ ] Confirmar antes de desactivar elementos usados por formularios.
-- [ ] Mostrar registros inactivos únicamente en contextos administrativos.
+- [x] Crear listados con búsqueda y estado activo/inactivo.
+- [x] Crear formularios de alta y edición.
+- [x] Gestionar piso y referencia de áreas.
+- [x] Gestionar categoría crítica.
+- [x] Gestionar prioridad base del tipo de problema.
+- [x] Implementar activación/desactivación en lugar de borrado.
+- [x] Invalidar cachés de catálogos después de cambios.
+- [x] Confirmar antes de desactivar elementos usados por formularios.
+- [x] Mostrar registros inactivos únicamente en contextos administrativos.
 
 ### Rutas
 
@@ -685,11 +687,11 @@ No se comenzará por dashboards decorativos. El orden sigue las dependencias del
 
 ### Paso a paso
 
-- [ ] Crear listado paginado de perfiles para consulta.
-- [ ] Buscar por DNI, nombres y apellidos.
-- [ ] Filtrar por rol y estado.
-- [ ] Mostrar rol y estado actuales en modo lectura.
-- [ ] Administrar cambios de rol, estado y acceso manualmente desde Supabase.
+- [x] Crear listado paginado de perfiles para consulta.
+- [x] Buscar por DNI, nombres y apellidos.
+- [x] Filtrar por rol y estado.
+- [x] Mostrar rol y estado actuales en modo lectura.
+- [x] Mantener cambios de rol, estado y acceso manualmente desde Supabase.
 
 ### Ruta
 
@@ -717,15 +719,27 @@ No se comenzará por dashboards decorativos. El orden sigue las dependencias del
 - Distribución por área y categoría.
 - Tiempo entre creación, asignación, inicio y resolución.
 
+### Definiciones implementadas
+
+- **Creados:** tickets con `created_at` dentro del periodo seleccionado en `America/Lima`.
+- **Resueltos:** tickets con `resolved_at` dentro del periodo, aunque hayan sido creados antes.
+- **Activos:** fotografía actual de estados `NUEVO`, `ASIGNADO`, `EN_CURSO` y `REABIERTO`.
+- **Sin asignar:** fotografía actual de tickets `NUEVO` o `REABIERTO` sin `asignado_a`.
+- **Promedio para asignar:** horas entre creación y primera asignación para tickets creados en el periodo.
+- **Promedio para resolver:** horas entre creación y resolución para tickets creados en el periodo.
+- **Estado, prioridad, área y categoría:** distribución de tickets creados en el periodo.
+- **Carga de apoyo:** fotografía actual de tickets `ASIGNADO`, `EN_CURSO` o `REABIERTO` por persona.
+- **Tendencia diaria:** creados y resueltos por fecha local dentro del periodo.
+
 ### Paso a paso
 
-- [ ] Acordar métricas y definiciones con MDSJ.
-- [ ] Definir zona horaria y rango de fechas.
-- [ ] Crear consultas/RPC/vistas optimizadas; no descargar todos los tickets para calcular en el navegador.
-- [ ] Usar vistas con `security_invoker = true` o protegerlas explícitamente.
-- [ ] Revisar índices con `EXPLAIN ANALYZE` sobre datos representativos.
-- [ ] Crear resumen responsive con números, tendencias y tablas accesibles.
-- [ ] Añadir exportación solo si existe una necesidad concreta.
+- [x] Definir métricas operativas iniciales y documentar su alcance en el dashboard.
+- [x] Usar zona horaria `America/Lima` y rangos inclusivos de hasta 366 días.
+- [x] Crear RPC agregada; no descargar tickets para calcular en el navegador.
+- [x] Usar `SECURITY INVOKER`, validación de rol y permisos explícitos.
+- [x] Aplicar la RPC manualmente en Supabase SQL Editor y verificar su protección de acceso.
+- [x] Crear resumen responsive con números, tendencias y tablas accesibles.
+- [x] Añadir exportación agregada a PDF y XLSX solicitada para reportes.
 
 ### Terminado cuando
 
@@ -922,18 +936,18 @@ El siguiente bloque debe terminar **Módulo 1 + Módulo 2**, sin cambios al esqu
 
 Actualizar esta tabla al finalizar cada bloque.
 
-| Módulo                         | Estado      | Observaciones                                                      |
-| ------------------------------ | ----------- | ------------------------------------------------------------------ |
-| 0. Conexión Supabase           | En progreso | La base se administrará únicamente desde SQL Editor                |
-| 1. Auth y sesión               | En progreso | Sesión, logout y roles implementados; falta cambio de contraseña   |
-| 2. App shell responsive        | En progreso | Header y UserMenu creados; falta navegación de módulos             |
-| 3. Catálogos de lectura        | Pendiente   | Datos y RLS existen en SQL                                         |
-| 4. Creación de tickets         | Pendiente   | Contrato existe en SQL                                             |
-| 5. Mis tickets y detalle       | Pendiente   | Contrato existe en SQL                                             |
-| 6. Cola de apoyo               | Pendiente   | RPC e índices existen en SQL                                       |
-| 7. Resolución y reapertura     | Pendiente   | RPC existen; requieren ajustes                                     |
-| 8. Adjuntos                    | Pendiente   | Bucket y policies parciales existen                                |
-| 9. Catálogos admin             | Pendiente   | Policies existen                                                   |
-| 10. Perfiles admin             | Pendiente   | Consulta en app; cambios manuales desde Supabase                   |
-| 11. Dashboard y reportes       | Pendiente   | Implementar después de flujos operativos                           |
-| 12. Módulos futuros            | Por definir | Requieren validación de negocio y backend                          |
+| Módulo                     | Estado      | Observaciones                                                    |
+| -------------------------- | ----------- | ---------------------------------------------------------------- |
+| 0. Conexión Supabase       | En progreso | La base se administrará únicamente desde SQL Editor              |
+| 1. Auth y sesión           | En progreso | Sesión, logout y roles implementados; falta cambio de contraseña |
+| 2. App shell responsive    | Completado  | Navegación por rol, sidebar, drawer móvil y estados compartidos  |
+| 3. Catálogos de lectura    | Completado  | Servicios, hooks y vistas de lectura responsive implementados    |
+| 4. Creación de tickets     | Completado  | Formulario, mutación y confirmación recargable implementados     |
+| 5. Mis tickets y detalle   | Completado  | Lista paginada, filtros URL, detalle e historial implementados   |
+| 6. Cola de apoyo           | Completado  | Cola, asignación, estados, resolución y conflictos implementados |
+| 7. Resolución y reapertura | Completado  | RPC corregidas y flujo confirmado contra Supabase real           |
+| 8. Adjuntos                | Completado  | Policy aplicada y carga/preview comprobados contra Supabase real |
+| 9. Catálogos admin         | Completado  | Altas, edición, búsqueda y activación sin borrado implementadas  |
+| 10. Perfiles admin         | Completado  | Directorio paginado y filtrable; cambios manuales desde Supabase |
+| 11. Dashboard y reportes   | Completado  | RPC aplicada; dashboard y exportaciones PDF/XLSX implementados   |
+| 12. Módulos futuros        | Por definir | Requieren validación de negocio y backend                        |

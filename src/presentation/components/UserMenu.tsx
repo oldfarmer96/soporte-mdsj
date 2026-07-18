@@ -1,6 +1,8 @@
 import { useLogout } from "@/application/hooks/useAuth";
 import { useAuthStore } from "@/application/store/auth-store";
-import { LogOut, UserRound } from "lucide-react";
+import { NAVIGATION_BY_ROLE } from "@/presentation/navigation/navigation";
+import { CircleUserRound, LogOut, UserRound } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const ROLE_LABELS = {
   SOLICITANTE: "Solicitante",
@@ -34,7 +36,7 @@ const UserMenu = () => {
         </span>
       </summary>
 
-      <ul className="menu dropdown-content z-20 mt-3 w-72 rounded-box border border-base-300 bg-base-100 p-2 shadow-xl">
+      <ul className="menu dropdown-content z-50 mt-3 w-72 rounded-box border border-base-300 bg-base-100 p-2 shadow-xl">
         <li className="menu-title px-3 py-2">
           <span className="flex items-center gap-2 text-base-content">
             <UserRound className="size-4" aria-hidden="true" />
@@ -44,6 +46,24 @@ const UserMenu = () => {
         <li className="pointer-events-none px-3 pb-2 text-xs text-base-content/60">
           <span className="block truncate">DNI {user.dni}</span>
         </li>
+        <li className="pointer-events-none px-3 pb-2">
+          <span className="flex items-center gap-2 text-xs text-success">
+            <span className="status status-success" aria-hidden="true" />
+            Sesión activa
+          </span>
+        </li>
+        <li>
+          <Link
+            to={NAVIGATION_BY_ROLE[user.role].profilePath}
+            onClick={(event) =>
+              event.currentTarget.closest("details")?.removeAttribute("open")
+            }
+          >
+            <CircleUserRound className="size-4" aria-hidden="true" />
+            Mi perfil
+          </Link>
+        </li>
+        <li className="my-1 border-t border-base-300" aria-hidden="true" />
         <li>
           <button
             type="button"

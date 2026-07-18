@@ -1,11 +1,12 @@
 import { useAuthStore } from "@/application/store/auth-store";
 import ToggleTheme from "@/presentation/components/ToggleTheme";
+import { roleBasedRedirection } from "@/shared/utils/roleBasedRedirection";
 import { ArrowLeft, FileQuestion, Headphones } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const NotFoundPage = () => {
-  const isAuth = useAuthStore((state) => state.isAuth);
-  const destination = isAuth ? "/" : "/login";
+  const user = useAuthStore((state) => state.user);
+  const destination = user ? roleBasedRedirection(user.role) : "/login";
 
   return (
     <main className="relative grid min-h-screen place-items-center overflow-hidden bg-base-200 px-5 py-16 text-base-content">
@@ -34,7 +35,7 @@ const NotFoundPage = () => {
 
         <Link to={destination} replace className="btn btn-primary btn-lg mt-8">
           <ArrowLeft className="size-5" aria-hidden="true" />
-          {isAuth ? "Volver al inicio" : "Ir al acceso"}
+          {user ? "Volver al inicio" : "Ir al acceso"}
         </Link>
 
         <div className="mt-8 flex items-center justify-center gap-2 border-t border-base-300 pt-6 text-sm font-semibold text-base-content/50">
