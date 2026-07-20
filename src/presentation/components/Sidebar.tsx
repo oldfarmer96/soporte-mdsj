@@ -15,7 +15,7 @@ const Sidebar = ({ navigation, drawerId, onNavigate }: SidebarProps) => (
         <Headphones className="size-6" aria-hidden="true" />
       </span>
       <div className="min-w-0 grow">
-        <p className="truncate text-sm font-black">Mesa de soporte</p>
+        <p className="truncate text-sm font-black">Soporte</p>
         <p className="truncate text-xs text-base-content/60">MDSJ</p>
       </div>
       <label
@@ -33,7 +33,10 @@ const Sidebar = ({ navigation, drawerId, onNavigate }: SidebarProps) => (
       </p>
     </div>
 
-    <nav className="grow overflow-y-auto px-3 pb-5" aria-label="Navegación principal">
+    <nav
+      className="grow overflow-y-auto px-3 pb-5"
+      aria-label="Navegación principal"
+    >
       <ul className="menu w-full gap-1 p-0">
         {navigation.items.map((item) => {
           const Icon = item.icon;
@@ -56,10 +59,6 @@ const Sidebar = ({ navigation, drawerId, onNavigate }: SidebarProps) => (
         })}
       </ul>
     </nav>
-
-    <div className="border-t border-base-300 p-4 text-xs leading-relaxed text-base-content/55">
-      Soporte interno de la Municipalidad Distrital de San Jerónimo
-    </div>
   </aside>
 );
 

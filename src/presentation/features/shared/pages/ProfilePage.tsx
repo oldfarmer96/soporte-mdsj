@@ -11,7 +11,11 @@ const ProfilePage = () => {
 
   const roleLabel = NAVIGATION_BY_ROLE[user.role].shortLabel;
   const fields = [
-    { label: "Nombre completo", value: `${user.name} ${user.lastName}`, icon: UserRound },
+    {
+      label: "Nombre completo",
+      value: `${user.name} ${user.lastName}`,
+      icon: UserRound,
+    },
     { label: "Correo institucional", value: user.email, icon: Mail },
     { label: "Teléfono", value: user.phone ?? "No registrado", icon: Phone },
     { label: "Rol", value: roleLabel, icon: ShieldCheck },
@@ -22,7 +26,7 @@ const ProfilePage = () => {
       <PageHeader
         eyebrow="Mi cuenta"
         title="Perfil"
-        description="Consulta los datos vinculados a tu sesión en la mesa de soporte."
+        description="Consulta los datos vinculados a tu sesión."
       />
 
       <section className="overflow-hidden rounded-box border border-base-300 bg-base-100 shadow-sm">

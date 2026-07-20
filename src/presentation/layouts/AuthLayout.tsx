@@ -11,7 +11,7 @@ const AuthLayout = () => {
             <Headphones className="size-5" aria-hidden="true" />
           </span>
           <div className="hidden sm:block">
-            <p className="font-bold">Mesa de soporte MDSJ</p>
+            <p className="font-bold">Soporte MDSJ</p>
           </div>
         </div>
         <ToggleTheme />
