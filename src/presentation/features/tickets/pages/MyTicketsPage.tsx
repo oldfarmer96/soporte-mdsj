@@ -1,4 +1,5 @@
 import { useMyTickets } from "@/application/hooks/useTickets";
+import CollapsibleFilters from "@/presentation/components/CollapsibleFilters";
 import EmptyState from "@/presentation/components/EmptyState";
 import ErrorState from "@/presentation/components/ErrorState";
 import PageContainer from "@/presentation/components/PageContainer";
@@ -77,14 +78,15 @@ const MyTicketsPage = () => {
     dateFrom: isDate(fromValue) ? fromValue : undefined,
     dateTo: isDate(toValue) ? toValue : undefined,
   };
+  const activeFilterCount = [
+    filters.search,
+    filters.status,
+    filters.priority,
+    filters.dateFrom,
+    filters.dateTo,
+  ].filter(Boolean).length;
   const ticketsQuery = useMyTickets(filters);
-  const hasFilters = Boolean(
-    filters.search ||
-      filters.status ||
-      filters.priority ||
-      filters.dateFrom ||
-      filters.dateTo,
-  );
+  const hasFilters = activeFilterCount > 0;
   const isPageOutOfRange =
     ticketsQuery.isSuccess &&
     ticketsQuery.data.total > 0 &&
@@ -116,14 +118,10 @@ const MyTicketsPage = () => {
       <Form
         key={searchParams.toString()}
         method="get"
-        className="mb-5 rounded-box border border-base-300 bg-base-100 p-4 shadow-sm sm:p-5"
         aria-label="Filtros de tickets"
       >
-        <div className="mb-4 flex items-center gap-2">
-          <Filter className="size-4" aria-hidden="true" />
-          <h2 className="text-sm font-black">Buscar y filtrar</h2>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
+        <CollapsibleFilters activeCount={activeFilterCount} title="Buscar y filtrar">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
           <fieldset className="fieldset sm:col-span-2 lg:col-span-2">
             <legend className="fieldset-legend">Código o asunto</legend>
             <label className="input w-full">
@@ -181,19 +179,20 @@ const MyTicketsPage = () => {
               defaultValue={filters.dateTo}
             />
           </fieldset>
-        </div>
-        <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          {hasFilters && (
-            <Link to="/tickets" className="btn btn-ghost">
-              <X className="size-4" aria-hidden="true" />
-              Limpiar
-            </Link>
-          )}
-          <button type="submit" className="btn">
-            <Filter className="size-4" aria-hidden="true" />
-            Aplicar filtros
-          </button>
-        </div>
+          </div>
+          <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            {hasFilters && (
+              <Link to="/tickets" className="btn btn-ghost">
+                <X className="size-4" aria-hidden="true" />
+                Limpiar
+              </Link>
+            )}
+            <button type="submit" className="btn">
+              <Filter className="size-4" aria-hidden="true" />
+              Aplicar filtros
+            </button>
+          </div>
+        </CollapsibleFilters>
       </Form>
 
       {ticketsQuery.isPending && (

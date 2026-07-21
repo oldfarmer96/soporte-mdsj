@@ -1,4 +1,5 @@
 import { useProfiles } from "@/application/hooks/useProfiles";
+import CollapsibleFilters from "@/presentation/components/CollapsibleFilters";
 import EmptyState from "@/presentation/components/EmptyState";
 import ErrorState from "@/presentation/components/ErrorState";
 import PageContainer from "@/presentation/components/PageContainer";
@@ -54,7 +55,8 @@ const ProfilesPage = () => {
     status: isStatus(statusValue) ? statusValue : undefined,
   };
   const profilesQuery = useProfiles(filters);
-  const hasFilters = Boolean(filters.search || filters.role || filters.status);
+  const activeFilterCount = [filters.search, filters.role, filters.status].filter(Boolean).length;
+  const hasFilters = activeFilterCount > 0;
   const isPageOutOfRange =
     profilesQuery.isSuccess &&
     profilesQuery.data.total > 0 &&
@@ -83,10 +85,10 @@ const ProfilesPage = () => {
       <Form
         key={searchParams.toString()}
         method="get"
-        className="mb-5 rounded-box border border-base-300 bg-base-100 p-4 shadow-sm sm:p-5"
         aria-label="Filtros de usuarios"
       >
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_14rem_14rem]">
+        <CollapsibleFilters activeCount={activeFilterCount} title="Buscar y filtrar">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_14rem_14rem]">
           <fieldset className="fieldset sm:col-span-2 lg:col-span-1">
             <legend className="fieldset-legend">DNI, nombres o apellidos</legend>
             <label className="input w-full">
@@ -122,17 +124,18 @@ const ProfilesPage = () => {
               ))}
             </select>
           </fieldset>
-        </div>
-        <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          {hasFilters && (
-            <Link to="/admin/usuarios" className="btn btn-ghost">
-              <X className="size-4" aria-hidden="true" /> Limpiar
-            </Link>
-          )}
-          <button type="submit" className="btn">
-            <Filter className="size-4" aria-hidden="true" /> Aplicar filtros
-          </button>
-        </div>
+          </div>
+          <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            {hasFilters && (
+              <Link to="/admin/usuarios" className="btn btn-ghost">
+                <X className="size-4" aria-hidden="true" /> Limpiar
+              </Link>
+            )}
+            <button type="submit" className="btn">
+              <Filter className="size-4" aria-hidden="true" /> Aplicar filtros
+            </button>
+          </div>
+        </CollapsibleFilters>
       </Form>
 
       {profilesQuery.isPending && (

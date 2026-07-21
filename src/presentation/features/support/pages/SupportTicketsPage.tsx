@@ -10,6 +10,7 @@ import {
 } from "@/application/hooks/useSupportTickets";
 import EmptyState from "@/presentation/components/EmptyState";
 import ErrorState from "@/presentation/components/ErrorState";
+import CollapsibleFilters from "@/presentation/components/CollapsibleFilters";
 import PageContainer from "@/presentation/components/PageContainer";
 import PageHeader from "@/presentation/components/PageHeader";
 import type { TicketPriority } from "@/shared/interfaces/catalog.interface";
@@ -123,20 +124,21 @@ const SupportTicketsPage = ({ mode = "queue" }: SupportTicketsPageProps) => {
     dateFrom: isDate(fromValue) ? fromValue : undefined,
     dateTo: isDate(toValue) ? toValue : undefined,
   };
+  const activeFilterCount = [
+    filters.search,
+    filters.status,
+    filters.priority,
+    filters.areaId,
+    filters.subareaId,
+    filters.categoryId,
+    filters.problemTypeId,
+    mode === "queue" ? filters.assignment : undefined,
+    filters.dateFrom,
+    filters.dateTo,
+  ].filter(Boolean).length;
   const ticketsQuery = useSupportTickets(filters);
   const basePath = mode === "mine" ? "/apoyo/asignados" : "/apoyo/tickets";
-  const hasFilters = Boolean(
-    filters.search ||
-      filters.status ||
-      filters.priority ||
-      filters.areaId ||
-      filters.subareaId ||
-      filters.categoryId ||
-      filters.problemTypeId ||
-      (mode === "queue" && filters.assignment) ||
-      filters.dateFrom ||
-      filters.dateTo,
-  );
+  const hasFilters = activeFilterCount > 0;
   const isPageOutOfRange =
     ticketsQuery.isSuccess &&
     ticketsQuery.data.total > 0 &&
@@ -192,14 +194,10 @@ const SupportTicketsPage = ({ mode = "queue" }: SupportTicketsPageProps) => {
       <Form
         key={searchParams.toString()}
         method="get"
-        className="mb-5 rounded-box border border-base-300 bg-base-100 p-4 shadow-sm sm:p-5"
         aria-label="Filtros de la cola"
       >
-        <div className="mb-4 flex items-center gap-2">
-          <Filter className="size-4" aria-hidden="true" />
-          <h2 className="text-sm font-black">Filtros operativos</h2>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-10">
+        <CollapsibleFilters activeCount={activeFilterCount} title="Filtros operativos">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-10">
           <fieldset className="fieldset sm:col-span-2">
             <legend className="fieldset-legend">Código o asunto</legend>
             <label className="input w-full">
@@ -325,17 +323,18 @@ const SupportTicketsPage = ({ mode = "queue" }: SupportTicketsPageProps) => {
             <legend className="fieldset-legend">Hasta</legend>
             <input type="date" name="hasta" className="input w-full" defaultValue={filters.dateTo} />
           </fieldset>
-        </div>
-        <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          {hasFilters && (
-            <Link to={basePath} className="btn btn-ghost">
-              <X className="size-4" aria-hidden="true" /> Limpiar
-            </Link>
-          )}
-          <button type="submit" className="btn">
-            <Filter className="size-4" aria-hidden="true" /> Aplicar filtros
-          </button>
-        </div>
+          </div>
+          <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            {hasFilters && (
+              <Link to={basePath} className="btn btn-ghost">
+                <X className="size-4" aria-hidden="true" /> Limpiar
+              </Link>
+            )}
+            <button type="submit" className="btn">
+              <Filter className="size-4" aria-hidden="true" /> Aplicar filtros
+            </button>
+          </div>
+        </CollapsibleFilters>
       </Form>
 
       {ticketsQuery.isPending && (

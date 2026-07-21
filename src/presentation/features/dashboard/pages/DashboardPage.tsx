@@ -1,4 +1,5 @@
 import { useSupportDashboard } from "@/application/hooks/useDashboard";
+import CollapsibleFilters from "@/presentation/components/CollapsibleFilters";
 import ErrorState from "@/presentation/components/ErrorState";
 import PageContainer from "@/presentation/components/PageContainer";
 import PageHeader from "@/presentation/components/PageHeader";
@@ -212,20 +213,26 @@ const DashboardPage = ({ role }: { role: "APOYO" | "ADMIN" }) => {
       <Form
         key={searchParams.toString()}
         method="get"
-        className="mb-5 rounded-box border border-base-300 bg-base-100 p-4 shadow-sm sm:flex sm:items-end sm:gap-3 sm:p-5"
         aria-label="Periodo del dashboard"
       >
-        <fieldset className="fieldset grow">
-          <legend className="fieldset-legend">Desde</legend>
-          <input type="date" name="desde" className="input w-full" defaultValue={range.from} />
-        </fieldset>
-        <fieldset className="fieldset grow">
-          <legend className="fieldset-legend">Hasta</legend>
-          <input type="date" name="hasta" className="input w-full" defaultValue={range.to} />
-        </fieldset>
-        <button type="submit" className="btn mt-3 sm:mt-0">
-          <CalendarDays className="size-4" aria-hidden="true" /> Actualizar periodo
-        </button>
+        <CollapsibleFilters
+          activeCount={Number(Boolean(fromParam || toParam))}
+          title="Periodo del dashboard"
+        >
+          <div className="sm:flex sm:items-end sm:gap-3">
+            <fieldset className="fieldset grow">
+              <legend className="fieldset-legend">Desde</legend>
+              <input type="date" name="desde" className="input w-full" defaultValue={range.from} />
+            </fieldset>
+            <fieldset className="fieldset grow">
+              <legend className="fieldset-legend">Hasta</legend>
+              <input type="date" name="hasta" className="input w-full" defaultValue={range.to} />
+            </fieldset>
+            <button type="submit" className="btn mt-3 sm:mt-0">
+              <CalendarDays className="size-4" aria-hidden="true" /> Actualizar periodo
+            </button>
+          </div>
+        </CollapsibleFilters>
       </Form>
 
       {!isRangeValid && (
