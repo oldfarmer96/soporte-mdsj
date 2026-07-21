@@ -1,15 +1,16 @@
 import type { RoleNavigation } from "@/presentation/navigation/navigation";
 import { getActiveNavigationItem } from "@/presentation/navigation/navigation";
-import { useRef } from "react";
+import { useRef, type ReactNode } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import AppHeader from "../components/AppHeader";
 import Sidebar from "../components/Sidebar";
 
 interface AppLayoutProps {
   navigation: RoleNavigation;
+  headerTools?: ReactNode;
 }
 
-const AppLayout = ({ navigation }: AppLayoutProps) => {
+const AppLayout = ({ navigation, headerTools }: AppLayoutProps) => {
   const drawerToggleRef = useRef<HTMLInputElement>(null);
   const { pathname } = useLocation();
   const activeItem = getActiveNavigationItem(pathname, navigation);
@@ -38,6 +39,7 @@ const AppLayout = ({ navigation }: AppLayoutProps) => {
           activeItem={activeItem}
           drawerId={drawerId}
           section={navigation.label}
+          tools={headerTools}
         />
         <main id="main-content" className="min-w-0 grow" tabIndex={-1}>
           <Outlet />

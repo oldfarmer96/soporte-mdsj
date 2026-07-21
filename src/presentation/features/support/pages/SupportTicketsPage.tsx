@@ -61,6 +61,7 @@ const dateFormatter = new Intl.DateTimeFormat("es-PE", { dateStyle: "medium" });
 
 interface SupportTicketsPageProps {
   mode?: "queue" | "mine";
+  variant?: "default" | "monitor";
 }
 
 const isStatus = (value: string | null): value is TicketStatus =>
@@ -72,7 +73,10 @@ const isUuid = (value: string | null): value is string =>
 const isDate = (value: string | null): value is string =>
   value !== null && /^\d{4}-\d{2}-\d{2}$/.test(value);
 
-const SupportTicketsPage = ({ mode = "queue" }: SupportTicketsPageProps) => {
+const SupportTicketsPage = ({
+  mode = "queue",
+  variant = "default",
+}: SupportTicketsPageProps) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const pageValue = Number(searchParams.get("pagina"));
   const page = Number.isInteger(pageValue) && pageValue > 0 ? pageValue : 1;
@@ -137,7 +141,12 @@ const SupportTicketsPage = ({ mode = "queue" }: SupportTicketsPageProps) => {
     filters.dateTo,
   ].filter(Boolean).length;
   const ticketsQuery = useSupportTickets(filters);
-  const basePath = mode === "mine" ? "/apoyo/asignados" : "/apoyo/tickets";
+  const isMonitor = variant === "monitor";
+  const basePath = isMonitor
+    ? "/apoyo"
+    : mode === "mine"
+      ? "/apoyo/asignados"
+      : "/apoyo/tickets";
   const hasFilters = activeFilterCount > 0;
   const isPageOutOfRange =
     ticketsQuery.isSuccess &&
@@ -169,16 +178,28 @@ const SupportTicketsPage = ({ mode = "queue" }: SupportTicketsPageProps) => {
     <PageContainer>
       <PageHeader
         eyebrow="Personal de apoyo"
-        title={mode === "mine" ? "Mis tickets asignados" : "Cola de tickets"}
+        title={
+          isMonitor
+            ? "Monitor de tickets"
+            : mode === "mine"
+              ? "Mis tickets asignados"
+              : "Cola de tickets"
+        }
         description={
-          mode === "mine"
+          isMonitor
+            ? "Supervisa en vivo todas las solicitudes registradas en la mesa de soporte."
+            : mode === "mine"
             ? "Revisa las solicitudes que están actualmente bajo tu responsabilidad."
             : "Prioriza, filtra y abre las solicitudes registradas en la mesa de soporte."
         }
-        breadcrumbs={[
-          { label: "Resumen", path: "/apoyo" },
-          { label: mode === "mine" ? "Mis asignados" : "Cola de tickets" },
-        ]}
+        breadcrumbs={
+          isMonitor
+            ? [{ label: "Monitor en vivo" }]
+            : [
+                { label: "Monitor", path: "/apoyo" },
+                { label: mode === "mine" ? "Mis asignados" : "Cola de tickets" },
+              ]
+        }
         actions={
           mode === "mine" ? (
             <Link to="/apoyo/tickets" className="btn">Ver cola general</Link>

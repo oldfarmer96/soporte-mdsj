@@ -72,8 +72,8 @@ export const NAVIGATION_BY_ROLE: Record<RoleT, RoleNavigation> = {
     profilePath: "/apoyo/perfil",
     items: [
       {
-        label: "Resumen",
-        description: "Entrada al espacio operativo",
+        label: "Monitor en vivo",
+        description: "Supervisa los tickets en tiempo real",
         path: "/apoyo",
         icon: House,
         end: true,
