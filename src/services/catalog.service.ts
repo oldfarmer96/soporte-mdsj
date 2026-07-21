@@ -177,12 +177,19 @@ export const updateArea = async (areaId: string, payload: AreaPayload) => {
       piso: payload.floor,
       referencia: payload.reference,
     })
-    .eq("id", areaId);
+    .eq("id", areaId)
+    .select("id")
+    .single();
   if (error) throw error;
 };
 
 export const setAreaActive = async (areaId: string, isActive: boolean) => {
-  const { error } = await supabase.from("areas").update({ activo: isActive }).eq("id", areaId);
+  const { error } = await supabase
+    .from("areas")
+    .update({ activo: isActive })
+    .eq("id", areaId)
+    .select("id")
+    .single();
   if (error) throw error;
 };
 
@@ -208,7 +215,9 @@ export const updateSubarea = async (
       nombre_corto: payload.shortName,
       descripcion: payload.description,
     })
-    .eq("id", subareaId);
+    .eq("id", subareaId)
+    .select("id")
+    .single();
   if (error) throw error;
 };
 
@@ -219,7 +228,9 @@ export const setSubareaActive = async (
   const { error } = await supabase
     .from("subareas")
     .update({ activo: isActive })
-    .eq("id", subareaId);
+    .eq("id", subareaId)
+    .select("id")
+    .single();
   if (error) throw error;
 };
 
@@ -240,7 +251,9 @@ export const updateCategory = async (categoryId: string, payload: CategoryPayloa
       descripcion: payload.description,
       es_critico: payload.isCritical,
     })
-    .eq("id", categoryId);
+    .eq("id", categoryId)
+    .select("id")
+    .single();
   if (error) throw error;
 };
 
@@ -248,7 +261,9 @@ export const setCategoryActive = async (categoryId: string, isActive: boolean) =
   const { error } = await supabase
     .from("categorias")
     .update({ activo: isActive })
-    .eq("id", categoryId);
+    .eq("id", categoryId)
+    .select("id")
+    .single();
   if (error) throw error;
 };
 
@@ -274,7 +289,9 @@ export const updateProblemType = async (
       descripcion: payload.description,
       prioridad: payload.priority,
     })
-    .eq("id", problemTypeId);
+    .eq("id", problemTypeId)
+    .select("id")
+    .single();
   if (error) throw error;
 };
 
@@ -285,7 +302,9 @@ export const setProblemTypeActive = async (
   const { error } = await supabase
     .from("ticket_tipos_problemas")
     .update({ activo: isActive })
-    .eq("id", problemTypeId);
+    .eq("id", problemTypeId)
+    .select("id")
+    .single();
   if (error) throw error;
 };
 

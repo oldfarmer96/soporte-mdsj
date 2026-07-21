@@ -32,8 +32,8 @@ const useCatalogMutation = <TVariables,>(
   return useMutation({
     mutationKey: [mutationKey],
     mutationFn,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: catalogKeys.all });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: catalogKeys.all });
       toast.success(successMessage);
     },
     onError: (error) => toast.error(getCatalogMutationErrorMessage(error)),

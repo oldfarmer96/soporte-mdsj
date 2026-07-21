@@ -7,7 +7,7 @@ import type { Area, Subarea } from "@/shared/interfaces/catalog.interface";
 import { getCatalogMutationErrorMessage } from "@/services/catalog.service";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertTriangle, Pencil, Plus, X } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import {
   subareaFormSchema,
   type SubareaForm,
@@ -107,18 +107,24 @@ const SubareaFormDialog = ({
           >
             <fieldset className="fieldset">
               <legend className="fieldset-legend">Área</legend>
-              <select
-                {...form.register("areaId")}
-                className={`select w-full ${form.formState.errors.areaId ? "select-error" : ""}`}
-              >
-                <option value="">Selecciona un área</option>
-                {areas.map((area) => (
-                  <option key={area.id} value={area.id}>
-                    {area.name}
-                    {area.isActive ? "" : " (inactiva)"}
-                  </option>
-                ))}
-              </select>
+              <Controller
+                control={form.control}
+                name="areaId"
+                render={({ field }) => (
+                  <select
+                    {...field}
+                    className={`select w-full ${form.formState.errors.areaId ? "select-error" : ""}`}
+                  >
+                    <option value="">Selecciona un área</option>
+                    {areas.map((area) => (
+                      <option key={area.id} value={area.id}>
+                        {area.name}
+                        {area.isActive ? "" : " (inactiva)"}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              />
               <FieldInfo
                 id="subarea-area-error"
                 error={form.formState.errors.areaId}
@@ -128,10 +134,16 @@ const SubareaFormDialog = ({
             <div className="grid gap-4 sm:grid-cols-2">
               <fieldset className="fieldset">
                 <legend className="fieldset-legend">Nombre</legend>
-                <input
-                  {...form.register("name")}
-                  className={`input w-full ${form.formState.errors.name ? "input-error" : ""}`}
-                  maxLength={150}
+                <Controller
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <input
+                      {...field}
+                      className={`input w-full ${form.formState.errors.name ? "input-error" : ""}`}
+                      maxLength={150}
+                    />
+                  )}
                 />
                 <FieldInfo
                   id="subarea-name-error"
@@ -140,10 +152,12 @@ const SubareaFormDialog = ({
               </fieldset>
               <fieldset className="fieldset">
                 <legend className="fieldset-legend">Nombre corto</legend>
-                <input
-                  {...form.register("shortName")}
-                  className="input w-full"
-                  maxLength={30}
+                <Controller
+                  control={form.control}
+                  name="shortName"
+                  render={({ field }) => (
+                    <input {...field} className="input w-full" maxLength={30} />
+                  )}
                 />
                 <FieldInfo
                   id="subarea-short-name-error"
@@ -154,10 +168,16 @@ const SubareaFormDialog = ({
 
             <fieldset className="fieldset">
               <legend className="fieldset-legend">Descripción</legend>
-              <textarea
-                {...form.register("description")}
-                className="textarea min-h-24 w-full"
-                maxLength={300}
+              <Controller
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <textarea
+                    {...field}
+                    className="textarea min-h-24 w-full"
+                    maxLength={300}
+                  />
+                )}
               />
               <FieldInfo
                 id="subarea-description-error"
@@ -183,12 +203,18 @@ const SubareaFormDialog = ({
               <button
                 type="submit"
                 className="btn btn-primary"
-                disabled={mutation.isPending}
+                disabled={
+                  mutation.isPending || Boolean(subarea && !form.formState.isDirty)
+                }
               >
                 {mutation.isPending && (
                   <span className="loading loading-spinner loading-sm" />
                 )}
-                {subarea ? "Guardar cambios" : "Crear subárea"}
+                {subarea && !form.formState.isDirty
+                  ? "Sin cambios"
+                  : subarea
+                    ? "Guardar cambios"
+                    : "Crear subárea"}
               </button>
             </div>
           </form>
