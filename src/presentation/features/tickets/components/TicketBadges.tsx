@@ -37,10 +37,10 @@ const STATUS_STYLES: Record<TicketStatus, string> = {
 
 export const TicketPriorityBadge = ({ priority }: { priority: TicketPriority }) => (
   <span className={`badge ${PRIORITY_STYLES[priority]}`}>
-    Prioridad {PRIORITY_LABELS[priority]}
+    {PRIORITY_LABELS[priority]}
   </span>
 );
 
 export const TicketStatusBadge = ({ status }: { status: TicketStatus }) => (
-  <span className={`badge ${STATUS_STYLES[status]}`}>Estado: {STATUS_LABELS[status]}</span>
+  <span className={`badge ${STATUS_STYLES[status]}`}>{STATUS_LABELS[status]}</span>
 );

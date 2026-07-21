@@ -98,12 +98,12 @@ export const getSupportTickets = async (
       "id, codigo, asunto, impacto, prioridad, estado, created_at, updated_at, area:areas(nombre), subarea:subareas!tickets_area_subarea_fk(nombre), categoria:categorias(nombre), tipo_problema:ticket_tipos_problemas!tickets_categoria_tipo_problema_fk(nombre), solicitante:perfiles!tickets_id_solicitante_fkey(id, dni, nombres, apellidos), asignado:perfiles!tickets_asignado_a_fkey(id, dni, nombres, apellidos)",
       { count: "exact" },
     )
-    .order("prioridad", { ascending: false })
-    .order("created_at", { ascending: true })
-    .order("id", { ascending: true });
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false });
 
   const search = filters.search ? sanitizeSearch(filters.search) : "";
-  if (search) query = query.or(`codigo.ilike.%${search}%,asunto.ilike.%${search}%`);
+  if (search)
+    query = query.or(`codigo.ilike.%${search}%,asunto.ilike.%${search}%`);
   if (filters.status) query = query.eq("estado", filters.status);
   if (filters.priority) query = query.eq("prioridad", filters.priority);
   if (filters.areaId) query = query.eq("id_area", filters.areaId);
@@ -124,7 +124,10 @@ export const getSupportTickets = async (
     query = query.gte("created_at", `${filters.dateFrom}T00:00:00-05:00`);
   }
   if (filters.dateTo) {
-    query = query.lt("created_at", `${nextDate(filters.dateTo)}T00:00:00-05:00`);
+    query = query.lt(
+      "created_at",
+      `${nextDate(filters.dateTo)}T00:00:00-05:00`,
+    );
   }
 
   const { data, error, count } = await query.range(from, to);
@@ -141,7 +144,9 @@ export const getSupportTickets = async (
     subareaName: relationName(ticket.subarea),
     categoryName: relationName(ticket.categoria),
     problemTypeName: relationName(ticket.tipo_problema),
-    requesterName: profileName(firstRelation(ticket.solicitante)) ?? "Solicitante no disponible",
+    requesterName:
+      profileName(firstRelation(ticket.solicitante)) ??
+      "Solicitante no disponible",
     assignedAgentName: profileName(firstRelation(ticket.asignado)),
     createdAt: ticket.created_at,
     updatedAt: ticket.updated_at,
@@ -218,7 +223,10 @@ export const getSupportTicketDetail = async (
   };
 };
 
-export const assignSupportTicket = async (ticketId: string, agentId: string) => {
+export const assignSupportTicket = async (
+  ticketId: string,
+  agentId: string,
+) => {
   const { error } = await supabase.rpc("asignar_ticket", {
     p_id_ticket: ticketId,
     p_id_apoyo: agentId,
@@ -261,7 +269,10 @@ export const getSupportTicketErrorMessage = (error: unknown) => {
   if (message.includes("personal seleccionado")) {
     return "El personal seleccionado ya no está disponible.";
   }
-  if (message.includes("no se permite cambiar") || message.includes("no puede")) {
+  if (
+    message.includes("no se permite cambiar") ||
+    message.includes("no puede")
+  ) {
     return "El ticket cambió o ya no permite esta operación. Se actualizarán los datos.";
   }
   if (message.includes("no se encontró")) {

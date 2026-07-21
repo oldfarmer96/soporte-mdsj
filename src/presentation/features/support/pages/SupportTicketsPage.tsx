@@ -378,7 +378,7 @@ const SupportTicketsPage = ({ mode = "queue" }: SupportTicketsPageProps) => {
               {ticketsQuery.data.total} tickets encontrados
             </h2>
             <p className="text-xs text-base-content/55">
-              Orden: prioridad y antigüedad
+              Orden: más recientes primero
             </p>
           </div>
 
