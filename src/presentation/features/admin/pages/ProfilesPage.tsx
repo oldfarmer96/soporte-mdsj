@@ -9,7 +9,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Filter,
-  Info,
   Phone,
   Search,
   ShieldCheck,
@@ -19,6 +18,7 @@ import {
 } from "lucide-react";
 import { Form, Link, useSearchParams } from "react-router-dom";
 import { ProfileRoleBadge, ProfileStatusBadge } from "../components/ProfileBadges";
+import ProfileAccessDialog from "../components/ProfileAccessDialog";
 
 const PAGE_SIZE = 20;
 const ROLES: RoleT[] = ["SOLICITANTE", "APOYO", "ADMIN"];
@@ -73,21 +73,12 @@ const ProfilesPage = () => {
       <PageHeader
         eyebrow="Administración"
         title="Usuarios"
-        description="Consulta los perfiles registrados, sus roles y su estado actual de acceso."
+        description="Consulta perfiles y administra sus roles y estados de acceso."
         breadcrumbs={[
           { label: "Administración", path: "/admin" },
           { label: "Usuarios" },
         ]}
-        actions={<span className="badge badge-outline">Solo consulta</span>}
       />
-
-      <div className="alert alert-info alert-soft mb-5 items-start">
-        <Info className="size-5 shrink-0" aria-hidden="true" />
-        <p className="text-sm leading-relaxed">
-          Los cambios de rol, estado y acceso se realizan manualmente desde Supabase. Esta
-          pantalla no modifica perfiles ni credenciales.
-        </p>
-      </div>
 
       <Form
         key={searchParams.toString()}
@@ -216,6 +207,9 @@ const ProfilesPage = () => {
                     <dd>Registrado {dateFormatter.format(new Date(profile.createdAt))}</dd>
                   </div>
                 </dl>
+                <div className="mt-4 border-t border-base-300 pt-4">
+                  <ProfileAccessDialog profile={profile} />
+                </div>
               </li>
             ))}
           </ul>
@@ -229,7 +223,8 @@ const ProfilesPage = () => {
                   <th>Teléfono</th>
                   <th>Rol</th>
                   <th>Estado</th>
-                  <th>Registrado</th>
+                   <th>Registrado</th>
+                   <th><span className="sr-only">Acciones</span></th>
                 </tr>
               </thead>
               <tbody>
@@ -246,6 +241,7 @@ const ProfilesPage = () => {
                     <td><ProfileRoleBadge role={profile.role} /></td>
                     <td><ProfileStatusBadge status={profile.status} /></td>
                     <td><time dateTime={profile.createdAt}>{dateFormatter.format(new Date(profile.createdAt))}</time></td>
+                    <td><ProfileAccessDialog profile={profile} /></td>
                   </tr>
                 ))}
               </tbody>

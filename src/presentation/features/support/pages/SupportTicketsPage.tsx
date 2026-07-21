@@ -1,4 +1,9 @@
-import { useAreas, useCategories } from "@/application/hooks/useCatalogs";
+import {
+  useAreas,
+  useCategories,
+  useProblemTypes,
+  useSubareas,
+} from "@/application/hooks/useCatalogs";
 import {
   useSupportAgents,
   useSupportTickets,
@@ -67,19 +72,35 @@ const isDate = (value: string | null): value is string =>
   value !== null && /^\d{4}-\d{2}-\d{2}$/.test(value);
 
 const SupportTicketsPage = ({ mode = "queue" }: SupportTicketsPageProps) => {
-  const [searchParams] = useSearchParams();
-  const areasQuery = useAreas({ includeInactive: true });
-  const categoriesQuery = useCategories({ includeInactive: true });
-  const agentsQuery = useSupportAgents();
+  const [searchParams, setSearchParams] = useSearchParams();
   const pageValue = Number(searchParams.get("pagina"));
   const page = Number.isInteger(pageValue) && pageValue > 0 ? pageValue : 1;
   const statusValue = searchParams.get("estado");
   const priorityValue = searchParams.get("prioridad");
   const areaValue = searchParams.get("area");
+  const subareaValue = searchParams.get("subarea");
   const categoryValue = searchParams.get("categoria");
+  const problemTypeValue = searchParams.get("tipo");
   const assignmentValue = searchParams.get("asignado");
   const fromValue = searchParams.get("desde");
   const toValue = searchParams.get("hasta");
+  const areaId = isUuid(areaValue) ? areaValue : undefined;
+  const subareaId = areaId && isUuid(subareaValue) ? subareaValue : undefined;
+  const categoryId = isUuid(categoryValue) ? categoryValue : undefined;
+  const problemTypeId = categoryId && isUuid(problemTypeValue)
+    ? problemTypeValue
+    : undefined;
+  const areasQuery = useAreas({ includeInactive: true });
+  const subareasQuery = useSubareas({
+    areaId: areaId ?? null,
+    includeInactive: true,
+  });
+  const categoriesQuery = useCategories({ includeInactive: true });
+  const problemTypesQuery = useProblemTypes({
+    categoryId: categoryId ?? null,
+    includeInactive: true,
+  });
+  const agentsQuery = useSupportAgents();
   const parsedAssignment =
     assignmentValue === "sin-asignar"
       ? "unassigned"
@@ -94,8 +115,10 @@ const SupportTicketsPage = ({ mode = "queue" }: SupportTicketsPageProps) => {
     search: searchParams.get("q")?.trim() || undefined,
     status: isStatus(statusValue) ? statusValue : undefined,
     priority: isPriority(priorityValue) ? priorityValue : undefined,
-    areaId: isUuid(areaValue) ? areaValue : undefined,
-    categoryId: isUuid(categoryValue) ? categoryValue : undefined,
+    areaId,
+    subareaId,
+    categoryId,
+    problemTypeId,
     assignment: mode === "mine" ? "mine" : parsedAssignment,
     dateFrom: isDate(fromValue) ? fromValue : undefined,
     dateTo: isDate(toValue) ? toValue : undefined,
@@ -107,7 +130,9 @@ const SupportTicketsPage = ({ mode = "queue" }: SupportTicketsPageProps) => {
       filters.status ||
       filters.priority ||
       filters.areaId ||
+      filters.subareaId ||
       filters.categoryId ||
+      filters.problemTypeId ||
       (mode === "queue" && filters.assignment) ||
       filters.dateFrom ||
       filters.dateTo,
@@ -123,6 +148,19 @@ const SupportTicketsPage = ({ mode = "queue" }: SupportTicketsPageProps) => {
     else params.set("pagina", String(nextPage));
     const query = params.toString();
     return query ? `${basePath}?${query}` : basePath;
+  };
+
+  const selectParentFilter = (
+    parent: "area" | "categoria",
+    child: "subarea" | "tipo",
+    value: string,
+  ) => {
+    const params = new URLSearchParams(searchParams);
+    if (value) params.set(parent, value);
+    else params.delete(parent);
+    params.delete(child);
+    params.delete("pagina");
+    setSearchParams(params);
   };
 
   return (
@@ -161,7 +199,7 @@ const SupportTicketsPage = ({ mode = "queue" }: SupportTicketsPageProps) => {
           <Filter className="size-4" aria-hidden="true" />
           <h2 className="text-sm font-black">Filtros operativos</h2>
         </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-10">
           <fieldset className="fieldset sm:col-span-2">
             <legend className="fieldset-legend">Código o asunto</legend>
             <label className="input w-full">
@@ -199,10 +237,33 @@ const SupportTicketsPage = ({ mode = "queue" }: SupportTicketsPageProps) => {
           </fieldset>
           <fieldset className="fieldset">
             <legend className="fieldset-legend">Área</legend>
-            <select name="area" className="select w-full" defaultValue={filters.areaId ?? ""}>
+            <select
+              name="area"
+              className="select w-full"
+              value={filters.areaId ?? ""}
+              onChange={(event) =>
+                selectParentFilter("area", "subarea", event.target.value)
+              }
+            >
               <option value="">Todas</option>
               {areasQuery.data?.map((area) => (
                 <option key={area.id} value={area.id}>{area.name}</option>
+              ))}
+            </select>
+          </fieldset>
+          <fieldset className="fieldset">
+            <legend className="fieldset-legend">Subárea</legend>
+            <select
+              name="subarea"
+              className="select w-full"
+              defaultValue={filters.subareaId ?? ""}
+              disabled={!filters.areaId || subareasQuery.isPending}
+            >
+              <option value="">Todas</option>
+              {subareasQuery.data?.map((subarea) => (
+                <option key={subarea.id} value={subarea.id}>
+                  {subarea.name}
+                </option>
               ))}
             </select>
           </fieldset>
@@ -211,11 +272,30 @@ const SupportTicketsPage = ({ mode = "queue" }: SupportTicketsPageProps) => {
             <select
               name="categoria"
               className="select w-full"
-              defaultValue={filters.categoryId ?? ""}
+              value={filters.categoryId ?? ""}
+              onChange={(event) =>
+                selectParentFilter("categoria", "tipo", event.target.value)
+              }
             >
               <option value="">Todas</option>
               {categoriesQuery.data?.map((category) => (
                 <option key={category.id} value={category.id}>{category.name}</option>
+              ))}
+            </select>
+          </fieldset>
+          <fieldset className="fieldset">
+            <legend className="fieldset-legend">Tipo</legend>
+            <select
+              name="tipo"
+              className="select w-full"
+              defaultValue={filters.problemTypeId ?? ""}
+              disabled={!filters.categoryId || problemTypesQuery.isPending}
+            >
+              <option value="">Todos</option>
+              {problemTypesQuery.data?.map((problemType) => (
+                <option key={problemType.id} value={problemType.id}>
+                  {problemType.name}
+                </option>
               ))}
             </select>
           </fieldset>
@@ -334,7 +414,12 @@ const SupportTicketsPage = ({ mode = "queue" }: SupportTicketsPageProps) => {
                     <td>{ticket.requesterName}</td>
                     <td>
                       <p className="font-semibold">{ticket.areaName}</p>
-                      <p className="mt-1 text-xs text-base-content/50">{ticket.categoryName}</p>
+                      <p className="mt-1 text-xs text-base-content/50">
+                        {ticket.subareaName}
+                      </p>
+                      <p className="mt-1 text-xs text-base-content/50">
+                        {ticket.categoryName} · {ticket.problemTypeName}
+                      </p>
                     </td>
                     <td><TicketStatusBadge status={ticket.status} /></td>
                     <td><TicketPriorityBadge priority={ticket.priority} /></td>

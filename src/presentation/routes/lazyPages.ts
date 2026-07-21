@@ -24,16 +24,16 @@ export const NotFoundPage = lazy(
   () => import("@/presentation/features/errors/pages/NotFoundPage"),
 );
 
-export const ModulePendingPage = lazy(
-  () => import("@/presentation/features/shared/pages/ModulePendingPage"),
-);
-
 export const ProfilePage = lazy(
   () => import("@/presentation/features/shared/pages/ProfilePage"),
 );
 
 export const AreasPage = lazy(
   () => import("@/presentation/features/catalogs/pages/AreasPage"),
+);
+
+export const SubareasPage = lazy(
+  () => import("@/presentation/features/catalogs/pages/SubareasPage"),
 );
 
 export const CategoriesPage = lazy(

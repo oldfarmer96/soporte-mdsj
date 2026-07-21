@@ -29,3 +29,9 @@ export interface PaginatedProfiles {
   pageSize: number;
   totalPages: number;
 }
+
+export interface UpdateProfileAccessInput {
+  profileId: string;
+  role: RoleT;
+  status: ProfileStatus;
+}

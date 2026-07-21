@@ -284,7 +284,12 @@ const MyTicketsPage = () => {
                     </td>
                     <td>
                       <p className="font-semibold">{ticket.areaName}</p>
-                      <p className="mt-1 text-xs text-base-content/50">{ticket.categoryName}</p>
+                      <p className="mt-1 text-xs text-base-content/50">
+                        {ticket.subareaName}
+                      </p>
+                      <p className="mt-1 text-xs text-base-content/50">
+                        {ticket.categoryName} · {ticket.problemTypeName}
+                      </p>
                     </td>
                     <td><TicketStatusBadge status={ticket.status} /></td>
                     <td><TicketPriorityBadge priority={ticket.priority} /></td>

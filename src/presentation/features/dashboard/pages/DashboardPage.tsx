@@ -277,8 +277,16 @@ const DashboardPage = ({ role }: { role: "APOYO" | "ADMIN" }) => {
             />
             <MetricBars title="Áreas con más tickets" items={metricsQuery.data.byArea} />
             <MetricBars
+              title="Subáreas con más tickets"
+              items={metricsQuery.data.bySubarea}
+            />
+            <MetricBars
               title="Categorías con más tickets"
               items={metricsQuery.data.byCategory}
+            />
+            <MetricBars
+              title="Tipos de problema más frecuentes"
+              items={metricsQuery.data.byProblemType}
             />
           </div>
 

@@ -56,7 +56,9 @@ export const exportDashboardExcel = async (metrics: SupportDashboardMetrics) => 
   addMetricSheet("Estados", metrics.byStatus);
   addMetricSheet("Prioridades", metrics.byPriority);
   addMetricSheet("Áreas", metrics.byArea);
+  addMetricSheet("Subáreas", metrics.bySubarea);
   addMetricSheet("Categorías", metrics.byCategory);
+  addMetricSheet("Tipos de problema", metrics.byProblemType);
 
   const workload = workbook.addWorksheet("Carga de apoyo");
   workload.addRow(["Personal", "Asignados", "En curso"]);

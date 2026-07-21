@@ -3,15 +3,20 @@ import type {
   ProfileListFilters,
   ProfileListItem,
   ProfileStatus,
+  UpdateProfileAccessInput,
 } from "@/shared/interfaces/profile.interface";
 import type { RoleT } from "@/shared/types/role.types";
 import { supabase } from "@/shared/utils/supabase";
+import type {
+  ChangePasswordT,
+  PersonalDataT,
+} from "@/presentation/features/shared/schemas/profile.schema";
 
 interface ProfileRow {
   id: string;
   dni: string;
-  nombres: string;
-  apellidos: string;
+  nombres: string | null;
+  apellidos: string | null;
   telefono: string | null;
   rol: RoleT;
   estado: ProfileStatus;
@@ -56,8 +61,8 @@ export const getProfiles = async (
   const items: ProfileListItem[] = (data as ProfileRow[]).map((profile) => ({
     id: profile.id,
     dni: profile.dni,
-    firstName: profile.nombres,
-    lastName: profile.apellidos,
+    firstName: profile.nombres ?? "Sin completar",
+    lastName: profile.apellidos ?? "",
     phone: profile.telefono,
     role: profile.rol,
     status: profile.estado,
@@ -73,4 +78,56 @@ export const getProfiles = async (
     pageSize: filters.pageSize,
     totalPages: Math.max(1, Math.ceil(total / filters.pageSize)),
   };
+};
+
+export const updateProfileAccess = async ({
+  profileId,
+  role,
+  status,
+}: UpdateProfileAccessInput) => {
+  const { error } = await supabase.rpc("actualizar_acceso_perfil", {
+    p_id_perfil: profileId,
+    p_rol: role,
+    p_estado: status,
+  });
+  if (error) throw error;
+};
+
+export const updateOwnProfile = async (input: PersonalDataT) => {
+  const { error } = await supabase.rpc("actualizar_mi_perfil", {
+    p_nombres: input.nombres,
+    p_apellidos: input.apellidos,
+    p_telefono: input.telefono,
+  });
+  if (error) throw error;
+};
+
+export const changeOwnPassword = async ({ password }: ChangePasswordT) => {
+  const { error: authError } = await supabase.auth.updateUser({ password });
+  if (authError) throw authError;
+
+  const { error } = await supabase.rpc("marcar_password_actualizado");
+  if (error) throw error;
+};
+
+export const getProfileMutationErrorMessage = (error: unknown) => {
+  const message =
+    typeof error === "object" && error !== null && "message" in error
+      ? String(error.message).toLowerCase()
+      : "";
+
+  if (message.includes("propia cuenta")) {
+    return "No puedes modificar tu propia cuenta administrativa.";
+  }
+  if (message.includes("último administrador")) {
+    return "Debe permanecer al menos un administrador activo.";
+  }
+  if (message.includes("tickets activos")) {
+    return "Reasigna los tickets activos antes de cambiar el acceso de este usuario.";
+  }
+  if (message.includes("permiso")) {
+    return "Tu cuenta no tiene permiso para administrar usuarios.";
+  }
+
+  return "No pudimos actualizar el acceso del usuario.";
 };

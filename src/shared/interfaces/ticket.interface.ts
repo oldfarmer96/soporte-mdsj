@@ -28,10 +28,10 @@ export type TicketEventType =
 
 export interface CreateTicketInput {
   areaId: string;
+  subareaId: string;
   categoryId: string;
-  problemTypeId: string | null;
-  subject: string;
-  description: string;
+  problemTypeId: string;
+  description: string | null;
   impact: TicketImpact;
   workStopped: boolean;
 }
@@ -58,12 +58,13 @@ export interface CreatedTicket {
 }
 
 export interface TicketDetail extends CreatedTicket {
-  description: string;
+  description: string | null;
   impact: TicketImpact;
   workStopped: boolean;
   areaName: string;
+  subareaName: string;
   categoryName: string;
-  problemTypeName: string | null;
+  problemTypeName: string;
   isAssigned: boolean;
   history: TicketHistoryEvent[];
   resolution: TicketResolution | null;
@@ -72,7 +73,9 @@ export interface TicketDetail extends CreatedTicket {
 
 export interface TicketListItem extends CreatedTicket {
   areaName: string;
+  subareaName: string;
   categoryName: string;
+  problemTypeName: string;
   isAssigned: boolean;
 }
 

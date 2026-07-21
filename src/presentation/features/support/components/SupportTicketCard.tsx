@@ -40,8 +40,11 @@ const SupportTicketCard = ({ ticket }: { ticket: SupportTicketListItem }) => (
         </div>
         <div className="flex min-w-0 items-center gap-2">
           <MapPin className="size-4 shrink-0" aria-hidden="true" />
-          <dt className="sr-only">Clasificación</dt>
-          <dd className="truncate">{ticket.areaName} · {ticket.categoryName}</dd>
+          <dt className="sr-only">Ubicación</dt>
+          <dd className="truncate">{ticket.areaName} · {ticket.subareaName}</dd>
+        </div>
+        <div className="truncate pl-6 text-xs">
+          {ticket.categoryName} · {ticket.problemTypeName}
         </div>
         <div className="flex min-w-0 items-center gap-2">
           <Wrench className="size-4 shrink-0" aria-hidden="true" />

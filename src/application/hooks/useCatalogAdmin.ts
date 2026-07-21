@@ -3,18 +3,22 @@ import type {
   AreaPayload,
   CategoryPayload,
   ProblemTypePayload,
+  SubareaPayload,
 } from "@/shared/interfaces/catalog.interface";
 import {
   createArea,
   createCategory,
   createProblemType,
+  createSubarea,
   getCatalogMutationErrorMessage,
   setAreaActive,
   setCategoryActive,
   setProblemTypeActive,
+  setSubareaActive,
   updateArea,
   updateCategory,
   updateProblemType,
+  updateSubarea,
 } from "@/services/catalog.service";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -49,6 +53,27 @@ export const useSetAreaActive = () =>
     "set-area-active",
     ({ id, isActive }: { id: string; isActive: boolean }) => setAreaActive(id, isActive),
     "Estado del área actualizado",
+  );
+
+export const useCreateSubarea = () =>
+  useCatalogMutation(
+    "create-subarea",
+    createSubarea,
+    "Subárea creada correctamente",
+  );
+export const useUpdateSubarea = () =>
+  useCatalogMutation(
+    "update-subarea",
+    ({ id, payload }: { id: string; payload: SubareaPayload }) =>
+      updateSubarea(id, payload),
+    "Subárea actualizada correctamente",
+  );
+export const useSetSubareaActive = () =>
+  useCatalogMutation(
+    "set-subarea-active",
+    ({ id, isActive }: { id: string; isActive: boolean }) =>
+      setSubareaActive(id, isActive),
+    "Estado de la subárea actualizado",
   );
 
 export const useCreateCategory = () =>

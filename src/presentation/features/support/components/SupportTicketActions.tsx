@@ -97,7 +97,7 @@ const SupportTicketActions = ({ ticket }: { ticket: SupportTicketDetail }) => {
               </option>
               {agentsQuery.data?.map((agent) => (
                 <option key={agent.id} value={agent.id}>
-                  {agent.name} · {agent.role === "ADMIN" ? "Admin" : "Apoyo"}
+                  {agent.name}
                 </option>
               ))}
             </select>

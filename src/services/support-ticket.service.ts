@@ -24,7 +24,7 @@ interface ProfileRelation {
   nombres: string;
   apellidos: string;
   telefono?: string | null;
-  rol?: "APOYO" | "ADMIN";
+  rol?: "APOYO";
 }
 
 interface SupportTicketRow {
@@ -37,7 +37,9 @@ interface SupportTicketRow {
   created_at: string;
   updated_at: string;
   area: NamedRelation | NamedRelation[] | null;
+  subarea: NamedRelation | NamedRelation[] | null;
   categoria: NamedRelation | NamedRelation[] | null;
+  tipo_problema: NamedRelation | NamedRelation[] | null;
   solicitante: ProfileRelation | ProfileRelation[] | null;
   asignado: ProfileRelation | ProfileRelation[] | null;
 }
@@ -55,7 +57,7 @@ interface SupportAgentRow {
   id: string;
   nombres: string;
   apellidos: string;
-  rol: "APOYO" | "ADMIN";
+  rol: "APOYO";
 }
 
 const firstRelation = <T>(relation: T | T[] | null): T | null =>
@@ -88,7 +90,7 @@ export const getSupportTickets = async (
   let query = supabase
     .from("tickets")
     .select(
-      "id, codigo, asunto, impacto, prioridad, estado, created_at, updated_at, area:areas(nombre), categoria:categorias(nombre), solicitante:perfiles!tickets_id_solicitante_fkey(id, nombres, apellidos), asignado:perfiles!tickets_asignado_a_fkey(id, nombres, apellidos)",
+      "id, codigo, asunto, impacto, prioridad, estado, created_at, updated_at, area:areas(nombre), subarea:subareas!tickets_area_subarea_fk(nombre), categoria:categorias(nombre), tipo_problema:ticket_tipos_problemas!tickets_categoria_tipo_problema_fk(nombre), solicitante:perfiles!tickets_id_solicitante_fkey(id, nombres, apellidos), asignado:perfiles!tickets_asignado_a_fkey(id, nombres, apellidos)",
       { count: "exact" },
     )
     .order("prioridad", { ascending: false })
@@ -100,7 +102,11 @@ export const getSupportTickets = async (
   if (filters.status) query = query.eq("estado", filters.status);
   if (filters.priority) query = query.eq("prioridad", filters.priority);
   if (filters.areaId) query = query.eq("id_area", filters.areaId);
+  if (filters.subareaId) query = query.eq("id_subarea", filters.subareaId);
   if (filters.categoryId) query = query.eq("id_categoria", filters.categoryId);
+  if (filters.problemTypeId) {
+    query = query.eq("id_tipo_problema", filters.problemTypeId);
+  }
   if (filters.assignment === "unassigned") query = query.is("asignado_a", null);
   if (filters.assignment === "mine") {
     const { data, error } = await supabase.auth.getUser();
@@ -127,7 +133,9 @@ export const getSupportTickets = async (
     priority: ticket.prioridad,
     status: ticket.estado,
     areaName: relationName(ticket.area),
+    subareaName: relationName(ticket.subarea),
     categoryName: relationName(ticket.categoria),
+    problemTypeName: relationName(ticket.tipo_problema),
     requesterName: profileName(firstRelation(ticket.solicitante)) ?? "Solicitante no disponible",
     assignedAgentName: profileName(firstRelation(ticket.asignado)),
     createdAt: ticket.created_at,
@@ -149,7 +157,7 @@ export const getSupportAgents = async (): Promise<SupportAgent[]> => {
     .from("perfiles")
     .select("id, nombres, apellidos, rol")
     .eq("estado", "ACTIVO")
-    .in("rol", ["APOYO", "ADMIN"])
+    .eq("rol", "APOYO")
     .order("nombres", { ascending: true })
     .order("apellidos", { ascending: true });
 
@@ -191,11 +199,11 @@ export const getSupportTicketDetail = async (
       phone: requester.telefono ?? null,
     },
     assignedAgent:
-      assignedAgent?.rol === "APOYO" || assignedAgent?.rol === "ADMIN"
+      assignedAgent?.rol === "APOYO"
         ? {
             id: assignedAgent.id,
             name: profileName(assignedAgent) ?? "Personal no disponible",
-            role: assignedAgent.rol,
+            role: "APOYO",
           }
         : null,
     assignedAt: context.assigned_at,

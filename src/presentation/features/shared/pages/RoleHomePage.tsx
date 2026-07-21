@@ -3,7 +3,7 @@ import PageContainer from "@/presentation/components/PageContainer";
 import PageHeader from "@/presentation/components/PageHeader";
 import { NAVIGATION_BY_ROLE } from "@/presentation/navigation/navigation";
 import type { RoleT } from "@/shared/types/role.types";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, UserRoundPen } from "lucide-react";
 import { Link } from "react-router-dom";
 
 interface RoleHomePageProps {
@@ -25,6 +25,25 @@ const RoleHomePage = ({ role, description }: RoleHomePageProps) => {
         title={`Hola, ${user?.name ?? "bienvenido"}`}
         description={description}
       />
+
+      {role === "SOLICITANTE" &&
+        (!user?.name ||
+          !user.lastName ||
+          !user.phone ||
+          user.mustChangePassword) && (
+          <div role="alert" className="alert alert-warning alert-soft mb-6 sm:alert-horizontal">
+            <UserRoundPen className="size-5" aria-hidden="true" />
+            <div className="grow">
+              <h2 className="font-bold">Completa tu perfil</h2>
+              <p className="text-sm">
+                Registra tus datos personales y cambia tu contraseña temporal.
+              </p>
+            </div>
+            <Link className="btn btn-sm" to={navigation.profilePath}>
+              Ir a mi perfil
+            </Link>
+          </div>
+        )}
 
       <section aria-labelledby="quick-access-title">
         <div className="mb-4 flex items-center justify-between gap-3">

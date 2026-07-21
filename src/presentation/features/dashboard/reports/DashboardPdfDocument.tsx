@@ -93,8 +93,19 @@ const DashboardPdfDocument = ({
         rows={metrics.byArea.map((item) => ({ label: item.key, value: item.count }))}
       />
       <MetricTable
+        title="Subáreas con más tickets"
+        rows={metrics.bySubarea.map((item) => ({ label: item.key, value: item.count }))}
+      />
+      <MetricTable
         title="Categorías con más tickets"
         rows={metrics.byCategory.map((item) => ({ label: item.key, value: item.count }))}
+      />
+      <MetricTable
+        title="Tipos de problema más frecuentes"
+        rows={metrics.byProblemType.map((item) => ({
+          label: item.key,
+          value: item.count,
+        }))}
       />
 
       <Text

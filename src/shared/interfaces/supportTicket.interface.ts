@@ -8,7 +8,7 @@ import type {
 export interface SupportAgent {
   id: string;
   name: string;
-  role: "APOYO" | "ADMIN";
+  role: "APOYO";
 }
 
 export interface TicketRequester {
@@ -26,7 +26,9 @@ export interface SupportTicketListItem {
   priority: TicketPriority;
   status: TicketStatus;
   areaName: string;
+  subareaName: string;
   categoryName: string;
+  problemTypeName: string;
   requesterName: string;
   assignedAgentName: string | null;
   createdAt: string;
@@ -40,7 +42,9 @@ export interface SupportTicketFilters {
   status?: TicketStatus;
   priority?: TicketPriority;
   areaId?: string;
+  subareaId?: string;
   categoryId?: string;
+  problemTypeId?: string;
   assignment?: "mine" | "unassigned" | string;
   dateFrom?: string;
   dateTo?: string;

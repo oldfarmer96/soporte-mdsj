@@ -3,6 +3,7 @@ import {
   ClipboardCheck,
   CircleUserRound,
   FolderKanban,
+  GitBranch,
   House,
   Inbox,
   ListTree,
@@ -111,12 +112,6 @@ export const NAVIGATION_BY_ROLE: Record<RoleT, RoleNavigation> = {
         end: true,
       },
       {
-        label: "Tickets",
-        description: "Consulta general de solicitudes",
-        path: "/admin/tickets",
-        icon: FolderKanban,
-      },
-      {
         label: "Usuarios",
         description: "Consulta los perfiles registrados",
         path: "/admin/usuarios",
@@ -127,6 +122,12 @@ export const NAVIGATION_BY_ROLE: Record<RoleT, RoleNavigation> = {
         description: "Administra áreas y ubicaciones",
         path: "/admin/areas",
         icon: MapPin,
+      },
+      {
+        label: "Subáreas",
+        description: "Administra unidades asociadas a cada área",
+        path: "/admin/subareas",
+        icon: GitBranch,
       },
       {
         label: "Categorías",

@@ -36,7 +36,9 @@ export interface SupportDashboardMetrics {
   byStatus: DashboardMetricItem[];
   byPriority: DashboardMetricItem[];
   byArea: DashboardMetricItem[];
+  bySubarea: DashboardMetricItem[];
   byCategory: DashboardMetricItem[];
+  byProblemType: DashboardMetricItem[];
   workload: DashboardWorkloadItem[];
   daily: DashboardDailyItem[];
 }

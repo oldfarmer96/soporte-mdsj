@@ -7,6 +7,9 @@ import type {
   ProblemType,
   ProblemTypePayload,
   ProblemTypeQueryOptions,
+  Subarea,
+  SubareaPayload,
+  SubareaQueryOptions,
   TicketPriority,
 } from "@/shared/interfaces/catalog.interface";
 import { supabase } from "@/shared/utils/supabase";
@@ -17,6 +20,17 @@ interface AreaRow {
   nombre_corto: string | null;
   piso: number | null;
   referencia: string | null;
+  es_otro: boolean;
+  activo: boolean;
+}
+
+interface SubareaRow {
+  id: string;
+  id_area: string;
+  nombre: string;
+  nombre_corto: string | null;
+  descripcion: string | null;
+  es_otro: boolean;
   activo: boolean;
 }
 
@@ -25,6 +39,7 @@ interface CategoryRow {
   nombre: string;
   descripcion: string | null;
   es_critico: boolean;
+  es_otro: boolean;
   activo: boolean;
 }
 
@@ -34,6 +49,7 @@ interface ProblemTypeRow {
   nombre: string;
   descripcion: string | null;
   prioridad: TicketPriority;
+  es_otro: boolean;
   activo: boolean;
 }
 
@@ -42,7 +58,7 @@ export const getAreas = async ({
 }: CatalogQueryOptions = {}): Promise<Area[]> => {
   let query = supabase
     .from("areas")
-    .select("id, nombre, nombre_corto, piso, referencia, activo")
+    .select("id, nombre, nombre_corto, piso, referencia, es_otro, activo")
     .order("nombre", { ascending: true });
 
   if (!includeInactive) query = query.eq("activo", true);
@@ -56,7 +72,37 @@ export const getAreas = async ({
     shortName: area.nombre_corto,
     floor: area.piso,
     reference: area.referencia,
+    isOther: area.es_otro,
     isActive: area.activo,
+  }));
+};
+
+export const getSubareas = async ({
+  areaId,
+  includeInactive = false,
+}: SubareaQueryOptions = {}): Promise<Subarea[]> => {
+  let query = supabase
+    .from("subareas")
+    .select(
+      "id, id_area, nombre, nombre_corto, descripcion, es_otro, activo",
+    )
+    .order("es_otro", { ascending: true })
+    .order("nombre", { ascending: true });
+
+  if (areaId) query = query.eq("id_area", areaId);
+  if (!includeInactive) query = query.eq("activo", true);
+
+  const { data, error } = await query;
+  if (error) throw error;
+
+  return (data as SubareaRow[]).map((subarea) => ({
+    id: subarea.id,
+    areaId: subarea.id_area,
+    name: subarea.nombre,
+    shortName: subarea.nombre_corto,
+    description: subarea.descripcion,
+    isOther: subarea.es_otro,
+    isActive: subarea.activo,
   }));
 };
 
@@ -65,7 +111,7 @@ export const getCategories = async ({
 }: CatalogQueryOptions = {}): Promise<Category[]> => {
   let query = supabase
     .from("categorias")
-    .select("id, nombre, descripcion, es_critico, activo")
+    .select("id, nombre, descripcion, es_critico, es_otro, activo")
     .order("nombre", { ascending: true });
 
   if (!includeInactive) query = query.eq("activo", true);
@@ -78,6 +124,7 @@ export const getCategories = async ({
     name: category.nombre,
     description: category.descripcion,
     isCritical: category.es_critico,
+    isOther: category.es_otro,
     isActive: category.activo,
   }));
 };
@@ -88,7 +135,10 @@ export const getProblemTypes = async ({
 }: ProblemTypeQueryOptions = {}): Promise<ProblemType[]> => {
   let query = supabase
     .from("ticket_tipos_problemas")
-    .select("id, id_categoria, nombre, descripcion, prioridad, activo")
+    .select(
+      "id, id_categoria, nombre, descripcion, prioridad, es_otro, activo",
+    )
+    .order("es_otro", { ascending: true })
     .order("nombre", { ascending: true });
 
   if (categoryId) query = query.eq("id_categoria", categoryId);
@@ -103,6 +153,7 @@ export const getProblemTypes = async ({
     name: problemType.nombre,
     description: problemType.descripcion,
     priority: problemType.prioridad,
+    isOther: problemType.es_otro,
     isActive: problemType.activo,
   }));
 };
@@ -132,6 +183,43 @@ export const updateArea = async (areaId: string, payload: AreaPayload) => {
 
 export const setAreaActive = async (areaId: string, isActive: boolean) => {
   const { error } = await supabase.from("areas").update({ activo: isActive }).eq("id", areaId);
+  if (error) throw error;
+};
+
+export const createSubarea = async (payload: SubareaPayload) => {
+  const { error } = await supabase.from("subareas").insert({
+    id_area: payload.areaId,
+    nombre: payload.name.trim(),
+    nombre_corto: payload.shortName,
+    descripcion: payload.description,
+  });
+  if (error) throw error;
+};
+
+export const updateSubarea = async (
+  subareaId: string,
+  payload: SubareaPayload,
+) => {
+  const { error } = await supabase
+    .from("subareas")
+    .update({
+      id_area: payload.areaId,
+      nombre: payload.name.trim(),
+      nombre_corto: payload.shortName,
+      descripcion: payload.description,
+    })
+    .eq("id", subareaId);
+  if (error) throw error;
+};
+
+export const setSubareaActive = async (
+  subareaId: string,
+  isActive: boolean,
+) => {
+  const { error } = await supabase
+    .from("subareas")
+    .update({ activo: isActive })
+    .eq("id", subareaId);
   if (error) throw error;
 };
 
