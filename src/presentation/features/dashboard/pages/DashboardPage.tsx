@@ -11,7 +11,6 @@ import { getDashboardErrorMessage } from "@/services/dashboard.service";
 import {
   Activity,
   CalendarDays,
-  FileDown,
   Inbox,
   Sheet,
   TicketCheck,
@@ -21,10 +20,7 @@ import {
 import { useState } from "react";
 import { Form, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
-import {
-  downloadDashboardExcel,
-  downloadDashboardPdf,
-} from "../utils/dashboardExports";
+import { downloadDashboardExcel } from "../utils/dashboardExports";
 
 const STATUS_LABELS: Record<string, string> = {
   NUEVO: "Nuevo",
@@ -134,7 +130,7 @@ const SummaryCards = ({ metrics }: { metrics: SupportDashboardMetrics }) => {
 
 const DashboardPage = ({ role }: { role: "APOYO" | "ADMIN" }) => {
   const [searchParams] = useSearchParams();
-  const [exporting, setExporting] = useState<"pdf" | "xlsx" | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
   const today = getLimaToday();
   const fromParam = searchParams.get("desde");
   const toParam = searchParams.get("hasta");
@@ -156,17 +152,16 @@ const DashboardPage = ({ role }: { role: "APOYO" | "ADMIN" }) => {
       )
     : 1;
 
-  const exportReport = async (format: "pdf" | "xlsx") => {
+  const exportReport = async () => {
     if (!metricsQuery.data) return;
-    setExporting(format);
+    setIsExporting(true);
     try {
-      if (format === "pdf") await downloadDashboardPdf(metricsQuery.data);
-      else await downloadDashboardExcel(metricsQuery.data);
-      toast.success(`Reporte ${format.toUpperCase()} generado correctamente`);
+      await downloadDashboardExcel(metricsQuery.data);
+      toast.success("Reporte Excel generado correctamente");
     } catch {
-      toast.error("No pudimos generar el reporte. Inténtalo nuevamente.");
+      toast.error("No pudimos generar el reporte Excel. Inténtalo nuevamente.");
     } finally {
-      setExporting(null);
+      setIsExporting(false);
     }
   };
 
@@ -178,34 +173,19 @@ const DashboardPage = ({ role }: { role: "APOYO" | "ADMIN" }) => {
         description="Indicadores agregados de la mesa de soporte en horario de Lima."
         actions={
           metricsQuery.isSuccess ? (
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                className="btn"
-                disabled={exporting !== null}
-                onClick={() => exportReport("pdf")}
-              >
-                {exporting === "pdf" ? (
-                  <span className="loading loading-spinner loading-sm" />
-                ) : (
-                  <FileDown className="size-4" aria-hidden="true" />
-                )}
-                PDF
-              </button>
-              <button
-                type="button"
-                className="btn"
-                disabled={exporting !== null}
-                onClick={() => exportReport("xlsx")}
-              >
-                {exporting === "xlsx" ? (
-                  <span className="loading loading-spinner loading-sm" />
-                ) : (
-                  <Sheet className="size-4" aria-hidden="true" />
-                )}
-                Excel
-              </button>
-            </div>
+            <button
+              type="button"
+              className="btn"
+              disabled={isExporting}
+              onClick={() => void exportReport()}
+            >
+              {isExporting ? (
+                <span className="loading loading-spinner loading-sm" />
+              ) : (
+                <Sheet className="size-4" aria-hidden="true" />
+              )}
+              Excel
+            </button>
           ) : undefined
         }
       />
