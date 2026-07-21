@@ -40,8 +40,6 @@ export const exportDashboardExcel = async (
     ["Tickets resueltos", metrics.summary.resolved],
     ["Tickets activos", metrics.summary.active],
     ["Tickets sin asignar", metrics.summary.unassigned],
-    ["Promedio de asignación (horas)", metrics.summary.avgAssignmentHours],
-    ["Promedio de resolución (horas)", metrics.summary.avgResolutionHours],
   ]);
   styleSheet(summary);
 

@@ -21,8 +21,8 @@ interface NamedRelation {
 interface ProfileRelation {
   id: string;
   dni?: string;
-  nombres: string;
-  apellidos: string;
+  nombres: string | null;
+  apellidos: string | null;
   telefono?: string | null;
   rol?: "APOYO";
 }
@@ -55,8 +55,9 @@ interface SupportTicketContextRow {
 
 interface SupportAgentRow {
   id: string;
-  nombres: string;
-  apellidos: string;
+  dni: string;
+  nombres: string | null;
+  apellidos: string | null;
   rol: "APOYO";
 }
 
@@ -67,7 +68,11 @@ const relationName = (relation: NamedRelation | NamedRelation[] | null) =>
   firstRelation(relation)?.nombre ?? "No disponible";
 
 const profileName = (profile: ProfileRelation | null) =>
-  profile ? `${profile.nombres} ${profile.apellidos}` : null;
+  profile
+    ? `${profile.nombres ?? ""} ${profile.apellidos ?? ""}`.trim() ||
+      profile.dni ||
+      null
+    : null;
 
 const sanitizeSearch = (search: string) =>
   search
@@ -90,7 +95,7 @@ export const getSupportTickets = async (
   let query = supabase
     .from("tickets")
     .select(
-      "id, codigo, asunto, impacto, prioridad, estado, created_at, updated_at, area:areas(nombre), subarea:subareas!tickets_area_subarea_fk(nombre), categoria:categorias(nombre), tipo_problema:ticket_tipos_problemas!tickets_categoria_tipo_problema_fk(nombre), solicitante:perfiles!tickets_id_solicitante_fkey(id, nombres, apellidos), asignado:perfiles!tickets_asignado_a_fkey(id, nombres, apellidos)",
+      "id, codigo, asunto, impacto, prioridad, estado, created_at, updated_at, area:areas(nombre), subarea:subareas!tickets_area_subarea_fk(nombre), categoria:categorias(nombre), tipo_problema:ticket_tipos_problemas!tickets_categoria_tipo_problema_fk(nombre), solicitante:perfiles!tickets_id_solicitante_fkey(id, dni, nombres, apellidos), asignado:perfiles!tickets_asignado_a_fkey(id, dni, nombres, apellidos)",
       { count: "exact" },
     )
     .order("prioridad", { ascending: false })
@@ -155,7 +160,7 @@ export const getSupportTickets = async (
 export const getSupportAgents = async (): Promise<SupportAgent[]> => {
   const { data, error } = await supabase
     .from("perfiles")
-    .select("id, nombres, apellidos, rol")
+    .select("id, dni, nombres, apellidos, rol")
     .eq("estado", "ACTIVO")
     .eq("rol", "APOYO")
     .order("nombres", { ascending: true })
@@ -165,7 +170,7 @@ export const getSupportAgents = async (): Promise<SupportAgent[]> => {
 
   return (data as SupportAgentRow[]).map((agent) => ({
     id: agent.id,
-    name: `${agent.nombres} ${agent.apellidos}`,
+    name: profileName(agent) ?? agent.dni,
     role: agent.rol,
   }));
 };
@@ -177,7 +182,7 @@ export const getSupportTicketDetail = async (
   const { data, error } = await supabase
     .from("tickets")
     .select(
-      "assigned_at, started_at, resolved_at, closed_at, solicitante:perfiles!tickets_id_solicitante_fkey(id, dni, nombres, apellidos, telefono), asignado:perfiles!tickets_asignado_a_fkey(id, nombres, apellidos, rol)",
+      "assigned_at, started_at, resolved_at, closed_at, solicitante:perfiles!tickets_id_solicitante_fkey(id, dni, nombres, apellidos, telefono), asignado:perfiles!tickets_asignado_a_fkey(id, dni, nombres, apellidos, rol)",
     )
     .eq("id", ticketId)
     .maybeSingle();

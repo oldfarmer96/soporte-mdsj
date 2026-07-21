@@ -9,8 +9,6 @@ export interface DashboardSummary {
   resolved: number;
   active: number;
   unassigned: number;
-  avgAssignmentHours: number;
-  avgResolutionHours: number;
 }
 
 export interface DashboardMetricItem {

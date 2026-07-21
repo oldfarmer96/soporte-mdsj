@@ -17,6 +17,11 @@ const RoleHomePage = ({ role, description }: RoleHomePageProps) => {
   const destinations = navigation.items.filter(
     (item) => item.path !== navigation.homePath && item.path !== navigation.profilePath,
   );
+  const profileNeedsAttention =
+    !user?.name ||
+    !user.lastName ||
+    user.mustChangePassword ||
+    (role === "SOLICITANTE" && !user.phone);
 
   return (
     <PageContainer>
@@ -26,24 +31,20 @@ const RoleHomePage = ({ role, description }: RoleHomePageProps) => {
         description={description}
       />
 
-      {role === "SOLICITANTE" &&
-        (!user?.name ||
-          !user.lastName ||
-          !user.phone ||
-          user.mustChangePassword) && (
-          <div role="alert" className="alert alert-warning alert-soft mb-6 sm:alert-horizontal">
-            <UserRoundPen className="size-5" aria-hidden="true" />
-            <div className="grow">
-              <h2 className="font-bold">Completa tu perfil</h2>
-              <p className="text-sm">
-                Registra tus datos personales y cambia tu contraseña temporal.
-              </p>
-            </div>
-            <Link className="btn btn-sm" to={navigation.profilePath}>
-              Ir a mi perfil
-            </Link>
+      {profileNeedsAttention && (
+        <div role="alert" className="alert alert-warning alert-soft mb-6 sm:alert-horizontal">
+          <UserRoundPen className="size-5" aria-hidden="true" />
+          <div className="grow">
+            <h2 className="font-bold">Completa tu perfil</h2>
+            <p className="text-sm">
+              Registra tus datos personales y cambia tu contraseña temporal.
+            </p>
           </div>
-        )}
+          <Link className="btn btn-sm" to={navigation.profilePath}>
+            Ir a mi perfil
+          </Link>
+        </div>
+      )}
 
       <section aria-labelledby="quick-access-title">
         <div className="mb-4 flex items-center justify-between gap-3">

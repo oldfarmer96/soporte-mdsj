@@ -83,8 +83,6 @@ const DashboardPdfDocument = ({
           ["Tickets resueltos", metrics.summary.resolved],
           ["Tickets activos", metrics.summary.active],
           ["Sin asignar", metrics.summary.unassigned],
-          ["Promedio asignación", `${metrics.summary.avgAssignmentHours} h`],
-          ["Promedio resolución", `${metrics.summary.avgResolutionHours} h`],
         ].map(([label, value]) => (
           <View key={String(label)} style={styles.summaryItem}>
             <Text style={styles.summaryLabel}>{label}</Text>

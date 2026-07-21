@@ -10,8 +10,6 @@ import { getDashboardErrorMessage } from "@/services/dashboard.service";
 import {
   Activity,
   CalendarDays,
-  CheckCircle2,
-  Clock3,
   FileDown,
   Inbox,
   Sheet,
@@ -111,16 +109,6 @@ const SummaryCards = ({ metrics }: { metrics: SupportDashboardMetrics }) => {
     { label: "Resueltos en el periodo", value: metrics.summary.resolved, icon: TicketCheck },
     { label: "Activos actualmente", value: metrics.summary.active, icon: Activity },
     { label: "Sin asignar", value: metrics.summary.unassigned, icon: Inbox },
-    {
-      label: "Promedio para asignar",
-      value: `${metrics.summary.avgAssignmentHours} h`,
-      icon: Clock3,
-    },
-    {
-      label: "Promedio para resolver",
-      value: `${metrics.summary.avgResolutionHours} h`,
-      icon: CheckCircle2,
-    },
   ];
 
   return (
