@@ -23,9 +23,11 @@ const styleSheet = (sheet: ExcelJS.Worksheet) => {
   sheet.views = [{ state: "frozen", ySplit: 1 }];
 };
 
-export const exportDashboardExcel = async (metrics: SupportDashboardMetrics) => {
+export const exportDashboardExcel = async (
+  metrics: SupportDashboardMetrics,
+) => {
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = "Mesa de soporte MDSJ";
+  workbook.creator = "Soporte MDSJ";
   workbook.created = new Date();
 
   const summary = workbook.addWorksheet("Resumen");
@@ -69,12 +71,17 @@ export const exportDashboardExcel = async (metrics: SupportDashboardMetrics) => 
 
   const daily = workbook.addWorksheet("Tendencia diaria");
   daily.addRow(["Fecha", "Creados", "Resueltos"]);
-  metrics.daily.forEach((row) => daily.addRow([row.date, row.created, row.resolved]));
+  metrics.daily.forEach((row) =>
+    daily.addRow([row.date, row.created, row.resolved]),
+  );
   styleSheet(daily);
 
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   });
-  downloadBlob(blob, `reporte-soporte-${metrics.period.from}-${metrics.period.to}.xlsx`);
+  downloadBlob(
+    blob,
+    `reporte-soporte-${metrics.period.from}-${metrics.period.to}.xlsx`,
+  );
 };

@@ -19,11 +19,21 @@ const styles = StyleSheet.create({
   summaryItem: { width: "31%", border: "1 solid #d1d5db", padding: 8 },
   summaryLabel: { fontSize: 7, color: "#6b7280", marginBottom: 3 },
   summaryValue: { fontSize: 14, fontWeight: 700 },
-  row: { flexDirection: "row", borderBottom: "1 solid #e5e7eb", paddingVertical: 4 },
+  row: {
+    flexDirection: "row",
+    borderBottom: "1 solid #e5e7eb",
+    paddingVertical: 4,
+  },
   cellGrow: { flexGrow: 1 },
   cellNumber: { width: 55, textAlign: "right" },
   header: { fontWeight: 700, backgroundColor: "#f3f4f6", paddingHorizontal: 4 },
-  footer: { position: "absolute", bottom: 18, left: 32, right: 32, color: "#9ca3af" },
+  footer: {
+    position: "absolute",
+    bottom: 18,
+    left: 32,
+    right: 32,
+    color: "#9ca3af",
+  },
 });
 
 const MetricTable = ({
@@ -40,7 +50,9 @@ const MetricTable = ({
       <Text style={styles.cellNumber}>Total</Text>
     </View>
     {rows.length === 0 ? (
-      <Text style={{ paddingVertical: 5, color: "#6b7280" }}>Sin datos en el periodo</Text>
+      <Text style={{ paddingVertical: 5, color: "#6b7280" }}>
+        Sin datos en el periodo
+      </Text>
     ) : (
       rows.map((row) => (
         <View key={row.label} style={styles.row}>
@@ -57,11 +69,12 @@ const DashboardPdfDocument = ({
 }: {
   metrics: SupportDashboardMetrics;
 }): ReactElement<DocumentProps> => (
-  <Document title="Reporte de mesa de soporte MDSJ">
+  <Document title="Reporte de Soporte MDSJ">
     <Page size="A4" style={styles.page}>
-      <Text style={styles.title}>Reporte de mesa de soporte MDSJ</Text>
+      <Text style={styles.title}>Reporte de soporte MDSJ</Text>
       <Text style={styles.subtitle}>
-        Periodo: {metrics.period.from} al {metrics.period.to} · Zona horaria: America/Lima
+        Periodo: {metrics.period.from} al {metrics.period.to} · Zona horaria:
+        America/Lima
       </Text>
 
       <View style={styles.summary}>
@@ -82,23 +95,38 @@ const DashboardPdfDocument = ({
 
       <MetricTable
         title="Tickets por estado"
-        rows={metrics.byStatus.map((item) => ({ label: item.key, value: item.count }))}
+        rows={metrics.byStatus.map((item) => ({
+          label: item.key,
+          value: item.count,
+        }))}
       />
       <MetricTable
         title="Tickets por prioridad"
-        rows={metrics.byPriority.map((item) => ({ label: item.key, value: item.count }))}
+        rows={metrics.byPriority.map((item) => ({
+          label: item.key,
+          value: item.count,
+        }))}
       />
       <MetricTable
         title="Áreas con más tickets"
-        rows={metrics.byArea.map((item) => ({ label: item.key, value: item.count }))}
+        rows={metrics.byArea.map((item) => ({
+          label: item.key,
+          value: item.count,
+        }))}
       />
       <MetricTable
         title="Subáreas con más tickets"
-        rows={metrics.bySubarea.map((item) => ({ label: item.key, value: item.count }))}
+        rows={metrics.bySubarea.map((item) => ({
+          label: item.key,
+          value: item.count,
+        }))}
       />
       <MetricTable
         title="Categorías con más tickets"
-        rows={metrics.byCategory.map((item) => ({ label: item.key, value: item.count }))}
+        rows={metrics.byCategory.map((item) => ({
+          label: item.key,
+          value: item.count,
+        }))}
       />
       <MetricTable
         title="Tipos de problema más frecuentes"
