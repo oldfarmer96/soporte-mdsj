@@ -10,6 +10,7 @@ import {
   ProfilePage,
   ProblemTypesPage,
   ProfilesPage,
+  AdminProfilePage,
   RegisterPage,
   RequesterPage,
   SupportPage,
@@ -195,6 +196,15 @@ export const routes = createBrowserRouter([
         element: (
           <LazyPageSuspense>
             <ProfilesPage />
+          </LazyPageSuspense>
+        ),
+      },
+      {
+        path: "/admin/usuarios/:profileId",
+        errorElement: <RouteErrorPage />,
+        element: (
+          <LazyPageSuspense>
+            <AdminProfilePage />
           </LazyPageSuspense>
         ),
       },

@@ -3,7 +3,7 @@ import type {
   ProfileListFilters,
   ProfileListItem,
   ProfileStatus,
-  UpdateProfileAccessInput,
+  UpdateManagedProfileInput,
 } from "@/shared/interfaces/profile.interface";
 import type { RoleT } from "@/shared/types/role.types";
 import { supabase } from "@/shared/utils/supabase";
@@ -22,7 +22,21 @@ interface ProfileRow {
   estado: ProfileStatus;
   created_at: string;
   updated_at: string;
+  debe_cambiar_password: boolean;
 }
+
+const mapProfile = (profile: ProfileRow): ProfileListItem => ({
+  id: profile.id,
+  dni: profile.dni,
+  firstName: profile.nombres,
+  lastName: profile.apellidos,
+  phone: profile.telefono,
+  role: profile.rol,
+  status: profile.estado,
+  mustChangePassword: profile.debe_cambiar_password,
+  createdAt: profile.created_at,
+  updatedAt: profile.updated_at,
+});
 
 const sanitizeSearch = (search: string) =>
   search
@@ -39,7 +53,7 @@ export const getProfiles = async (
   let query = supabase
     .from("perfiles")
     .select(
-      "id, dni, nombres, apellidos, telefono, rol, estado, created_at, updated_at",
+      "id, dni, nombres, apellidos, telefono, rol, estado, debe_cambiar_password, created_at, updated_at",
       { count: "exact" },
     )
     .order("nombres", { ascending: true })
@@ -58,17 +72,7 @@ export const getProfiles = async (
   const { data, error, count } = await query.range(from, to);
   if (error) throw error;
 
-  const items: ProfileListItem[] = (data as ProfileRow[]).map((profile) => ({
-    id: profile.id,
-    dni: profile.dni,
-    firstName: profile.nombres ?? "Sin completar",
-    lastName: profile.apellidos ?? "",
-    phone: profile.telefono,
-    role: profile.rol,
-    status: profile.estado,
-    createdAt: profile.created_at,
-    updatedAt: profile.updated_at,
-  }));
+  const items = (data as ProfileRow[]).map(mapProfile);
   const total = count ?? 0;
 
   return {
@@ -80,13 +84,31 @@ export const getProfiles = async (
   };
 };
 
-export const updateProfileAccess = async ({
+export const getProfile = async (profileId: string): Promise<ProfileListItem> => {
+  const { data, error } = await supabase
+    .from("perfiles")
+    .select(
+      "id, dni, nombres, apellidos, telefono, rol, estado, debe_cambiar_password, created_at, updated_at",
+    )
+    .eq("id", profileId)
+    .single();
+  if (error) throw error;
+  return mapProfile(data as ProfileRow);
+};
+
+export const updateManagedProfile = async ({
   profileId,
+  firstName,
+  lastName,
+  phone,
   role,
   status,
-}: UpdateProfileAccessInput) => {
-  const { error } = await supabase.rpc("actualizar_acceso_perfil", {
+}: UpdateManagedProfileInput) => {
+  const { error } = await supabase.rpc("actualizar_perfil_administrador", {
     p_id_perfil: profileId,
+    p_nombres: firstName,
+    p_apellidos: lastName,
+    p_telefono: phone,
     p_rol: role,
     p_estado: status,
   });
@@ -129,5 +151,5 @@ export const getProfileMutationErrorMessage = (error: unknown) => {
     return "Tu cuenta no tiene permiso para administrar usuarios.";
   }
 
-  return "No pudimos actualizar el acceso del usuario.";
+  return "No pudimos actualizar los datos del usuario.";
 };

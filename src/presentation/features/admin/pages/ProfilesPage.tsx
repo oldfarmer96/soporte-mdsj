@@ -13,13 +13,13 @@ import {
   Phone,
   Search,
   ShieldCheck,
+  Settings2,
   UserRound,
   UsersRound,
   X,
 } from "lucide-react";
 import { Form, Link, useSearchParams } from "react-router-dom";
 import { ProfileRoleBadge, ProfileStatusBadge } from "../components/ProfileBadges";
-import ProfileAccessDialog from "../components/ProfileAccessDialog";
 
 const PAGE_SIZE = 20;
 const ROLES: RoleT[] = ["SOLICITANTE", "APOYO", "ADMIN"];
@@ -35,6 +35,8 @@ const STATUS_LABELS: Record<ProfileStatus, string> = {
   BLOQUEADO: "Bloqueado",
 };
 const dateFormatter = new Intl.DateTimeFormat("es-PE", { dateStyle: "medium" });
+const profileName = (firstName: string | null, lastName: string | null) =>
+  `${firstName ?? ""} ${lastName ?? ""}`.trim() || "Perfil sin completar";
 
 const isRole = (value: string | null): value is RoleT =>
   value !== null && ROLES.includes(value as RoleT);
@@ -186,11 +188,13 @@ const ProfilesPage = () => {
                 <div className="flex items-start gap-3">
                   <span className="avatar avatar-placeholder">
                     <span className="grid size-11 place-items-center rounded-xl bg-neutral font-black text-neutral-content">
-                      {`${profile.firstName.charAt(0)}${profile.lastName.charAt(0)}`.toUpperCase()}
+                      {profile.firstName && profile.lastName
+                        ? `${profile.firstName.charAt(0)}${profile.lastName.charAt(0)}`.toUpperCase()
+                        : "?"}
                     </span>
                   </span>
                   <div className="min-w-0 grow">
-                    <h3 className="font-black">{profile.firstName} {profile.lastName}</h3>
+                    <h3 className="font-black">{profileName(profile.firstName, profile.lastName)}</h3>
                     <p className="mt-1 text-sm text-base-content/55">DNI {profile.dni}</p>
                   </div>
                 </div>
@@ -211,7 +215,9 @@ const ProfilesPage = () => {
                   </div>
                 </dl>
                 <div className="mt-4 border-t border-base-300 pt-4">
-                  <ProfileAccessDialog profile={profile} />
+                  <Link className="btn btn-sm" to={`/admin/usuarios/${profile.id}`}>
+                    <Settings2 className="size-4" aria-hidden="true" /> Gestionar
+                  </Link>
                 </div>
               </li>
             ))}
@@ -236,7 +242,7 @@ const ProfilesPage = () => {
                     <td>
                       <span className="flex items-center gap-2 font-black">
                         <UserRound className="size-4" aria-hidden="true" />
-                        {profile.firstName} {profile.lastName}
+                        {profileName(profile.firstName, profile.lastName)}
                       </span>
                     </td>
                     <td>{profile.dni}</td>
@@ -244,7 +250,11 @@ const ProfilesPage = () => {
                     <td><ProfileRoleBadge role={profile.role} /></td>
                     <td><ProfileStatusBadge status={profile.status} /></td>
                     <td><time dateTime={profile.createdAt}>{dateFormatter.format(new Date(profile.createdAt))}</time></td>
-                    <td><ProfileAccessDialog profile={profile} /></td>
+                    <td>
+                      <Link className="btn btn-sm" to={`/admin/usuarios/${profile.id}`}>
+                        <Settings2 className="size-4" aria-hidden="true" /> Gestionar
+                      </Link>
+                    </td>
                   </tr>
                 ))}
               </tbody>

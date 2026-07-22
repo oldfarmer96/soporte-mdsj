@@ -5,11 +5,12 @@ export type ProfileStatus = "ACTIVO" | "INACTIVO" | "BLOQUEADO";
 export interface ProfileListItem {
   id: string;
   dni: string;
-  firstName: string;
-  lastName: string;
+  firstName: string | null;
+  lastName: string | null;
   phone: string | null;
   role: RoleT;
   status: ProfileStatus;
+  mustChangePassword: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -30,8 +31,11 @@ export interface PaginatedProfiles {
   totalPages: number;
 }
 
-export interface UpdateProfileAccessInput {
+export interface UpdateManagedProfileInput {
   profileId: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
   role: RoleT;
   status: ProfileStatus;
 }

@@ -67,3 +67,7 @@ export const SupportTicketDetailPage = lazy(
 export const ProfilesPage = lazy(
   () => import("@/presentation/features/admin/pages/ProfilesPage"),
 );
+
+export const AdminProfilePage = lazy(
+  () => import("@/presentation/features/admin/pages/AdminProfilePage"),
+);

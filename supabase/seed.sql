@@ -592,3 +592,84 @@ SET
   prioridad = EXCLUDED.prioridad,
   es_otro = EXCLUDED.es_otro,
   activo = true;
+
+-- Cuenta administrativa inicial. La contrasena temporal solo se establece al
+-- crear el usuario; volver a ejecutar el seed no reemplaza una contrasena nueva.
+BEGIN;
+
+INSERT INTO auth.users (
+  instance_id,
+  id,
+  aud,
+  role,
+  email,
+  encrypted_password,
+  email_confirmed_at,
+  raw_app_meta_data,
+  raw_user_meta_data,
+  confirmation_token,
+  recovery_token,
+  email_change_token_new,
+  email_change,
+  created_at,
+  updated_at
+)
+VALUES (
+  '00000000-0000-0000-0000-000000000000',
+  '00000000-0000-4000-8000-000000000001',
+  'authenticated',
+  'authenticated',
+  '12345678@mdsj.com',
+  extensions.crypt('12345678', extensions.gen_salt('bf')),
+  now(),
+  '{"provider":"email","providers":["email"]}'::jsonb,
+  '{"dni":"12345678"}'::jsonb,
+  '',
+  '',
+  '',
+  '',
+  now(),
+  now()
+)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO auth.identities (
+  id,
+  user_id,
+  provider_id,
+  identity_data,
+  provider,
+  created_at,
+  updated_at
+)
+SELECT
+  '00000000-0000-4000-8000-000000000001',
+  '00000000-0000-4000-8000-000000000001',
+  '00000000-0000-4000-8000-000000000001',
+  jsonb_build_object(
+    'sub', '00000000-0000-4000-8000-000000000001',
+    'email', '12345678@mdsj.com',
+    'email_verified', true,
+    'phone_verified', false
+  ),
+  'email',
+  now(),
+  now()
+WHERE EXISTS (
+  SELECT 1
+  FROM auth.users
+  WHERE id = '00000000-0000-4000-8000-000000000001'
+    AND email = '12345678@mdsj.com'
+)
+ON CONFLICT (id) DO NOTHING;
+
+UPDATE public.perfiles AS perfil
+SET rol = 'ADMIN',
+    estado = 'ACTIVO'
+FROM auth.users AS usuario
+WHERE perfil.id = '00000000-0000-4000-8000-000000000001'
+  AND usuario.id = perfil.id
+  AND usuario.email = '12345678@mdsj.com'
+  AND perfil.dni = '12345678';
+
+COMMIT;

@@ -21,6 +21,7 @@ const getProfile = async (authUser: SupabaseUser): Promise<User> => {
   }
 
   return {
+    id: authUser.id,
     dni: profile.dni,
     name: profile.nombres ?? "",
     lastName: profile.apellidos ?? "",

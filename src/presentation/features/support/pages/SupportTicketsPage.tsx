@@ -92,9 +92,8 @@ const SupportTicketsPage = ({
   const areaId = isUuid(areaValue) ? areaValue : undefined;
   const subareaId = areaId && isUuid(subareaValue) ? subareaValue : undefined;
   const categoryId = isUuid(categoryValue) ? categoryValue : undefined;
-  const problemTypeId = categoryId && isUuid(problemTypeValue)
-    ? problemTypeValue
-    : undefined;
+  const problemTypeId =
+    categoryId && isUuid(problemTypeValue) ? problemTypeValue : undefined;
   const areasQuery = useAreas({ includeInactive: true });
   const subareasQuery = useSubareas({
     areaId: areaId ?? null,
@@ -189,20 +188,24 @@ const SupportTicketsPage = ({
           isMonitor
             ? "Supervisa en vivo todas las solicitudes registradas en la mesa de soporte."
             : mode === "mine"
-            ? "Revisa las solicitudes que están actualmente bajo tu responsabilidad."
-            : "Prioriza, filtra y abre las solicitudes registradas en la mesa de soporte."
+              ? "Revisa las solicitudes que están actualmente bajo tu responsabilidad."
+              : "Prioriza, filtra y abre las solicitudes registradas en la mesa de soporte."
         }
         breadcrumbs={
           isMonitor
             ? [{ label: "Monitor en vivo" }]
             : [
                 { label: "Monitor", path: "/apoyo" },
-                { label: mode === "mine" ? "Mis asignados" : "Cola de tickets" },
+                {
+                  label: mode === "mine" ? "Mis asignados" : "Cola de tickets",
+                },
               ]
         }
         actions={
           mode === "mine" ? (
-            <Link to="/apoyo/tickets" className="btn">Ver cola general</Link>
+            <Link to="/apoyo/tickets" className="btn">
+              Ver cola general
+            </Link>
           ) : (
             <Link to="/apoyo/asignados" className="btn">
               <UserCheck className="size-4" aria-hidden="true" />
@@ -217,133 +220,160 @@ const SupportTicketsPage = ({
         method="get"
         aria-label="Filtros de la cola"
       >
-        <CollapsibleFilters activeCount={activeFilterCount} title="Filtros operativos">
+        <CollapsibleFilters
+          activeCount={activeFilterCount}
+          title="Filtros operativos"
+        >
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-10">
-          <fieldset className="fieldset sm:col-span-2">
-            <legend className="fieldset-legend">Código o asunto</legend>
-            <label className="input w-full">
-              <Search className="size-4 opacity-45" aria-hidden="true" />
-              <input
-                type="search"
-                name="q"
-                defaultValue={filters.search}
-                maxLength={100}
-                placeholder="Buscar ticket"
-              />
-            </label>
-          </fieldset>
-          <fieldset className="fieldset">
-            <legend className="fieldset-legend">Estado</legend>
-            <select name="estado" className="select w-full" defaultValue={filters.status ?? ""}>
-              <option value="">Todos</option>
-              {STATUSES.map((status) => (
-                <option key={status} value={status}>{STATUS_LABELS[status]}</option>
-              ))}
-            </select>
-          </fieldset>
-          <fieldset className="fieldset">
-            <legend className="fieldset-legend">Prioridad</legend>
-            <select
-              name="prioridad"
-              className="select w-full"
-              defaultValue={filters.priority ?? ""}
-            >
-              <option value="">Todas</option>
-              {PRIORITIES.map((priority) => (
-                <option key={priority} value={priority}>{PRIORITY_LABELS[priority]}</option>
-              ))}
-            </select>
-          </fieldset>
-          <fieldset className="fieldset">
-            <legend className="fieldset-legend">Área</legend>
-            <select
-              name="area"
-              className="select w-full"
-              value={filters.areaId ?? ""}
-              onChange={(event) =>
-                selectParentFilter("area", "subarea", event.target.value)
-              }
-            >
-              <option value="">Todas</option>
-              {areasQuery.data?.map((area) => (
-                <option key={area.id} value={area.id}>{area.name}</option>
-              ))}
-            </select>
-          </fieldset>
-          <fieldset className="fieldset">
-            <legend className="fieldset-legend">Subárea</legend>
-            <select
-              name="subarea"
-              className="select w-full"
-              defaultValue={filters.subareaId ?? ""}
-              disabled={!filters.areaId || subareasQuery.isPending}
-            >
-              <option value="">Todas</option>
-              {subareasQuery.data?.map((subarea) => (
-                <option key={subarea.id} value={subarea.id}>
-                  {subarea.name}
-                </option>
-              ))}
-            </select>
-          </fieldset>
-          <fieldset className="fieldset">
-            <legend className="fieldset-legend">Categoría</legend>
-            <select
-              name="categoria"
-              className="select w-full"
-              value={filters.categoryId ?? ""}
-              onChange={(event) =>
-                selectParentFilter("categoria", "tipo", event.target.value)
-              }
-            >
-              <option value="">Todas</option>
-              {categoriesQuery.data?.map((category) => (
-                <option key={category.id} value={category.id}>{category.name}</option>
-              ))}
-            </select>
-          </fieldset>
-          <fieldset className="fieldset">
-            <legend className="fieldset-legend">Tipo</legend>
-            <select
-              name="tipo"
-              className="select w-full"
-              defaultValue={filters.problemTypeId ?? ""}
-              disabled={!filters.categoryId || problemTypesQuery.isPending}
-            >
-              <option value="">Todos</option>
-              {problemTypesQuery.data?.map((problemType) => (
-                <option key={problemType.id} value={problemType.id}>
-                  {problemType.name}
-                </option>
-              ))}
-            </select>
-          </fieldset>
-          {mode === "queue" && (
             <fieldset className="fieldset sm:col-span-2">
-              <legend className="fieldset-legend">Asignación</legend>
+              <legend className="fieldset-legend">Código o asunto</legend>
+              <label className="input w-full">
+                <Search className="size-4 opacity-45" aria-hidden="true" />
+                <input
+                  type="search"
+                  name="q"
+                  defaultValue={filters.search}
+                  maxLength={100}
+                  placeholder="Buscar ticket"
+                />
+              </label>
+            </fieldset>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend">Estado</legend>
               <select
-                name="asignado"
+                name="estado"
                 className="select w-full"
-                defaultValue={assignmentValue ?? ""}
-                disabled={agentsQuery.isPending || agentsQuery.isError}
+                defaultValue={filters.status ?? ""}
               >
-                <option value="">Cualquier asignación</option>
-                <option value="sin-asignar">Sin asignar</option>
-                <option value="mios">Asignados a mí</option>
-                {agentsQuery.data?.map((agent) => (
-                  <option key={agent.id} value={agent.id}>{agent.name}</option>
+                <option value="">Todos</option>
+                {STATUSES.map((status) => (
+                  <option key={status} value={status}>
+                    {STATUS_LABELS[status]}
+                  </option>
                 ))}
               </select>
             </fieldset>
-          )}
-          <fieldset className="fieldset">
-            <legend className="fieldset-legend">Desde</legend>
-            <input type="date" name="desde" className="input w-full" defaultValue={filters.dateFrom} />
-          </fieldset>
-          <fieldset className="fieldset">
-            <legend className="fieldset-legend">Hasta</legend>
-            <input type="date" name="hasta" className="input w-full" defaultValue={filters.dateTo} />
-          </fieldset>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend">Prioridad</legend>
+              <select
+                name="prioridad"
+                className="select w-full"
+                defaultValue={filters.priority ?? ""}
+              >
+                <option value="">Todas</option>
+                {PRIORITIES.map((priority) => (
+                  <option key={priority} value={priority}>
+                    {PRIORITY_LABELS[priority]}
+                  </option>
+                ))}
+              </select>
+            </fieldset>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend">Área</legend>
+              <select
+                name="area"
+                className="select w-full"
+                value={filters.areaId ?? ""}
+                onChange={(event) =>
+                  selectParentFilter("area", "subarea", event.target.value)
+                }
+              >
+                <option value="">Todas</option>
+                {areasQuery.data?.map((area) => (
+                  <option key={area.id} value={area.id}>
+                    {area.name}
+                  </option>
+                ))}
+              </select>
+            </fieldset>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend">Subárea</legend>
+              <select
+                name="subarea"
+                className="select w-full"
+                defaultValue={filters.subareaId ?? ""}
+                disabled={!filters.areaId || subareasQuery.isPending}
+              >
+                <option value="">Todas</option>
+                {subareasQuery.data?.map((subarea) => (
+                  <option key={subarea.id} value={subarea.id}>
+                    {subarea.name}
+                  </option>
+                ))}
+              </select>
+            </fieldset>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend">Categoría</legend>
+              <select
+                name="categoria"
+                className="select w-full"
+                value={filters.categoryId ?? ""}
+                onChange={(event) =>
+                  selectParentFilter("categoria", "tipo", event.target.value)
+                }
+              >
+                <option value="">Todas</option>
+                {categoriesQuery.data?.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </fieldset>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend">Tipo</legend>
+              <select
+                name="tipo"
+                className="select w-full"
+                defaultValue={filters.problemTypeId ?? ""}
+                disabled={!filters.categoryId || problemTypesQuery.isPending}
+              >
+                <option value="">Todos</option>
+                {problemTypesQuery.data?.map((problemType) => (
+                  <option key={problemType.id} value={problemType.id}>
+                    {problemType.name}
+                  </option>
+                ))}
+              </select>
+            </fieldset>
+            {mode === "queue" && (
+              <fieldset className="fieldset sm:col-span-2">
+                <legend className="fieldset-legend">Asignación</legend>
+                <select
+                  name="asignado"
+                  className="select w-full"
+                  defaultValue={assignmentValue ?? ""}
+                  disabled={agentsQuery.isPending || agentsQuery.isError}
+                >
+                  <option value="">Cualquier asignación</option>
+                  <option value="sin-asignar">Sin asignar</option>
+                  <option value="mios">Asignados a mí</option>
+                  {agentsQuery.data?.map((agent) => (
+                    <option key={agent.id} value={agent.id}>
+                      {agent.name}
+                    </option>
+                  ))}
+                </select>
+              </fieldset>
+            )}
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend">Desde</legend>
+              <input
+                type="date"
+                name="desde"
+                className="input w-full"
+                defaultValue={filters.dateFrom}
+              />
+            </fieldset>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend">Hasta</legend>
+              <input
+                type="date"
+                name="hasta"
+                className="input w-full"
+                defaultValue={filters.dateTo}
+              />
+            </fieldset>
           </div>
           <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             {hasFilters && (
@@ -361,14 +391,22 @@ const SupportTicketsPage = ({
       {ticketsQuery.isPending && (
         <div className="grid gap-3" role="status">
           <span className="sr-only">Cargando cola de tickets...</span>
-          {[0, 1, 2].map((item) => <div key={item} className="skeleton h-48 w-full" />)}
+          {[0, 1, 2].map((item) => (
+            <div key={item} className="skeleton h-48 w-full" />
+          ))}
         </div>
       )}
-      {ticketsQuery.isError && <ErrorState onRetry={() => ticketsQuery.refetch()} />}
+      {ticketsQuery.isError && (
+        <ErrorState onRetry={() => ticketsQuery.refetch()} />
+      )}
       {ticketsQuery.isSuccess && ticketsQuery.data.items.length === 0 && (
         <EmptyState
           icon={Inbox}
-          title={isPageOutOfRange ? "Esta página ya no está disponible" : "No hay tickets para mostrar"}
+          title={
+            isPageOutOfRange
+              ? "Esta página ya no está disponible"
+              : "No hay tickets para mostrar"
+          }
           description={
             isPageOutOfRange
               ? "Vuelve a la primera página para continuar revisando la cola."
@@ -380,9 +418,13 @@ const SupportTicketsPage = ({
           }
           action={
             isPageOutOfRange ? (
-              <Link to={pageUrl(1)} className="btn">Primera página</Link>
+              <Link to={pageUrl(1)} className="btn">
+                Primera página
+              </Link>
             ) : hasFilters ? (
-              <Link to={basePath} className="btn">Limpiar filtros</Link>
+              <Link to={basePath} className="btn">
+                Limpiar filtros
+              </Link>
             ) : undefined
           }
         />
@@ -419,17 +461,24 @@ const SupportTicketsPage = ({
                   <th>Prioridad</th>
                   <th>Asignado</th>
                   <th>Creado</th>
-                  <th><span className="sr-only">Abrir</span></th>
+                  <th>
+                    <span className="sr-only">Abrir</span>
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {ticketsQuery.data.items.map((ticket) => (
                   <tr key={ticket.id}>
                     <td className="max-w-64">
-                      <Link to={`/apoyo/tickets/${ticket.id}`} className="link font-black no-underline">
+                      <Link
+                        to={`/apoyo/tickets/${ticket.id}`}
+                        className="link font-black no-underline"
+                      >
                         {ticket.subject}
                       </Link>
-                      <p className="mt-1 text-xs text-base-content/50">{ticket.code}</p>
+                      <p className="mt-1 text-xs text-base-content/50">
+                        {ticket.code}
+                      </p>
                     </td>
                     <td>{ticket.requesterName}</td>
                     <td>
@@ -441,10 +490,18 @@ const SupportTicketsPage = ({
                         {ticket.categoryName} · {ticket.problemTypeName}
                       </p>
                     </td>
-                    <td><TicketStatusBadge status={ticket.status} /></td>
-                    <td><TicketPriorityBadge priority={ticket.priority} /></td>
+                    <td>
+                      <TicketStatusBadge status={ticket.status} />
+                    </td>
+                    <td>
+                      <TicketPriorityBadge priority={ticket.priority} />
+                    </td>
                     <td>{ticket.assignedAgentName ?? "Sin asignar"}</td>
-                    <td><time dateTime={ticket.createdAt}>{dateFormatter.format(new Date(ticket.createdAt))}</time></td>
+                    <td>
+                      <time dateTime={ticket.createdAt}>
+                        {dateFormatter.format(new Date(ticket.createdAt))}
+                      </time>
+                    </td>
                     <td>
                       <Link
                         to={`/apoyo/tickets/${ticket.id}`}
@@ -460,7 +517,10 @@ const SupportTicketsPage = ({
             </table>
           </div>
 
-          <nav className="mt-5 flex items-center justify-between gap-3" aria-label="Paginación">
+          <nav
+            className="mt-5 flex items-center justify-between gap-3"
+            aria-label="Paginación"
+          >
             {page > 1 ? (
               <Link to={pageUrl(page - 1)} className="btn">
                 <ChevronLeft className="size-4" aria-hidden="true" />
@@ -472,7 +532,9 @@ const SupportTicketsPage = ({
                 <span className="hidden sm:inline">Anterior</span>
               </button>
             )}
-            <span className="text-sm font-semibold">{page} / {ticketsQuery.data.totalPages}</span>
+            <span className="text-sm font-semibold">
+              {page} / {ticketsQuery.data.totalPages}
+            </span>
             {page < ticketsQuery.data.totalPages ? (
               <Link to={pageUrl(page + 1)} className="btn">
                 <span className="hidden sm:inline">Siguiente</span>
