@@ -6,9 +6,18 @@ interface LocalApiMessage {
 }
 
 export interface DniLookupResult {
-  dni: string;
+  id: string;
   nombres: string;
-  apellidos: string;
+  apellido_paterno: string;
+  apellido_materno: string;
+  nombre_completo: string;
+  codigo_verificacion: string;
+}
+
+interface DniLookupResponse {
+  estado: boolean;
+  mensaje: string;
+  resultado: DniLookupResult | null;
 }
 
 const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
@@ -36,11 +45,16 @@ export const checkLocalAdminApi = async () => {
   return true;
 };
 
-export const lookupDni = (dni: string) =>
-  request<DniLookupResult>("/dni/lookup", {
+export const lookupDni = async (dni: string) => {
+  const response = await request<DniLookupResponse>("/dni/lookup", {
     method: "POST",
     body: JSON.stringify({ dni }),
   });
+  if (!response.estado || !response.resultado) {
+    throw new Error(response.mensaje || "No se encontraron datos para el DNI");
+  }
+  return response.resultado;
+};
 
 export const resetProfilePassword = (profileId: string) =>
   request<LocalApiMessage>(`/users/${profileId}/reset-password`, {

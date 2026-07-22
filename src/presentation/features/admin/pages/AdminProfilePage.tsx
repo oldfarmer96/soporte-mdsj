@@ -111,7 +111,11 @@ const AdminProfilePage = () => {
     dniLookup.mutate(profile.dni, {
       onSuccess: (result) => {
         form.setValue("firstName", result.nombres, { shouldDirty: true, shouldValidate: true });
-        form.setValue("lastName", result.apellidos, { shouldDirty: true, shouldValidate: true });
+        form.setValue(
+          "lastName",
+          `${result.apellido_paterno} ${result.apellido_materno}`.trim(),
+          { shouldDirty: true, shouldValidate: true },
+        );
       },
     });
   };
