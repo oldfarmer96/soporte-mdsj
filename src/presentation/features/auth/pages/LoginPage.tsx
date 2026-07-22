@@ -1,14 +1,13 @@
 import { useLogin } from "@/application/hooks/useAuth";
 import FieldInfo from "@/presentation/components/FieldInfo";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, IdCard, LockKeyhole, LogIn } from "lucide-react";
-import { useState } from "react";
+import { IdCard, LockKeyhole, LogIn } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import { loginSchema, type LoginT } from "../schemas/login.schema";
 
 const LoginPage = () => {
-  const [showPassword, setShowPassword] = useState(false);
+  // const [showPassword, setShowPassword] = useState(false);
   const login = useLogin();
 
   const {
@@ -29,14 +28,8 @@ const LoginPage = () => {
 
   return (
     <div className="rounded-3xl border border-base-300 bg-base-100 p-6 shadow-xl shadow-base-300/30 sm:p-9 mx-6 lg:mx-auto lg:max-w-5/12 mt-6">
-      <div className="mb-8">
-        <p className="mb-2 text-sm font-bold uppercase tracking-widest text-primary">
-          Bienvenido
-        </p>
+      <div className="mb-8 text-center">
         <h2 className="text-3xl font-black">Inicia sesión</h2>
-        <p className="mt-2 text-sm leading-relaxed text-base-content/60">
-          Usa tu DNI y contraseña para ingresar a la mesa de soporte.
-        </p>
       </div>
 
       <form className="space-y-5" onSubmit={handleSubmit(onSubmit)} noValidate>
@@ -74,14 +67,15 @@ const LoginPage = () => {
             <input
               id="password"
               {...register("password")}
-              type={showPassword ? "text" : "password"}
+              type="password"
+              // type={showPassword ? "text" : "password"}
               autoComplete="current-password"
               aria-invalid={Boolean(errors.password)}
               aria-describedby={errors.password ? "password-error" : undefined}
               placeholder="Ingresa tu contraseña"
               className="grow"
             />
-            <button
+            {/* <button
               type="button"
               className="btn btn-circle btn-ghost btn-sm"
               onClick={() => setShowPassword((current) => !current)}
@@ -94,7 +88,7 @@ const LoginPage = () => {
               ) : (
                 <Eye className="size-4" aria-hidden="true" />
               )}
-            </button>
+            </button> */}
           </label>
           <FieldInfo id="password-error" error={errors.password} />
         </fieldset>

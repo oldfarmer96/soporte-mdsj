@@ -21,10 +21,10 @@ interface NamedRelation {
 interface ProfileRelation {
   id: string;
   dni?: string;
-  nombres: string;
-  apellidos: string;
+  nombres: string | null;
+  apellidos: string | null;
   telefono?: string | null;
-  rol?: "APOYO" | "ADMIN";
+  rol?: "APOYO";
 }
 
 interface SupportTicketRow {
@@ -37,7 +37,9 @@ interface SupportTicketRow {
   created_at: string;
   updated_at: string;
   area: NamedRelation | NamedRelation[] | null;
+  subarea: NamedRelation | NamedRelation[] | null;
   categoria: NamedRelation | NamedRelation[] | null;
+  tipo_problema: NamedRelation | NamedRelation[] | null;
   solicitante: ProfileRelation | ProfileRelation[] | null;
   asignado: ProfileRelation | ProfileRelation[] | null;
 }
@@ -53,9 +55,10 @@ interface SupportTicketContextRow {
 
 interface SupportAgentRow {
   id: string;
-  nombres: string;
-  apellidos: string;
-  rol: "APOYO" | "ADMIN";
+  dni: string;
+  nombres: string | null;
+  apellidos: string | null;
+  rol: "APOYO";
 }
 
 const firstRelation = <T>(relation: T | T[] | null): T | null =>
@@ -65,7 +68,11 @@ const relationName = (relation: NamedRelation | NamedRelation[] | null) =>
   firstRelation(relation)?.nombre ?? "No disponible";
 
 const profileName = (profile: ProfileRelation | null) =>
-  profile ? `${profile.nombres} ${profile.apellidos}` : null;
+  profile
+    ? `${profile.nombres ?? ""} ${profile.apellidos ?? ""}`.trim() ||
+      profile.dni ||
+      null
+    : null;
 
 const sanitizeSearch = (search: string) =>
   search
@@ -88,19 +95,23 @@ export const getSupportTickets = async (
   let query = supabase
     .from("tickets")
     .select(
-      "id, codigo, asunto, impacto, prioridad, estado, created_at, updated_at, area:areas(nombre), categoria:categorias(nombre), solicitante:perfiles!tickets_id_solicitante_fkey(id, nombres, apellidos), asignado:perfiles!tickets_asignado_a_fkey(id, nombres, apellidos)",
+      "id, codigo, asunto, impacto, prioridad, estado, created_at, updated_at, area:areas(nombre), subarea:subareas!tickets_area_subarea_fk(nombre), categoria:categorias(nombre), tipo_problema:ticket_tipos_problemas!tickets_categoria_tipo_problema_fk(nombre), solicitante:perfiles!tickets_id_solicitante_fkey(id, dni, nombres, apellidos), asignado:perfiles!tickets_asignado_a_fkey(id, dni, nombres, apellidos)",
       { count: "exact" },
     )
-    .order("prioridad", { ascending: false })
-    .order("created_at", { ascending: true })
-    .order("id", { ascending: true });
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false });
 
   const search = filters.search ? sanitizeSearch(filters.search) : "";
-  if (search) query = query.or(`codigo.ilike.%${search}%,asunto.ilike.%${search}%`);
+  if (search)
+    query = query.or(`codigo.ilike.%${search}%,asunto.ilike.%${search}%`);
   if (filters.status) query = query.eq("estado", filters.status);
   if (filters.priority) query = query.eq("prioridad", filters.priority);
   if (filters.areaId) query = query.eq("id_area", filters.areaId);
+  if (filters.subareaId) query = query.eq("id_subarea", filters.subareaId);
   if (filters.categoryId) query = query.eq("id_categoria", filters.categoryId);
+  if (filters.problemTypeId) {
+    query = query.eq("id_tipo_problema", filters.problemTypeId);
+  }
   if (filters.assignment === "unassigned") query = query.is("asignado_a", null);
   if (filters.assignment === "mine") {
     const { data, error } = await supabase.auth.getUser();
@@ -113,7 +124,10 @@ export const getSupportTickets = async (
     query = query.gte("created_at", `${filters.dateFrom}T00:00:00-05:00`);
   }
   if (filters.dateTo) {
-    query = query.lt("created_at", `${nextDate(filters.dateTo)}T00:00:00-05:00`);
+    query = query.lt(
+      "created_at",
+      `${nextDate(filters.dateTo)}T00:00:00-05:00`,
+    );
   }
 
   const { data, error, count } = await query.range(from, to);
@@ -127,8 +141,12 @@ export const getSupportTickets = async (
     priority: ticket.prioridad,
     status: ticket.estado,
     areaName: relationName(ticket.area),
+    subareaName: relationName(ticket.subarea),
     categoryName: relationName(ticket.categoria),
-    requesterName: profileName(firstRelation(ticket.solicitante)) ?? "Solicitante no disponible",
+    problemTypeName: relationName(ticket.tipo_problema),
+    requesterName:
+      profileName(firstRelation(ticket.solicitante)) ??
+      "Solicitante no disponible",
     assignedAgentName: profileName(firstRelation(ticket.asignado)),
     createdAt: ticket.created_at,
     updatedAt: ticket.updated_at,
@@ -147,9 +165,9 @@ export const getSupportTickets = async (
 export const getSupportAgents = async (): Promise<SupportAgent[]> => {
   const { data, error } = await supabase
     .from("perfiles")
-    .select("id, nombres, apellidos, rol")
+    .select("id, dni, nombres, apellidos, rol")
     .eq("estado", "ACTIVO")
-    .in("rol", ["APOYO", "ADMIN"])
+    .eq("rol", "APOYO")
     .order("nombres", { ascending: true })
     .order("apellidos", { ascending: true });
 
@@ -157,7 +175,7 @@ export const getSupportAgents = async (): Promise<SupportAgent[]> => {
 
   return (data as SupportAgentRow[]).map((agent) => ({
     id: agent.id,
-    name: `${agent.nombres} ${agent.apellidos}`,
+    name: profileName(agent) ?? agent.dni,
     role: agent.rol,
   }));
 };
@@ -169,7 +187,7 @@ export const getSupportTicketDetail = async (
   const { data, error } = await supabase
     .from("tickets")
     .select(
-      "assigned_at, started_at, resolved_at, closed_at, solicitante:perfiles!tickets_id_solicitante_fkey(id, dni, nombres, apellidos, telefono), asignado:perfiles!tickets_asignado_a_fkey(id, nombres, apellidos, rol)",
+      "assigned_at, started_at, resolved_at, closed_at, solicitante:perfiles!tickets_id_solicitante_fkey(id, dni, nombres, apellidos, telefono), asignado:perfiles!tickets_asignado_a_fkey(id, dni, nombres, apellidos, rol)",
     )
     .eq("id", ticketId)
     .maybeSingle();
@@ -191,11 +209,11 @@ export const getSupportTicketDetail = async (
       phone: requester.telefono ?? null,
     },
     assignedAgent:
-      assignedAgent?.rol === "APOYO" || assignedAgent?.rol === "ADMIN"
+      assignedAgent?.rol === "APOYO"
         ? {
             id: assignedAgent.id,
             name: profileName(assignedAgent) ?? "Personal no disponible",
-            role: assignedAgent.rol,
+            role: "APOYO",
           }
         : null,
     assignedAt: context.assigned_at,
@@ -205,7 +223,10 @@ export const getSupportTicketDetail = async (
   };
 };
 
-export const assignSupportTicket = async (ticketId: string, agentId: string) => {
+export const assignSupportTicket = async (
+  ticketId: string,
+  agentId: string,
+) => {
   const { error } = await supabase.rpc("asignar_ticket", {
     p_id_ticket: ticketId,
     p_id_apoyo: agentId,
@@ -248,7 +269,10 @@ export const getSupportTicketErrorMessage = (error: unknown) => {
   if (message.includes("personal seleccionado")) {
     return "El personal seleccionado ya no está disponible.";
   }
-  if (message.includes("no se permite cambiar") || message.includes("no puede")) {
+  if (
+    message.includes("no se permite cambiar") ||
+    message.includes("no puede")
+  ) {
     return "El ticket cambió o ya no permite esta operación. Se actualizarán los datos.";
   }
   if (message.includes("no se encontró")) {

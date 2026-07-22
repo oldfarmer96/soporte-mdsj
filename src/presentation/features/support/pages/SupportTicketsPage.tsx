@@ -1,10 +1,16 @@
-import { useAreas, useCategories } from "@/application/hooks/useCatalogs";
+import {
+  useAreas,
+  useCategories,
+  useProblemTypes,
+  useSubareas,
+} from "@/application/hooks/useCatalogs";
 import {
   useSupportAgents,
   useSupportTickets,
 } from "@/application/hooks/useSupportTickets";
 import EmptyState from "@/presentation/components/EmptyState";
 import ErrorState from "@/presentation/components/ErrorState";
+import CollapsibleFilters from "@/presentation/components/CollapsibleFilters";
 import PageContainer from "@/presentation/components/PageContainer";
 import PageHeader from "@/presentation/components/PageHeader";
 import type { TicketPriority } from "@/shared/interfaces/catalog.interface";
@@ -55,6 +61,7 @@ const dateFormatter = new Intl.DateTimeFormat("es-PE", { dateStyle: "medium" });
 
 interface SupportTicketsPageProps {
   mode?: "queue" | "mine";
+  variant?: "default" | "monitor";
 }
 
 const isStatus = (value: string | null): value is TicketStatus =>
@@ -66,20 +73,38 @@ const isUuid = (value: string | null): value is string =>
 const isDate = (value: string | null): value is string =>
   value !== null && /^\d{4}-\d{2}-\d{2}$/.test(value);
 
-const SupportTicketsPage = ({ mode = "queue" }: SupportTicketsPageProps) => {
-  const [searchParams] = useSearchParams();
-  const areasQuery = useAreas({ includeInactive: true });
-  const categoriesQuery = useCategories({ includeInactive: true });
-  const agentsQuery = useSupportAgents();
+const SupportTicketsPage = ({
+  mode = "queue",
+  variant = "default",
+}: SupportTicketsPageProps) => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const pageValue = Number(searchParams.get("pagina"));
   const page = Number.isInteger(pageValue) && pageValue > 0 ? pageValue : 1;
   const statusValue = searchParams.get("estado");
   const priorityValue = searchParams.get("prioridad");
   const areaValue = searchParams.get("area");
+  const subareaValue = searchParams.get("subarea");
   const categoryValue = searchParams.get("categoria");
+  const problemTypeValue = searchParams.get("tipo");
   const assignmentValue = searchParams.get("asignado");
   const fromValue = searchParams.get("desde");
   const toValue = searchParams.get("hasta");
+  const areaId = isUuid(areaValue) ? areaValue : undefined;
+  const subareaId = areaId && isUuid(subareaValue) ? subareaValue : undefined;
+  const categoryId = isUuid(categoryValue) ? categoryValue : undefined;
+  const problemTypeId =
+    categoryId && isUuid(problemTypeValue) ? problemTypeValue : undefined;
+  const areasQuery = useAreas({ includeInactive: true });
+  const subareasQuery = useSubareas({
+    areaId: areaId ?? null,
+    includeInactive: true,
+  });
+  const categoriesQuery = useCategories({ includeInactive: true });
+  const problemTypesQuery = useProblemTypes({
+    categoryId: categoryId ?? null,
+    includeInactive: true,
+  });
+  const agentsQuery = useSupportAgents();
   const parsedAssignment =
     assignmentValue === "sin-asignar"
       ? "unassigned"
@@ -94,24 +119,34 @@ const SupportTicketsPage = ({ mode = "queue" }: SupportTicketsPageProps) => {
     search: searchParams.get("q")?.trim() || undefined,
     status: isStatus(statusValue) ? statusValue : undefined,
     priority: isPriority(priorityValue) ? priorityValue : undefined,
-    areaId: isUuid(areaValue) ? areaValue : undefined,
-    categoryId: isUuid(categoryValue) ? categoryValue : undefined,
+    areaId,
+    subareaId,
+    categoryId,
+    problemTypeId,
     assignment: mode === "mine" ? "mine" : parsedAssignment,
     dateFrom: isDate(fromValue) ? fromValue : undefined,
     dateTo: isDate(toValue) ? toValue : undefined,
   };
+  const activeFilterCount = [
+    filters.search,
+    filters.status,
+    filters.priority,
+    filters.areaId,
+    filters.subareaId,
+    filters.categoryId,
+    filters.problemTypeId,
+    mode === "queue" ? filters.assignment : undefined,
+    filters.dateFrom,
+    filters.dateTo,
+  ].filter(Boolean).length;
   const ticketsQuery = useSupportTickets(filters);
-  const basePath = mode === "mine" ? "/apoyo/asignados" : "/apoyo/tickets";
-  const hasFilters = Boolean(
-    filters.search ||
-      filters.status ||
-      filters.priority ||
-      filters.areaId ||
-      filters.categoryId ||
-      (mode === "queue" && filters.assignment) ||
-      filters.dateFrom ||
-      filters.dateTo,
-  );
+  const isMonitor = variant === "monitor";
+  const basePath = isMonitor
+    ? "/apoyo"
+    : mode === "mine"
+      ? "/apoyo/asignados"
+      : "/apoyo/tickets";
+  const hasFilters = activeFilterCount > 0;
   const isPageOutOfRange =
     ticketsQuery.isSuccess &&
     ticketsQuery.data.total > 0 &&
@@ -125,23 +160,52 @@ const SupportTicketsPage = ({ mode = "queue" }: SupportTicketsPageProps) => {
     return query ? `${basePath}?${query}` : basePath;
   };
 
+  const selectParentFilter = (
+    parent: "area" | "categoria",
+    child: "subarea" | "tipo",
+    value: string,
+  ) => {
+    const params = new URLSearchParams(searchParams);
+    if (value) params.set(parent, value);
+    else params.delete(parent);
+    params.delete(child);
+    params.delete("pagina");
+    setSearchParams(params);
+  };
+
   return (
     <PageContainer>
       <PageHeader
         eyebrow="Personal de apoyo"
-        title={mode === "mine" ? "Mis tickets asignados" : "Cola de tickets"}
-        description={
-          mode === "mine"
-            ? "Revisa las solicitudes que están actualmente bajo tu responsabilidad."
-            : "Prioriza, filtra y abre las solicitudes registradas en la mesa de soporte."
+        title={
+          isMonitor
+            ? "Monitor de tickets"
+            : mode === "mine"
+              ? "Mis tickets asignados"
+              : "Cola de tickets"
         }
-        breadcrumbs={[
-          { label: "Resumen", path: "/apoyo" },
-          { label: mode === "mine" ? "Mis asignados" : "Cola de tickets" },
-        ]}
+        description={
+          isMonitor
+            ? "Supervisa en vivo todas las solicitudes registradas en la mesa de soporte."
+            : mode === "mine"
+              ? "Revisa las solicitudes que están actualmente bajo tu responsabilidad."
+              : "Prioriza, filtra y abre las solicitudes registradas en la mesa de soporte."
+        }
+        breadcrumbs={
+          isMonitor
+            ? [{ label: "Monitor en vivo" }]
+            : [
+                { label: "Monitor", path: "/apoyo" },
+                {
+                  label: mode === "mine" ? "Mis asignados" : "Cola de tickets",
+                },
+              ]
+        }
         actions={
           mode === "mine" ? (
-            <Link to="/apoyo/tickets" className="btn">Ver cola general</Link>
+            <Link to="/apoyo/tickets" className="btn">
+              Ver cola general
+            </Link>
           ) : (
             <Link to="/apoyo/asignados" className="btn">
               <UserCheck className="size-4" aria-hidden="true" />
@@ -154,121 +218,195 @@ const SupportTicketsPage = ({ mode = "queue" }: SupportTicketsPageProps) => {
       <Form
         key={searchParams.toString()}
         method="get"
-        className="mb-5 rounded-box border border-base-300 bg-base-100 p-4 shadow-sm sm:p-5"
         aria-label="Filtros de la cola"
       >
-        <div className="mb-4 flex items-center gap-2">
-          <Filter className="size-4" aria-hidden="true" />
-          <h2 className="text-sm font-black">Filtros operativos</h2>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
-          <fieldset className="fieldset sm:col-span-2">
-            <legend className="fieldset-legend">Código o asunto</legend>
-            <label className="input w-full">
-              <Search className="size-4 opacity-45" aria-hidden="true" />
-              <input
-                type="search"
-                name="q"
-                defaultValue={filters.search}
-                maxLength={100}
-                placeholder="Buscar ticket"
-              />
-            </label>
-          </fieldset>
-          <fieldset className="fieldset">
-            <legend className="fieldset-legend">Estado</legend>
-            <select name="estado" className="select w-full" defaultValue={filters.status ?? ""}>
-              <option value="">Todos</option>
-              {STATUSES.map((status) => (
-                <option key={status} value={status}>{STATUS_LABELS[status]}</option>
-              ))}
-            </select>
-          </fieldset>
-          <fieldset className="fieldset">
-            <legend className="fieldset-legend">Prioridad</legend>
-            <select
-              name="prioridad"
-              className="select w-full"
-              defaultValue={filters.priority ?? ""}
-            >
-              <option value="">Todas</option>
-              {PRIORITIES.map((priority) => (
-                <option key={priority} value={priority}>{PRIORITY_LABELS[priority]}</option>
-              ))}
-            </select>
-          </fieldset>
-          <fieldset className="fieldset">
-            <legend className="fieldset-legend">Área</legend>
-            <select name="area" className="select w-full" defaultValue={filters.areaId ?? ""}>
-              <option value="">Todas</option>
-              {areasQuery.data?.map((area) => (
-                <option key={area.id} value={area.id}>{area.name}</option>
-              ))}
-            </select>
-          </fieldset>
-          <fieldset className="fieldset">
-            <legend className="fieldset-legend">Categoría</legend>
-            <select
-              name="categoria"
-              className="select w-full"
-              defaultValue={filters.categoryId ?? ""}
-            >
-              <option value="">Todas</option>
-              {categoriesQuery.data?.map((category) => (
-                <option key={category.id} value={category.id}>{category.name}</option>
-              ))}
-            </select>
-          </fieldset>
-          {mode === "queue" && (
+        <CollapsibleFilters
+          activeCount={activeFilterCount}
+          title="Filtros operativos"
+        >
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-10">
             <fieldset className="fieldset sm:col-span-2">
-              <legend className="fieldset-legend">Asignación</legend>
+              <legend className="fieldset-legend">Código o asunto</legend>
+              <label className="input w-full">
+                <Search className="size-4 opacity-45" aria-hidden="true" />
+                <input
+                  type="search"
+                  name="q"
+                  defaultValue={filters.search}
+                  maxLength={100}
+                  placeholder="Buscar ticket"
+                />
+              </label>
+            </fieldset>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend">Estado</legend>
               <select
-                name="asignado"
+                name="estado"
                 className="select w-full"
-                defaultValue={assignmentValue ?? ""}
-                disabled={agentsQuery.isPending || agentsQuery.isError}
+                defaultValue={filters.status ?? ""}
               >
-                <option value="">Cualquier asignación</option>
-                <option value="sin-asignar">Sin asignar</option>
-                <option value="mios">Asignados a mí</option>
-                {agentsQuery.data?.map((agent) => (
-                  <option key={agent.id} value={agent.id}>{agent.name}</option>
+                <option value="">Todos</option>
+                {STATUSES.map((status) => (
+                  <option key={status} value={status}>
+                    {STATUS_LABELS[status]}
+                  </option>
                 ))}
               </select>
             </fieldset>
-          )}
-          <fieldset className="fieldset">
-            <legend className="fieldset-legend">Desde</legend>
-            <input type="date" name="desde" className="input w-full" defaultValue={filters.dateFrom} />
-          </fieldset>
-          <fieldset className="fieldset">
-            <legend className="fieldset-legend">Hasta</legend>
-            <input type="date" name="hasta" className="input w-full" defaultValue={filters.dateTo} />
-          </fieldset>
-        </div>
-        <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          {hasFilters && (
-            <Link to={basePath} className="btn btn-ghost">
-              <X className="size-4" aria-hidden="true" /> Limpiar
-            </Link>
-          )}
-          <button type="submit" className="btn">
-            <Filter className="size-4" aria-hidden="true" /> Aplicar filtros
-          </button>
-        </div>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend">Prioridad</legend>
+              <select
+                name="prioridad"
+                className="select w-full"
+                defaultValue={filters.priority ?? ""}
+              >
+                <option value="">Todas</option>
+                {PRIORITIES.map((priority) => (
+                  <option key={priority} value={priority}>
+                    {PRIORITY_LABELS[priority]}
+                  </option>
+                ))}
+              </select>
+            </fieldset>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend">Área</legend>
+              <select
+                name="area"
+                className="select w-full"
+                value={filters.areaId ?? ""}
+                onChange={(event) =>
+                  selectParentFilter("area", "subarea", event.target.value)
+                }
+              >
+                <option value="">Todas</option>
+                {areasQuery.data?.map((area) => (
+                  <option key={area.id} value={area.id}>
+                    {area.name}
+                  </option>
+                ))}
+              </select>
+            </fieldset>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend">Subárea</legend>
+              <select
+                name="subarea"
+                className="select w-full"
+                defaultValue={filters.subareaId ?? ""}
+                disabled={!filters.areaId || subareasQuery.isPending}
+              >
+                <option value="">Todas</option>
+                {subareasQuery.data?.map((subarea) => (
+                  <option key={subarea.id} value={subarea.id}>
+                    {subarea.name}
+                  </option>
+                ))}
+              </select>
+            </fieldset>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend">Categoría</legend>
+              <select
+                name="categoria"
+                className="select w-full"
+                value={filters.categoryId ?? ""}
+                onChange={(event) =>
+                  selectParentFilter("categoria", "tipo", event.target.value)
+                }
+              >
+                <option value="">Todas</option>
+                {categoriesQuery.data?.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </fieldset>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend">Tipo</legend>
+              <select
+                name="tipo"
+                className="select w-full"
+                defaultValue={filters.problemTypeId ?? ""}
+                disabled={!filters.categoryId || problemTypesQuery.isPending}
+              >
+                <option value="">Todos</option>
+                {problemTypesQuery.data?.map((problemType) => (
+                  <option key={problemType.id} value={problemType.id}>
+                    {problemType.name}
+                  </option>
+                ))}
+              </select>
+            </fieldset>
+            {mode === "queue" && (
+              <fieldset className="fieldset sm:col-span-2">
+                <legend className="fieldset-legend">Asignación</legend>
+                <select
+                  name="asignado"
+                  className="select w-full"
+                  defaultValue={assignmentValue ?? ""}
+                  disabled={agentsQuery.isPending || agentsQuery.isError}
+                >
+                  <option value="">Cualquier asignación</option>
+                  <option value="sin-asignar">Sin asignar</option>
+                  <option value="mios">Asignados a mí</option>
+                  {agentsQuery.data?.map((agent) => (
+                    <option key={agent.id} value={agent.id}>
+                      {agent.name}
+                    </option>
+                  ))}
+                </select>
+              </fieldset>
+            )}
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend">Desde</legend>
+              <input
+                type="date"
+                name="desde"
+                className="input w-full"
+                defaultValue={filters.dateFrom}
+              />
+            </fieldset>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend">Hasta</legend>
+              <input
+                type="date"
+                name="hasta"
+                className="input w-full"
+                defaultValue={filters.dateTo}
+              />
+            </fieldset>
+          </div>
+          <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            {hasFilters && (
+              <Link to={basePath} className="btn btn-ghost">
+                <X className="size-4" aria-hidden="true" /> Limpiar
+              </Link>
+            )}
+            <button type="submit" className="btn">
+              <Filter className="size-4" aria-hidden="true" /> Aplicar filtros
+            </button>
+          </div>
+        </CollapsibleFilters>
       </Form>
 
       {ticketsQuery.isPending && (
         <div className="grid gap-3" role="status">
           <span className="sr-only">Cargando cola de tickets...</span>
-          {[0, 1, 2].map((item) => <div key={item} className="skeleton h-48 w-full" />)}
+          {[0, 1, 2].map((item) => (
+            <div key={item} className="skeleton h-48 w-full" />
+          ))}
         </div>
       )}
-      {ticketsQuery.isError && <ErrorState onRetry={() => ticketsQuery.refetch()} />}
+      {ticketsQuery.isError && (
+        <ErrorState onRetry={() => ticketsQuery.refetch()} />
+      )}
       {ticketsQuery.isSuccess && ticketsQuery.data.items.length === 0 && (
         <EmptyState
           icon={Inbox}
-          title={isPageOutOfRange ? "Esta página ya no está disponible" : "No hay tickets para mostrar"}
+          title={
+            isPageOutOfRange
+              ? "Esta página ya no está disponible"
+              : "No hay tickets para mostrar"
+          }
           description={
             isPageOutOfRange
               ? "Vuelve a la primera página para continuar revisando la cola."
@@ -280,9 +418,13 @@ const SupportTicketsPage = ({ mode = "queue" }: SupportTicketsPageProps) => {
           }
           action={
             isPageOutOfRange ? (
-              <Link to={pageUrl(1)} className="btn">Primera página</Link>
+              <Link to={pageUrl(1)} className="btn">
+                Primera página
+              </Link>
             ) : hasFilters ? (
-              <Link to={basePath} className="btn">Limpiar filtros</Link>
+              <Link to={basePath} className="btn">
+                Limpiar filtros
+              </Link>
             ) : undefined
           }
         />
@@ -298,7 +440,7 @@ const SupportTicketsPage = ({ mode = "queue" }: SupportTicketsPageProps) => {
               {ticketsQuery.data.total} tickets encontrados
             </h2>
             <p className="text-xs text-base-content/55">
-              Orden: prioridad y antigüedad
+              Orden: más recientes primero
             </p>
           </div>
 
@@ -319,27 +461,47 @@ const SupportTicketsPage = ({ mode = "queue" }: SupportTicketsPageProps) => {
                   <th>Prioridad</th>
                   <th>Asignado</th>
                   <th>Creado</th>
-                  <th><span className="sr-only">Abrir</span></th>
+                  <th>
+                    <span className="sr-only">Abrir</span>
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {ticketsQuery.data.items.map((ticket) => (
                   <tr key={ticket.id}>
                     <td className="max-w-64">
-                      <Link to={`/apoyo/tickets/${ticket.id}`} className="link font-black no-underline">
+                      <Link
+                        to={`/apoyo/tickets/${ticket.id}`}
+                        className="link font-black no-underline"
+                      >
                         {ticket.subject}
                       </Link>
-                      <p className="mt-1 text-xs text-base-content/50">{ticket.code}</p>
+                      <p className="mt-1 text-xs text-base-content/50">
+                        {ticket.code}
+                      </p>
                     </td>
                     <td>{ticket.requesterName}</td>
                     <td>
                       <p className="font-semibold">{ticket.areaName}</p>
-                      <p className="mt-1 text-xs text-base-content/50">{ticket.categoryName}</p>
+                      <p className="mt-1 text-xs text-base-content/50">
+                        {ticket.subareaName}
+                      </p>
+                      <p className="mt-1 text-xs text-base-content/50">
+                        {ticket.categoryName} · {ticket.problemTypeName}
+                      </p>
                     </td>
-                    <td><TicketStatusBadge status={ticket.status} /></td>
-                    <td><TicketPriorityBadge priority={ticket.priority} /></td>
+                    <td>
+                      <TicketStatusBadge status={ticket.status} />
+                    </td>
+                    <td>
+                      <TicketPriorityBadge priority={ticket.priority} />
+                    </td>
                     <td>{ticket.assignedAgentName ?? "Sin asignar"}</td>
-                    <td><time dateTime={ticket.createdAt}>{dateFormatter.format(new Date(ticket.createdAt))}</time></td>
+                    <td>
+                      <time dateTime={ticket.createdAt}>
+                        {dateFormatter.format(new Date(ticket.createdAt))}
+                      </time>
+                    </td>
                     <td>
                       <Link
                         to={`/apoyo/tickets/${ticket.id}`}
@@ -355,7 +517,10 @@ const SupportTicketsPage = ({ mode = "queue" }: SupportTicketsPageProps) => {
             </table>
           </div>
 
-          <nav className="mt-5 flex items-center justify-between gap-3" aria-label="Paginación">
+          <nav
+            className="mt-5 flex items-center justify-between gap-3"
+            aria-label="Paginación"
+          >
             {page > 1 ? (
               <Link to={pageUrl(page - 1)} className="btn">
                 <ChevronLeft className="size-4" aria-hidden="true" />
@@ -367,7 +532,9 @@ const SupportTicketsPage = ({ mode = "queue" }: SupportTicketsPageProps) => {
                 <span className="hidden sm:inline">Anterior</span>
               </button>
             )}
-            <span className="text-sm font-semibold">{page} / {ticketsQuery.data.totalPages}</span>
+            <span className="text-sm font-semibold">
+              {page} / {ticketsQuery.data.totalPages}
+            </span>
             {page < ticketsQuery.data.totalPages ? (
               <Link to={pageUrl(page + 1)} className="btn">
                 <span className="hidden sm:inline">Siguiente</span>

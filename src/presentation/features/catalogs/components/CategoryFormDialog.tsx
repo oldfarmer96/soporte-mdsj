@@ -7,7 +7,7 @@ import type { Category } from "@/shared/interfaces/catalog.interface";
 import { getCatalogMutationErrorMessage } from "@/services/catalog.service";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertTriangle, Pencil, Plus, X } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import {
   categoryFormSchema,
   type CategoryForm,
@@ -88,19 +88,31 @@ const CategoryFormDialog = ({ category }: { category?: Category }) => {
           <form className="mt-5 space-y-4" onSubmit={form.handleSubmit(submit)} noValidate>
             <fieldset className="fieldset">
               <legend className="fieldset-legend">Nombre</legend>
-              <input
-                {...form.register("name")}
-                className={`input w-full ${form.formState.errors.name ? "input-error" : ""}`}
-                maxLength={100}
+              <Controller
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <input
+                    {...field}
+                    className={`input w-full ${form.formState.errors.name ? "input-error" : ""}`}
+                    maxLength={100}
+                  />
+                )}
               />
               <FieldInfo id="category-name-error" error={form.formState.errors.name} />
             </fieldset>
             <fieldset className="fieldset">
               <legend className="fieldset-legend">Descripción</legend>
-              <textarea
-                {...form.register("description")}
-                className="textarea min-h-28 w-full"
-                maxLength={300}
+              <Controller
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <textarea
+                    {...field}
+                    className="textarea min-h-28 w-full"
+                    maxLength={300}
+                  />
+                )}
               />
               <FieldInfo
                 id="category-description-error"
@@ -114,7 +126,20 @@ const CategoryFormDialog = ({ category }: { category?: Category }) => {
                   Los nuevos tickets de esta categoría tendrán prioridad crítica.
                 </span>
               </span>
-              <input {...form.register("isCritical")} type="checkbox" className="toggle" />
+              <Controller
+                control={form.control}
+                name="isCritical"
+                render={({ field }) => (
+                  <input
+                    ref={field.ref}
+                    type="checkbox"
+                    className="toggle"
+                    checked={field.value}
+                    onBlur={field.onBlur}
+                    onChange={(event) => field.onChange(event.target.checked)}
+                  />
+                )}
+              />
             </label>
             {mutation.isError && (
               <div className="alert alert-error alert-soft">
@@ -126,9 +151,19 @@ const CategoryFormDialog = ({ category }: { category?: Category }) => {
               <button type="button" className="btn" onClick={() => getDialog(dialogId)?.close()}>
                 Cancelar
               </button>
-              <button type="submit" className="btn btn-primary" disabled={mutation.isPending}>
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={
+                  mutation.isPending || Boolean(category && !form.formState.isDirty)
+                }
+              >
                 {mutation.isPending && <span className="loading loading-spinner loading-sm" />}
-                {category ? "Guardar cambios" : "Crear categoría"}
+                {category && !form.formState.isDirty
+                  ? "Sin cambios"
+                  : category
+                    ? "Guardar cambios"
+                    : "Crear categoría"}
               </button>
             </div>
           </form>

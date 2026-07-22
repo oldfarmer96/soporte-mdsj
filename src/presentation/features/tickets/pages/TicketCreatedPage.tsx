@@ -106,6 +106,9 @@ const TicketCreatedPage = () => {
               Área
             </dt>
             <dd className="mt-2 font-semibold">{ticket.areaName}</dd>
+            <dd className="mt-1 text-sm text-base-content/60">
+              {ticket.subareaName}
+            </dd>
           </div>
           <div className="bg-base-100 p-5 sm:p-6">
             <dt className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-base-content/50">
@@ -120,7 +123,7 @@ const TicketCreatedPage = () => {
               Tipo e impacto
             </dt>
             <dd className="mt-2 font-semibold">
-              {ticket.problemTypeName ?? "Sin tipo específico"}
+              {ticket.problemTypeName}
             </dd>
             <dd className="mt-1 text-sm text-base-content/60">
               {IMPACT_LABELS[ticket.impact]}
@@ -157,7 +160,7 @@ const TicketCreatedPage = () => {
             Descripción
           </h2>
           <p className="mt-3 whitespace-pre-wrap wrap-break-word text-sm leading-relaxed sm:text-base">
-            {ticket.description}
+            {ticket.description ?? "Sin descripción adicional."}
           </p>
         </div>
       </section>

@@ -10,7 +10,7 @@ const getInstitutionalEmail = (dni: string) => `${dni}@mdsj.com`;
 const getProfile = async (authUser: SupabaseUser): Promise<User> => {
   const { data: profile, error } = await supabase
     .from("perfiles")
-    .select("dni, nombres, apellidos, telefono, rol, estado")
+    .select("dni, nombres, apellidos, telefono, rol, estado, debe_cambiar_password")
     .eq("id", authUser.id)
     .single();
 
@@ -21,12 +21,14 @@ const getProfile = async (authUser: SupabaseUser): Promise<User> => {
   }
 
   return {
+    id: authUser.id,
     dni: profile.dni,
-    name: profile.nombres,
-    lastName: profile.apellidos,
+    name: profile.nombres ?? "",
+    lastName: profile.apellidos ?? "",
     email: authUser.email ?? getInstitutionalEmail(profile.dni),
     phone: profile.telefono,
     role: profile.rol,
+    mustChangePassword: profile.debe_cambiar_password,
   };
 };
 
@@ -50,22 +52,13 @@ export const loginWithDni = async ({
   }
 };
 
-export const registerWithDni = async ({
-  dni,
-  nombres,
-  apellidos,
-  telefono,
-  password,
-}: RegisterT): Promise<User> => {
+export const registerWithDni = async ({ dni }: RegisterT): Promise<User> => {
   const { data, error } = await supabase.auth.signUp({
     email: getInstitutionalEmail(dni),
-    password,
+    password: dni,
     options: {
       data: {
         dni,
-        nombres,
-        apellidos,
-        telefono: telefono || null,
       },
     },
   });

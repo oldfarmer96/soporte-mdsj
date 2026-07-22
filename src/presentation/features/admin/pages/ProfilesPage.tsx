@@ -1,4 +1,5 @@
 import { useProfiles } from "@/application/hooks/useProfiles";
+import CollapsibleFilters from "@/presentation/components/CollapsibleFilters";
 import EmptyState from "@/presentation/components/EmptyState";
 import ErrorState from "@/presentation/components/ErrorState";
 import PageContainer from "@/presentation/components/PageContainer";
@@ -9,10 +10,10 @@ import {
   ChevronLeft,
   ChevronRight,
   Filter,
-  Info,
   Phone,
   Search,
   ShieldCheck,
+  Settings2,
   UserRound,
   UsersRound,
   X,
@@ -34,6 +35,8 @@ const STATUS_LABELS: Record<ProfileStatus, string> = {
   BLOQUEADO: "Bloqueado",
 };
 const dateFormatter = new Intl.DateTimeFormat("es-PE", { dateStyle: "medium" });
+const profileName = (firstName: string | null, lastName: string | null) =>
+  `${firstName ?? ""} ${lastName ?? ""}`.trim() || "Perfil sin completar";
 
 const isRole = (value: string | null): value is RoleT =>
   value !== null && ROLES.includes(value as RoleT);
@@ -54,7 +57,8 @@ const ProfilesPage = () => {
     status: isStatus(statusValue) ? statusValue : undefined,
   };
   const profilesQuery = useProfiles(filters);
-  const hasFilters = Boolean(filters.search || filters.role || filters.status);
+  const activeFilterCount = [filters.search, filters.role, filters.status].filter(Boolean).length;
+  const hasFilters = activeFilterCount > 0;
   const isPageOutOfRange =
     profilesQuery.isSuccess &&
     profilesQuery.data.total > 0 &&
@@ -73,29 +77,20 @@ const ProfilesPage = () => {
       <PageHeader
         eyebrow="Administración"
         title="Usuarios"
-        description="Consulta los perfiles registrados, sus roles y su estado actual de acceso."
+        description="Consulta perfiles y administra sus roles y estados de acceso."
         breadcrumbs={[
           { label: "Administración", path: "/admin" },
           { label: "Usuarios" },
         ]}
-        actions={<span className="badge badge-outline">Solo consulta</span>}
       />
-
-      <div className="alert alert-info alert-soft mb-5 items-start">
-        <Info className="size-5 shrink-0" aria-hidden="true" />
-        <p className="text-sm leading-relaxed">
-          Los cambios de rol, estado y acceso se realizan manualmente desde Supabase. Esta
-          pantalla no modifica perfiles ni credenciales.
-        </p>
-      </div>
 
       <Form
         key={searchParams.toString()}
         method="get"
-        className="mb-5 rounded-box border border-base-300 bg-base-100 p-4 shadow-sm sm:p-5"
         aria-label="Filtros de usuarios"
       >
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_14rem_14rem]">
+        <CollapsibleFilters activeCount={activeFilterCount} title="Buscar y filtrar">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_14rem_14rem]">
           <fieldset className="fieldset sm:col-span-2 lg:col-span-1">
             <legend className="fieldset-legend">DNI, nombres o apellidos</legend>
             <label className="input w-full">
@@ -131,17 +126,18 @@ const ProfilesPage = () => {
               ))}
             </select>
           </fieldset>
-        </div>
-        <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          {hasFilters && (
-            <Link to="/admin/usuarios" className="btn btn-ghost">
-              <X className="size-4" aria-hidden="true" /> Limpiar
-            </Link>
-          )}
-          <button type="submit" className="btn">
-            <Filter className="size-4" aria-hidden="true" /> Aplicar filtros
-          </button>
-        </div>
+          </div>
+          <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            {hasFilters && (
+              <Link to="/admin/usuarios" className="btn btn-ghost">
+                <X className="size-4" aria-hidden="true" /> Limpiar
+              </Link>
+            )}
+            <button type="submit" className="btn">
+              <Filter className="size-4" aria-hidden="true" /> Aplicar filtros
+            </button>
+          </div>
+        </CollapsibleFilters>
       </Form>
 
       {profilesQuery.isPending && (
@@ -192,11 +188,13 @@ const ProfilesPage = () => {
                 <div className="flex items-start gap-3">
                   <span className="avatar avatar-placeholder">
                     <span className="grid size-11 place-items-center rounded-xl bg-neutral font-black text-neutral-content">
-                      {`${profile.firstName.charAt(0)}${profile.lastName.charAt(0)}`.toUpperCase()}
+                      {profile.firstName && profile.lastName
+                        ? `${profile.firstName.charAt(0)}${profile.lastName.charAt(0)}`.toUpperCase()
+                        : "?"}
                     </span>
                   </span>
                   <div className="min-w-0 grow">
-                    <h3 className="font-black">{profile.firstName} {profile.lastName}</h3>
+                    <h3 className="font-black">{profileName(profile.firstName, profile.lastName)}</h3>
                     <p className="mt-1 text-sm text-base-content/55">DNI {profile.dni}</p>
                   </div>
                 </div>
@@ -216,6 +214,11 @@ const ProfilesPage = () => {
                     <dd>Registrado {dateFormatter.format(new Date(profile.createdAt))}</dd>
                   </div>
                 </dl>
+                <div className="mt-4 border-t border-base-300 pt-4">
+                  <Link className="btn btn-sm" to={`/admin/usuarios/${profile.id}`}>
+                    <Settings2 className="size-4" aria-hidden="true" /> Gestionar
+                  </Link>
+                </div>
               </li>
             ))}
           </ul>
@@ -229,7 +232,8 @@ const ProfilesPage = () => {
                   <th>Teléfono</th>
                   <th>Rol</th>
                   <th>Estado</th>
-                  <th>Registrado</th>
+                   <th>Registrado</th>
+                   <th><span className="sr-only">Acciones</span></th>
                 </tr>
               </thead>
               <tbody>
@@ -238,7 +242,7 @@ const ProfilesPage = () => {
                     <td>
                       <span className="flex items-center gap-2 font-black">
                         <UserRound className="size-4" aria-hidden="true" />
-                        {profile.firstName} {profile.lastName}
+                        {profileName(profile.firstName, profile.lastName)}
                       </span>
                     </td>
                     <td>{profile.dni}</td>
@@ -246,6 +250,11 @@ const ProfilesPage = () => {
                     <td><ProfileRoleBadge role={profile.role} /></td>
                     <td><ProfileStatusBadge status={profile.status} /></td>
                     <td><time dateTime={profile.createdAt}>{dateFormatter.format(new Date(profile.createdAt))}</time></td>
+                    <td>
+                      <Link className="btn btn-sm" to={`/admin/usuarios/${profile.id}`}>
+                        <Settings2 className="size-4" aria-hidden="true" /> Gestionar
+                      </Link>
+                    </td>
                   </tr>
                 ))}
               </tbody>

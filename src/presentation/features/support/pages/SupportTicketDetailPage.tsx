@@ -82,7 +82,7 @@ const SupportTicketDetailPage = () => {
               <FileText className="size-5" aria-hidden="true" /> Descripción
             </h2>
             <p className="mt-4 whitespace-pre-wrap break-words leading-relaxed">
-              {ticket.description}
+              {ticket.description ?? "Sin descripción adicional."}
             </p>
             <dl className="mt-6 grid gap-px overflow-hidden rounded-box bg-base-300 sm:grid-cols-2">
               <div className="bg-base-200 p-4">
@@ -90,6 +90,9 @@ const SupportTicketDetailPage = () => {
                   <Building2 className="size-4" aria-hidden="true" /> Área
                 </dt>
                 <dd className="mt-2 font-semibold">{ticket.areaName}</dd>
+                <dd className="mt-1 text-sm text-base-content/60">
+                  {ticket.subareaName}
+                </dd>
               </div>
               <div className="bg-base-200 p-4">
                 <dt className="flex items-center gap-2 text-xs font-bold uppercase text-base-content/50">
@@ -97,7 +100,7 @@ const SupportTicketDetailPage = () => {
                 </dt>
                 <dd className="mt-2 font-semibold">{ticket.categoryName}</dd>
                 <dd className="mt-1 text-sm text-base-content/60">
-                  {ticket.problemTypeName ?? "Sin tipo específico"}
+                  {ticket.problemTypeName}
                 </dd>
               </div>
               <div className="bg-base-200 p-4">

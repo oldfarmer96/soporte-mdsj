@@ -3,6 +3,7 @@ import {
   getAreas,
   getCategories,
   getProblemTypes,
+  getSubareas,
 } from "@/services/catalog.service";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -15,6 +16,10 @@ interface CatalogHookOptions {
 
 interface ProblemTypeHookOptions extends CatalogHookOptions {
   categoryId?: string | null;
+}
+
+interface SubareaHookOptions extends CatalogHookOptions {
+  areaId?: string | null;
 }
 
 export const useAreas = ({
@@ -33,6 +38,25 @@ export const useCategories = ({
   useQuery({
     queryKey: catalogKeys.categories(includeInactive),
     queryFn: () => getCategories({ includeInactive }),
+    staleTime: CATALOG_STALE_TIME,
+    retry: 2,
+  });
+
+export const useSubareas = ({
+  areaId,
+  includeInactive = false,
+}: SubareaHookOptions = {}) =>
+  useQuery({
+    queryKey: catalogKeys.subareas({
+      areaId: areaId ?? undefined,
+      includeInactive,
+    }),
+    queryFn: () =>
+      getSubareas({
+        areaId: areaId ?? undefined,
+        includeInactive,
+      }),
+    enabled: areaId !== null,
     staleTime: CATALOG_STALE_TIME,
     retry: 2,
   });
@@ -57,11 +81,19 @@ export const useProblemTypes = ({
   });
 
 export const useTicketCatalogSelection = () => {
+  const [areaId, setAreaId] = useState<string | null>(null);
+  const [subareaId, setSubareaId] = useState<string | null>(null);
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [problemTypeId, setProblemTypeId] = useState<string | null>(null);
   const areasQuery = useAreas();
+  const subareasQuery = useSubareas({ areaId });
   const categoriesQuery = useCategories();
   const problemTypesQuery = useProblemTypes({ categoryId });
+
+  const selectArea = (nextAreaId: string | null) => {
+    setAreaId(nextAreaId);
+    setSubareaId(null);
+  };
 
   const selectCategory = (nextCategoryId: string | null) => {
     setCategoryId(nextCategoryId);
@@ -70,10 +102,15 @@ export const useTicketCatalogSelection = () => {
 
   return {
     areasQuery,
+    subareasQuery,
     categoriesQuery,
     problemTypesQuery,
+    areaId,
+    subareaId,
     categoryId,
     problemTypeId,
+    selectArea,
+    selectSubarea: setSubareaId,
     selectCategory,
     selectProblemType: setProblemTypeId,
   };

@@ -40,7 +40,7 @@ const NotFoundPage = () => {
 
         <div className="mt-8 flex items-center justify-center gap-2 border-t border-base-300 pt-6 text-sm font-semibold text-base-content/50">
           <Headphones className="size-4" aria-hidden="true" />
-          Mesa de soporte MDSJ
+          Soporte MDSJ
         </div>
       </section>
     </main>

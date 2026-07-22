@@ -11,8 +11,8 @@ import {
   Building2,
   CircleHelp,
   FileText,
-  Info,
   ListTree,
+  MapPin,
   Send,
   Tags,
 } from "lucide-react";
@@ -56,24 +56,37 @@ const CreateTicketPage = () => {
     register,
     handleSubmit,
     setValue,
+    setError,
     control,
     formState: { errors, touchedFields },
   } = useForm<CreateTicketForm>({
     resolver: zodResolver(createTicketSchema),
     defaultValues: {
       areaId: "",
+      subareaId: "",
       categoryId: "",
       problemTypeId: "",
-      subject: "",
       description: "",
       impact: "INDIVIDUAL",
       workStopped: false,
     },
   });
-  const subject = useWatch({ control, name: "subject" });
   const description = useWatch({ control, name: "description" });
   const catalogsUnavailable =
-    catalogs.areasQuery.isError || catalogs.categoriesQuery.isError;
+    catalogs.areasQuery.isError ||
+    catalogs.subareasQuery.isError ||
+    catalogs.categoriesQuery.isError ||
+    catalogs.problemTypesQuery.isError;
+
+  const areaRegistration = register("areaId", {
+    onChange: (event) => {
+      const nextAreaId = String(event.target.value);
+      setValue("subareaId", "", {
+        shouldValidate: Boolean(touchedFields.subareaId),
+      });
+      catalogs.selectArea(nextAreaId || null);
+    },
+  });
 
   const categoryRegistration = register("categoryId", {
     onChange: (event) => {
@@ -86,12 +99,25 @@ const CreateTicketPage = () => {
   });
 
   const onSubmit = (form: CreateTicketForm) => {
+    const category = catalogs.categoriesQuery.data?.find(
+      (item) => item.id === form.categoryId,
+    );
+    const problemType = catalogs.problemTypesQuery.data?.find(
+      (item) => item.id === form.problemTypeId,
+    );
+    if ((category?.isOther || problemType?.isOther) && form.description.length < 5) {
+      setError("description", {
+        message: "Describe el problema al seleccionar una opción Otro",
+      });
+      return;
+    }
+
     createTicketMutation.mutate({
       areaId: form.areaId,
+      subareaId: form.subareaId,
       categoryId: form.categoryId,
-      problemTypeId: form.problemTypeId || null,
-      subject: form.subject,
-      description: form.description,
+      problemTypeId: form.problemTypeId,
+      description: form.description || null,
       impact: form.impact,
       workStopped: form.workStopped,
     });
@@ -103,17 +129,24 @@ const CreateTicketPage = () => {
         eyebrow="Solicitante"
         title="Nuevo ticket"
         description="Describe el problema con suficiente detalle para que el personal de apoyo pueda atenderlo correctamente."
-        breadcrumbs={[{ label: "Inicio", path: "/" }, { label: "Nuevo ticket" }]}
+        breadcrumbs={[
+          { label: "Inicio", path: "/" },
+          { label: "Nuevo ticket" },
+        ]}
       />
 
       <form className="space-y-5" onSubmit={handleSubmit(onSubmit)} noValidate>
         {catalogsUnavailable && (
-          <div className="alert alert-error alert-soft alert-vertical sm:alert-horizontal" role="alert">
+          <div
+            className="alert alert-error alert-soft alert-vertical sm:alert-horizontal"
+            role="alert"
+          >
             <AlertCircle className="size-5 shrink-0" aria-hidden="true" />
             <div className="grow">
               <p className="font-bold">No pudimos cargar los catálogos</p>
               <p className="mt-1 text-sm">
-                Reintenta antes de enviar para seleccionar un área y una categoría válidas.
+                Reintenta antes de enviar para seleccionar un área y una
+                categoría válidas.
               </p>
             </div>
             <button
@@ -121,7 +154,9 @@ const CreateTicketPage = () => {
               className="btn"
               onClick={() => {
                 catalogs.areasQuery.refetch();
+                if (catalogs.areaId) catalogs.subareasQuery.refetch();
                 catalogs.categoriesQuery.refetch();
+                if (catalogs.categoryId) catalogs.problemTypesQuery.refetch();
               }}
             >
               Reintentar
@@ -135,7 +170,9 @@ const CreateTicketPage = () => {
               <Building2 className="size-5" aria-hidden="true" />
             </span>
             <div>
-              <h2 className="font-black sm:text-lg">Ubicación y clasificación</h2>
+              <h2 className="font-black sm:text-lg">
+                Ubicación y clasificación
+              </h2>
               <p className="mt-1 text-sm text-base-content/60">
                 Indica dónde ocurre y qué tipo de ayuda necesitas.
               </p>
@@ -146,16 +183,25 @@ const CreateTicketPage = () => {
             <fieldset className="fieldset">
               <legend className="fieldset-legend">Área</legend>
               <div className="relative">
-                <Building2 className="pointer-events-none absolute left-3 top-1/2 z-10 size-4 -translate-y-1/2 text-base-content/45" aria-hidden="true" />
+                <Building2
+                  className="pointer-events-none absolute left-3 top-1/2 z-10 size-4 -translate-y-1/2 text-base-content/45"
+                  aria-hidden="true"
+                />
                 <select
-                  {...register("areaId")}
+                  {...areaRegistration}
                   className={`select w-full pl-10 ${errors.areaId ? "select-error" : ""}`}
-                  disabled={catalogs.areasQuery.isPending || catalogs.areasQuery.isError}
+                  disabled={
+                    catalogs.areasQuery.isPending || catalogs.areasQuery.isError
+                  }
                   aria-invalid={Boolean(errors.areaId)}
-                  aria-describedby={errors.areaId ? "ticket-area-error" : undefined}
+                  aria-describedby={
+                    errors.areaId ? "ticket-area-error" : undefined
+                  }
                 >
                   <option value="">
-                    {catalogs.areasQuery.isPending ? "Cargando áreas..." : "Selecciona un área"}
+                    {catalogs.areasQuery.isPending
+                      ? "Cargando áreas..."
+                      : "Selecciona un área"}
                   </option>
                   {catalogs.areasQuery.data?.map((area) => (
                     <option key={area.id} value={area.id}>
@@ -168,13 +214,59 @@ const CreateTicketPage = () => {
             </fieldset>
 
             <fieldset className="fieldset">
+              <legend className="fieldset-legend">Subárea</legend>
+              <div className="relative">
+                <MapPin
+                  className="pointer-events-none absolute left-3 top-1/2 z-10 size-4 -translate-y-1/2 text-base-content/45"
+                  aria-hidden="true"
+                />
+                <select
+                  {...register("subareaId", {
+                    onChange: (event) =>
+                      catalogs.selectSubarea(String(event.target.value) || null),
+                  })}
+                  className={`select w-full pl-10 ${errors.subareaId ? "select-error" : ""}`}
+                  disabled={
+                    !catalogs.areaId ||
+                    catalogs.subareasQuery.isPending ||
+                    catalogs.subareasQuery.isError
+                  }
+                  aria-invalid={Boolean(errors.subareaId)}
+                  aria-describedby={
+                    errors.subareaId ? "ticket-subarea-error" : undefined
+                  }
+                >
+                  <option value="">
+                    {!catalogs.areaId
+                      ? "Selecciona primero un área"
+                      : catalogs.subareasQuery.isPending
+                        ? "Cargando subáreas..."
+                        : "Selecciona una subárea"}
+                  </option>
+                  {catalogs.subareasQuery.data?.map((subarea) => (
+                    <option key={subarea.id} value={subarea.id}>
+                      {subarea.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <FieldInfo id="ticket-subarea-error" error={errors.subareaId} />
+            </fieldset>
+
+            <fieldset className="fieldset">
               <legend className="fieldset-legend">Categoría</legend>
               <div className="relative">
-                <Tags className="pointer-events-none absolute left-3 top-1/2 z-10 size-4 -translate-y-1/2 text-base-content/45" aria-hidden="true" />
+                <Tags
+                  className="pointer-events-none absolute left-3 top-1/2 z-10 size-4 -translate-y-1/2 text-base-content/45"
+                  aria-hidden="true"
+                />
                 <select
                   {...categoryRegistration}
                   className={`select w-full pl-10 ${errors.categoryId ? "select-error" : ""}`}
-                  disabled={catalogs.categoriesQuery.isPending || catalogs.categoriesQuery.isError}
+                  disabled={
+                    catalogs.categoriesQuery.isPending ||
+                    catalogs.categoriesQuery.isError
+                  }
                   aria-invalid={Boolean(errors.categoryId)}
                   aria-describedby={
                     errors.categoryId ? "ticket-category-error" : undefined
@@ -197,18 +289,25 @@ const CreateTicketPage = () => {
           </div>
 
           <fieldset className="fieldset mt-4">
-            <legend className="fieldset-legend">
-              Tipo de problema <span className="font-normal opacity-55">(opcional)</span>
-            </legend>
+            <legend className="fieldset-legend">Tipo de problema</legend>
             <div className="relative">
-              <ListTree className="pointer-events-none absolute left-3 top-1/2 z-10 size-4 -translate-y-1/2 text-base-content/45" aria-hidden="true" />
+              <ListTree
+                className="pointer-events-none absolute left-3 top-1/2 z-10 size-4 -translate-y-1/2 text-base-content/45"
+                aria-hidden="true"
+              />
               <select
                 {...register("problemTypeId", {
                   onChange: (event) =>
-                    catalogs.selectProblemType(String(event.target.value) || null),
+                    catalogs.selectProblemType(
+                      String(event.target.value) || null,
+                    ),
                 })}
                 className={`select w-full pl-10 ${errors.problemTypeId ? "select-error" : ""}`}
-                disabled={!catalogs.categoryId || catalogs.problemTypesQuery.isPending}
+                disabled={
+                  !catalogs.categoryId ||
+                  catalogs.problemTypesQuery.isPending ||
+                  catalogs.problemTypesQuery.isError
+                }
                 aria-invalid={Boolean(errors.problemTypeId)}
                 aria-describedby={
                   errors.problemTypeId ? "ticket-problem-type-error" : undefined
@@ -219,7 +318,7 @@ const CreateTicketPage = () => {
                     ? "Selecciona primero una categoría"
                     : catalogs.problemTypesQuery.isPending
                       ? "Cargando tipos..."
-                      : "Sin tipo específico"}
+                      : "Selecciona un tipo de problema"}
                 </option>
                 {catalogs.problemTypesQuery.data?.map((problemType) => (
                   <option key={problemType.id} value={problemType.id}>
@@ -228,10 +327,14 @@ const CreateTicketPage = () => {
                 ))}
               </select>
             </div>
-            <FieldInfo id="ticket-problem-type-error" error={errors.problemTypeId} />
+            <FieldInfo
+              id="ticket-problem-type-error"
+              error={errors.problemTypeId}
+            />
             {catalogs.problemTypesQuery.isError && (
-              <p className="label text-warning">
-                No pudimos cargar los tipos. Puedes enviar el ticket sin elegir uno.
+              <p className="label text-error">
+                No pudimos cargar los tipos de problema. Reintenta antes de
+                enviar.
               </p>
             )}
           </fieldset>
@@ -243,33 +346,14 @@ const CreateTicketPage = () => {
               <FileText className="size-5" aria-hidden="true" />
             </span>
             <div>
-              <h2 className="font-black sm:text-lg">Cuéntanos qué sucede</h2>
+              <h2 className="font-black sm:text-lg">Detalle adicional</h2>
               <p className="mt-1 text-sm text-base-content/60">
-                Evita compartir contraseñas u otra información sensible.
+                Es opcional, excepto cuando selecciones una opción Otro.
               </p>
             </div>
           </div>
 
           <fieldset className="fieldset">
-            <legend className="fieldset-legend">Asunto</legend>
-            <input
-              {...register("subject")}
-              className={`input w-full ${errors.subject ? "input-error" : ""}`}
-              type="text"
-              maxLength={150}
-              placeholder="Ejemplo: La impresora no responde"
-              aria-invalid={Boolean(errors.subject)}
-              aria-describedby={errors.subject ? "ticket-subject-error" : "ticket-subject-help"}
-            />
-            <div className="flex justify-between gap-3">
-              <FieldInfo id="ticket-subject-error" error={errors.subject} />
-              <p id="ticket-subject-help" className="label ml-auto">
-                {subject.length}/150
-              </p>
-            </div>
-          </fieldset>
-
-          <fieldset className="fieldset mt-4">
             <legend className="fieldset-legend">Descripción</legend>
             <textarea
               {...register("description")}
@@ -280,11 +364,16 @@ const CreateTicketPage = () => {
               placeholder="Describe qué estabas haciendo, qué ocurrió y si aparece algún mensaje de error."
               aria-invalid={Boolean(errors.description)}
               aria-describedby={
-                errors.description ? "ticket-description-error" : "ticket-description-help"
+                errors.description
+                  ? "ticket-description-error"
+                  : "ticket-description-help"
               }
             />
             <div className="flex justify-between gap-3">
-              <FieldInfo id="ticket-description-error" error={errors.description} />
+              <FieldInfo
+                id="ticket-description-error"
+                error={errors.description}
+              />
               <p id="ticket-description-help" className="label ml-auto">
                 {description.length}/3000
               </p>
@@ -320,7 +409,9 @@ const CreateTicketPage = () => {
                     className="radio mt-0.5"
                   />
                   <span>
-                    <span className="block text-sm font-bold">{option.label}</span>
+                    <span className="block text-sm font-bold">
+                      {option.label}
+                    </span>
                     <span className="mt-1 block text-xs leading-relaxed text-base-content/60">
                       {option.description}
                     </span>
@@ -333,25 +424,26 @@ const CreateTicketPage = () => {
 
           <label className="mt-4 flex cursor-pointer items-center justify-between gap-4 rounded-box bg-base-200 p-4">
             <span>
-              <span className="block text-sm font-bold">¿Tu trabajo está detenido?</span>
+              <span className="block text-sm font-bold">
+                ¿Tu trabajo está detenido?
+              </span>
               <span className="mt-1 block text-xs leading-relaxed text-base-content/60">
                 Actívalo solo si no puedes continuar con tus funciones.
               </span>
             </span>
-            <input {...register("workStopped")} type="checkbox" className="toggle shrink-0" />
+            <input
+              {...register("workStopped")}
+              type="checkbox"
+              className="toggle shrink-0"
+            />
           </label>
         </section>
 
-        <div className="alert alert-info alert-soft items-start">
-          <Info className="size-5 shrink-0" aria-hidden="true" />
-          <p className="text-sm leading-relaxed">
-            La prioridad y el código se calcularán automáticamente al registrar el ticket.
-            Podrás adjuntar imágenes cuando se implemente el módulo de evidencias.
-          </p>
-        </div>
-
         {createTicketMutation.isError && (
-          <div className="alert alert-error alert-soft items-start" role="alert">
+          <div
+            className="alert alert-error alert-soft items-start"
+            role="alert"
+          >
             <AlertCircle className="size-5 shrink-0" aria-hidden="true" />
             <p className="text-sm leading-relaxed">
               {getTicketErrorMessage(createTicketMutation.error)}
@@ -370,7 +462,9 @@ const CreateTicketPage = () => {
             ) : (
               <Send className="size-5" aria-hidden="true" />
             )}
-            {createTicketMutation.isPending ? "Registrando..." : "Registrar ticket"}
+            {createTicketMutation.isPending
+              ? "Registrando..."
+              : "Registrar ticket"}
           </button>
         </div>
       </form>

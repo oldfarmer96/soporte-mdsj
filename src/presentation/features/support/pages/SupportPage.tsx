@@ -1,5 +1,5 @@
-import DashboardPage from "../../dashboard/pages/DashboardPage";
+import SupportTicketsPage from "./SupportTicketsPage";
 
-const SupportPage = () => <DashboardPage role="APOYO" />;
+const SupportPage = () => <SupportTicketsPage mode="queue" variant="monitor" />;
 
 export default SupportPage;

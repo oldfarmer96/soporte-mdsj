@@ -32,10 +32,11 @@ interface NamedRelation {
 }
 
 interface TicketDetailRow extends CreatedTicketRow {
-  descripcion: string;
+  descripcion: string | null;
   impacto: TicketImpact;
   trabajo_detenido: boolean;
   area: NamedRelation | NamedRelation[] | null;
+  subarea: NamedRelation | NamedRelation[] | null;
   categoria: NamedRelation | NamedRelation[] | null;
   tipo_problema: NamedRelation | NamedRelation[] | null;
   asignado_a: string | null;
@@ -43,7 +44,9 @@ interface TicketDetailRow extends CreatedTicketRow {
 
 interface TicketListRow extends CreatedTicketRow {
   area: NamedRelation | NamedRelation[] | null;
+  subarea: NamedRelation | NamedRelation[] | null;
   categoria: NamedRelation | NamedRelation[] | null;
+  tipo_problema: NamedRelation | NamedRelation[] | null;
   asignado_a: string | null;
 }
 
@@ -91,9 +94,9 @@ export const createTicket = async (
     .from("tickets")
     .insert({
       id_area: input.areaId,
+      id_subarea: input.subareaId,
       id_categoria: input.categoryId,
       id_tipo_problema: input.problemTypeId,
-      asunto: input.subject,
       descripcion: input.description,
       impacto: input.impact,
       trabajo_detenido: input.workStopped,
@@ -136,7 +139,7 @@ export const getMyTickets = async (
   let query = supabase
     .from("tickets")
     .select(
-      "id, codigo, asunto, prioridad, estado, created_at, updated_at, asignado_a, area:areas(nombre), categoria:categorias(nombre)",
+      "id, codigo, asunto, prioridad, estado, created_at, updated_at, asignado_a, area:areas(nombre), subarea:subareas!tickets_area_subarea_fk(nombre), categoria:categorias(nombre), tipo_problema:ticket_tipos_problemas!tickets_categoria_tipo_problema_fk(nombre)",
       { count: "exact" },
     )
     .order("created_at", { ascending: false })
@@ -165,7 +168,10 @@ export const getMyTickets = async (
     createdAt: ticket.created_at,
     updatedAt: ticket.updated_at,
     areaName: getRelationName(ticket.area) ?? "Área no disponible",
+    subareaName: getRelationName(ticket.subarea) ?? "Subárea no disponible",
     categoryName: getRelationName(ticket.categoria) ?? "Categoría no disponible",
+    problemTypeName:
+      getRelationName(ticket.tipo_problema) ?? "Tipo no disponible",
     isAssigned: Boolean(ticket.asignado_a),
   }));
   const total = count ?? 0;
@@ -253,7 +259,7 @@ export const getTicketDetail = async (ticketId: string): Promise<TicketDetail> =
   const { data, error } = await supabase
     .from("tickets")
     .select(
-      "id, codigo, asunto, descripcion, impacto, trabajo_detenido, prioridad, estado, asignado_a, created_at, updated_at, area:areas(nombre), categoria:categorias(nombre), tipo_problema:ticket_tipos_problemas(nombre)",
+      "id, codigo, asunto, descripcion, impacto, trabajo_detenido, prioridad, estado, asignado_a, created_at, updated_at, area:areas(nombre), subarea:subareas!tickets_area_subarea_fk(nombre), categoria:categorias(nombre), tipo_problema:ticket_tipos_problemas!tickets_categoria_tipo_problema_fk(nombre)",
     )
     .eq("id", ticketId)
     .maybeSingle();
@@ -280,8 +286,10 @@ export const getTicketDetail = async (ticketId: string): Promise<TicketDetail> =
     createdAt: ticket.created_at,
     updatedAt: ticket.updated_at,
     areaName: getRelationName(ticket.area) ?? "Área no disponible",
+    subareaName: getRelationName(ticket.subarea) ?? "Subárea no disponible",
     categoryName: getRelationName(ticket.categoria) ?? "Categoría no disponible",
-    problemTypeName: getRelationName(ticket.tipo_problema),
+    problemTypeName:
+      getRelationName(ticket.tipo_problema) ?? "Tipo no disponible",
     isAssigned: Boolean(ticket.asignado_a),
     history,
     resolution,
@@ -322,8 +330,14 @@ export const getTicketErrorMessage = (error: unknown) => {
   if (normalizedMessage.includes("ticket_not_found")) {
     return "No encontramos el ticket o no tienes permiso para consultarlo.";
   }
+  if (normalizedMessage.includes("subárea")) {
+    return "La subárea no está disponible o no corresponde al área seleccionada.";
+  }
   if (normalizedMessage.includes("área seleccionada")) {
     return "El área seleccionada ya no está disponible. Elige otra opción.";
+  }
+  if (normalizedMessage.includes("opción otro")) {
+    return "Describe el problema con al menos 5 caracteres al seleccionar Otro.";
   }
   if (normalizedMessage.includes("categoría seleccionada")) {
     return "La categoría seleccionada ya no está disponible. Elige otra opción.";

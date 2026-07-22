@@ -11,7 +11,7 @@ import type {
 import { getCatalogMutationErrorMessage } from "@/services/catalog.service";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertTriangle, Pencil, Plus, X } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import {
   problemTypeFormSchema,
   type ProblemTypeForm,
@@ -110,17 +110,23 @@ const ProblemTypeFormDialog = ({
           <form className="mt-5 space-y-4" onSubmit={form.handleSubmit(submit)} noValidate>
             <fieldset className="fieldset">
               <legend className="fieldset-legend">Categoría</legend>
-              <select
-                {...form.register("categoryId")}
-                className={`select w-full ${form.formState.errors.categoryId ? "select-error" : ""}`}
-              >
-                <option value="">Selecciona una categoría</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}{category.isActive ? "" : " (inactiva)"}
-                  </option>
-                ))}
-              </select>
+              <Controller
+                control={form.control}
+                name="categoryId"
+                render={({ field }) => (
+                  <select
+                    {...field}
+                    className={`select w-full ${form.formState.errors.categoryId ? "select-error" : ""}`}
+                  >
+                    <option value="">Selecciona una categoría</option>
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}{category.isActive ? "" : " (inactiva)"}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              />
               <FieldInfo
                 id="problem-category-error"
                 error={form.formState.errors.categoryId}
@@ -128,19 +134,31 @@ const ProblemTypeFormDialog = ({
             </fieldset>
             <fieldset className="fieldset">
               <legend className="fieldset-legend">Nombre</legend>
-              <input
-                {...form.register("name")}
-                className={`input w-full ${form.formState.errors.name ? "input-error" : ""}`}
-                maxLength={150}
+              <Controller
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <input
+                    {...field}
+                    className={`input w-full ${form.formState.errors.name ? "input-error" : ""}`}
+                    maxLength={150}
+                  />
+                )}
               />
               <FieldInfo id="problem-name-error" error={form.formState.errors.name} />
             </fieldset>
             <fieldset className="fieldset">
               <legend className="fieldset-legend">Descripción</legend>
-              <textarea
-                {...form.register("description")}
-                className="textarea min-h-24 w-full"
-                maxLength={300}
+              <Controller
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <textarea
+                    {...field}
+                    className="textarea min-h-24 w-full"
+                    maxLength={300}
+                  />
+                )}
               />
               <FieldInfo
                 id="problem-description-error"
@@ -149,11 +167,17 @@ const ProblemTypeFormDialog = ({
             </fieldset>
             <fieldset className="fieldset">
               <legend className="fieldset-legend">Prioridad base</legend>
-              <select {...form.register("priority")} className="select w-full">
-                {PRIORITIES.map((priority) => (
-                  <option key={priority.value} value={priority.value}>{priority.label}</option>
-                ))}
-              </select>
+              <Controller
+                control={form.control}
+                name="priority"
+                render={({ field }) => (
+                  <select {...field} className="select w-full">
+                    {PRIORITIES.map((priority) => (
+                      <option key={priority.value} value={priority.value}>{priority.label}</option>
+                    ))}
+                  </select>
+                )}
+              />
             </fieldset>
             {mutation.isError && (
               <div className="alert alert-error alert-soft">
@@ -165,9 +189,19 @@ const ProblemTypeFormDialog = ({
               <button type="button" className="btn" onClick={() => getDialog(dialogId)?.close()}>
                 Cancelar
               </button>
-              <button type="submit" className="btn btn-primary" disabled={mutation.isPending}>
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={
+                  mutation.isPending || Boolean(problemType && !form.formState.isDirty)
+                }
+              >
                 {mutation.isPending && <span className="loading loading-spinner loading-sm" />}
-                {problemType ? "Guardar cambios" : "Crear tipo"}
+                {problemType && !form.formState.isDirty
+                  ? "Sin cambios"
+                  : problemType
+                    ? "Guardar cambios"
+                    : "Crear tipo"}
               </button>
             </div>
           </form>

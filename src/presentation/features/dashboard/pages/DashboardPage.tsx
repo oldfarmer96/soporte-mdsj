@@ -1,4 +1,5 @@
 import { useSupportDashboard } from "@/application/hooks/useDashboard";
+import CollapsibleFilters from "@/presentation/components/CollapsibleFilters";
 import ErrorState from "@/presentation/components/ErrorState";
 import PageContainer from "@/presentation/components/PageContainer";
 import PageHeader from "@/presentation/components/PageHeader";
@@ -10,9 +11,6 @@ import { getDashboardErrorMessage } from "@/services/dashboard.service";
 import {
   Activity,
   CalendarDays,
-  CheckCircle2,
-  Clock3,
-  FileDown,
   Inbox,
   Sheet,
   TicketCheck,
@@ -22,10 +20,7 @@ import {
 import { useState } from "react";
 import { Form, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
-import {
-  downloadDashboardExcel,
-  downloadDashboardPdf,
-} from "../utils/dashboardExports";
+import { downloadDashboardExcel } from "../utils/dashboardExports";
 
 const STATUS_LABELS: Record<string, string> = {
   NUEVO: "Nuevo",
@@ -111,16 +106,6 @@ const SummaryCards = ({ metrics }: { metrics: SupportDashboardMetrics }) => {
     { label: "Resueltos en el periodo", value: metrics.summary.resolved, icon: TicketCheck },
     { label: "Activos actualmente", value: metrics.summary.active, icon: Activity },
     { label: "Sin asignar", value: metrics.summary.unassigned, icon: Inbox },
-    {
-      label: "Promedio para asignar",
-      value: `${metrics.summary.avgAssignmentHours} h`,
-      icon: Clock3,
-    },
-    {
-      label: "Promedio para resolver",
-      value: `${metrics.summary.avgResolutionHours} h`,
-      icon: CheckCircle2,
-    },
   ];
 
   return (
@@ -145,7 +130,7 @@ const SummaryCards = ({ metrics }: { metrics: SupportDashboardMetrics }) => {
 
 const DashboardPage = ({ role }: { role: "APOYO" | "ADMIN" }) => {
   const [searchParams] = useSearchParams();
-  const [exporting, setExporting] = useState<"pdf" | "xlsx" | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
   const today = getLimaToday();
   const fromParam = searchParams.get("desde");
   const toParam = searchParams.get("hasta");
@@ -167,17 +152,16 @@ const DashboardPage = ({ role }: { role: "APOYO" | "ADMIN" }) => {
       )
     : 1;
 
-  const exportReport = async (format: "pdf" | "xlsx") => {
+  const exportReport = async () => {
     if (!metricsQuery.data) return;
-    setExporting(format);
+    setIsExporting(true);
     try {
-      if (format === "pdf") await downloadDashboardPdf(metricsQuery.data);
-      else await downloadDashboardExcel(metricsQuery.data);
-      toast.success(`Reporte ${format.toUpperCase()} generado correctamente`);
+      await downloadDashboardExcel(metricsQuery.data);
+      toast.success("Reporte Excel generado correctamente");
     } catch {
-      toast.error("No pudimos generar el reporte. Inténtalo nuevamente.");
+      toast.error("No pudimos generar el reporte Excel. Inténtalo nuevamente.");
     } finally {
-      setExporting(null);
+      setIsExporting(false);
     }
   };
 
@@ -189,34 +173,19 @@ const DashboardPage = ({ role }: { role: "APOYO" | "ADMIN" }) => {
         description="Indicadores agregados de la mesa de soporte en horario de Lima."
         actions={
           metricsQuery.isSuccess ? (
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                className="btn"
-                disabled={exporting !== null}
-                onClick={() => exportReport("pdf")}
-              >
-                {exporting === "pdf" ? (
-                  <span className="loading loading-spinner loading-sm" />
-                ) : (
-                  <FileDown className="size-4" aria-hidden="true" />
-                )}
-                PDF
-              </button>
-              <button
-                type="button"
-                className="btn"
-                disabled={exporting !== null}
-                onClick={() => exportReport("xlsx")}
-              >
-                {exporting === "xlsx" ? (
-                  <span className="loading loading-spinner loading-sm" />
-                ) : (
-                  <Sheet className="size-4" aria-hidden="true" />
-                )}
-                Excel
-              </button>
-            </div>
+            <button
+              type="button"
+              className="btn"
+              disabled={isExporting}
+              onClick={() => void exportReport()}
+            >
+              {isExporting ? (
+                <span className="loading loading-spinner loading-sm" />
+              ) : (
+                <Sheet className="size-4" aria-hidden="true" />
+              )}
+              Excel
+            </button>
           ) : undefined
         }
       />
@@ -224,20 +193,26 @@ const DashboardPage = ({ role }: { role: "APOYO" | "ADMIN" }) => {
       <Form
         key={searchParams.toString()}
         method="get"
-        className="mb-5 rounded-box border border-base-300 bg-base-100 p-4 shadow-sm sm:flex sm:items-end sm:gap-3 sm:p-5"
         aria-label="Periodo del dashboard"
       >
-        <fieldset className="fieldset grow">
-          <legend className="fieldset-legend">Desde</legend>
-          <input type="date" name="desde" className="input w-full" defaultValue={range.from} />
-        </fieldset>
-        <fieldset className="fieldset grow">
-          <legend className="fieldset-legend">Hasta</legend>
-          <input type="date" name="hasta" className="input w-full" defaultValue={range.to} />
-        </fieldset>
-        <button type="submit" className="btn mt-3 sm:mt-0">
-          <CalendarDays className="size-4" aria-hidden="true" /> Actualizar periodo
-        </button>
+        <CollapsibleFilters
+          activeCount={Number(Boolean(fromParam || toParam))}
+          title="Periodo del dashboard"
+        >
+          <div className="sm:flex sm:items-end sm:gap-3">
+            <fieldset className="fieldset grow">
+              <legend className="fieldset-legend">Desde</legend>
+              <input type="date" name="desde" className="input w-full" defaultValue={range.from} />
+            </fieldset>
+            <fieldset className="fieldset grow">
+              <legend className="fieldset-legend">Hasta</legend>
+              <input type="date" name="hasta" className="input w-full" defaultValue={range.to} />
+            </fieldset>
+            <button type="submit" className="btn mt-3 sm:mt-0">
+              <CalendarDays className="size-4" aria-hidden="true" /> Actualizar periodo
+            </button>
+          </div>
+        </CollapsibleFilters>
       </Form>
 
       {!isRangeValid && (
@@ -277,8 +252,16 @@ const DashboardPage = ({ role }: { role: "APOYO" | "ADMIN" }) => {
             />
             <MetricBars title="Áreas con más tickets" items={metricsQuery.data.byArea} />
             <MetricBars
+              title="Subáreas con más tickets"
+              items={metricsQuery.data.bySubarea}
+            />
+            <MetricBars
               title="Categorías con más tickets"
               items={metricsQuery.data.byCategory}
+            />
+            <MetricBars
+              title="Tipos de problema más frecuentes"
+              items={metricsQuery.data.byProblemType}
             />
           </div>
 

@@ -1,11 +1,10 @@
 import type { SupportDashboardMetrics } from "@/shared/interfaces/dashboard.interface";
-
-export const downloadDashboardPdf = async (metrics: SupportDashboardMetrics) => {
-  const { exportDashboardPdf } = await import("../reports/DashboardPdfReport");
-  await exportDashboardPdf(metrics);
-};
+import { getDashboardTicketReport } from "@/services/dashboard.service";
 
 export const downloadDashboardExcel = async (metrics: SupportDashboardMetrics) => {
-  const { exportDashboardExcel } = await import("../reports/DashboardExcelReport");
-  await exportDashboardExcel(metrics);
+  const [{ exportDashboardExcel }, tickets] = await Promise.all([
+    import("../reports/DashboardExcelReport"),
+    getDashboardTicketReport({ from: metrics.period.from, to: metrics.period.to }),
+  ]);
+  await exportDashboardExcel(metrics, tickets);
 };

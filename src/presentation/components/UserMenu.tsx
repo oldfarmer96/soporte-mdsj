@@ -16,7 +16,10 @@ const UserMenu = () => {
 
   if (!user) return null;
 
-  const initials = `${user.name.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase();
+  const displayName = `${user.name} ${user.lastName}`.trim() || `DNI ${user.dni}`;
+  const initials = user.name && user.lastName
+    ? `${user.name.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase()
+    : "?";
 
   return (
     <details className="dropdown dropdown-end">
@@ -28,7 +31,7 @@ const UserMenu = () => {
         </span>
         <span className="hidden min-w-0 text-left sm:block">
           <span className="block max-w-44 truncate text-sm font-bold">
-            {user.name} {user.lastName}
+            {displayName}
           </span>
           <span className="block text-xs font-normal text-base-content/60">
             {ROLE_LABELS[user.role]}

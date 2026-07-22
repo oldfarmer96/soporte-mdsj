@@ -1,21 +1,22 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import {
   AdminPage,
   AreasPage,
   CategoriesPage,
   CreateTicketPage,
   LoginPage,
-  ModulePendingPage,
   MyTicketsPage,
   NotFoundPage,
   ProfilePage,
   ProblemTypesPage,
   ProfilesPage,
+  AdminProfilePage,
   RegisterPage,
   RequesterPage,
   SupportPage,
   SupportTicketDetailPage,
   SupportTicketsPage,
+  SubareasPage,
   TicketCreatedPage,
 } from "./lazyPages";
 import RequesterLayout from "../layouts/RequesterLayout";
@@ -27,9 +28,6 @@ import RoleGuard from "../guards/RoleGuard";
 import SupportLayout from "../layouts/SupportLayout";
 import AdminLayout from "../layouts/AdminLayout";
 import RouteErrorPage from "../features/errors/pages/RouteErrorPage";
-import {
-  FolderKanban,
-} from "lucide-react";
 
 export const routes = createBrowserRouter([
   {
@@ -190,16 +188,7 @@ export const routes = createBrowserRouter([
       {
         path: "/admin/tickets",
         errorElement: <RouteErrorPage />,
-        element: (
-          <LazyPageSuspense>
-            <ModulePendingPage
-              title="Tickets"
-              description="Consulta general de las solicitudes registradas en la mesa de soporte."
-              section="Administración"
-              icon={FolderKanban}
-            />
-          </LazyPageSuspense>
-        ),
+        element: <Navigate to="/admin" replace />,
       },
       {
         path: "/admin/usuarios",
@@ -211,11 +200,29 @@ export const routes = createBrowserRouter([
         ),
       },
       {
+        path: "/admin/usuarios/:profileId",
+        errorElement: <RouteErrorPage />,
+        element: (
+          <LazyPageSuspense>
+            <AdminProfilePage />
+          </LazyPageSuspense>
+        ),
+      },
+      {
         path: "/admin/areas",
         errorElement: <RouteErrorPage />,
         element: (
           <LazyPageSuspense>
             <AreasPage />
+          </LazyPageSuspense>
+        ),
+      },
+      {
+        path: "/admin/subareas",
+        errorElement: <RouteErrorPage />,
+        element: (
+          <LazyPageSuspense>
+            <SubareasPage />
           </LazyPageSuspense>
         ),
       },
