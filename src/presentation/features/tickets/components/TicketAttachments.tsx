@@ -34,18 +34,29 @@ const formatFileSize = (sizeBytes: number | null) => {
   return `${(sizeBytes / 1024 / 1024).toFixed(2)} MB`;
 };
 
-const AttachmentPreview = ({ attachment }: { attachment: TicketAttachment }) => {
+const AttachmentPreview = ({
+  attachment,
+}: {
+  attachment: TicketAttachment;
+}) => {
   const signedUrlQuery = useAttachmentSignedUrl(attachment);
 
   return (
     <li className="overflow-hidden rounded-box border border-base-300 bg-base-100">
       <div className="aspect-video bg-base-200">
-        {signedUrlQuery.isPending && <div className="skeleton h-full w-full rounded-none" />}
+        {signedUrlQuery.isPending && (
+          <div className="skeleton h-full w-full rounded-none" />
+        )}
         {signedUrlQuery.isError && (
           <div className="grid h-full place-items-center p-4 text-center">
             <div>
-              <FileImage className="mx-auto size-7 text-base-content/40" aria-hidden="true" />
-              <p className="mt-2 text-xs text-error">No pudimos abrir la vista previa.</p>
+              <FileImage
+                className="mx-auto size-7 text-base-content/40"
+                aria-hidden="true"
+              />
+              <p className="mt-2 text-xs text-error">
+                No pudimos abrir la vista previa.
+              </p>
               <button
                 type="button"
                 className="btn btn-sm mt-3"
@@ -99,24 +110,33 @@ const TicketAttachments = ({
   attachments: TicketAttachment[];
 }) => {
   const [uploads, setUploads] = useState<UploadItem[]>([]);
-  const [batchError, setBatchError] = useState<string | null>(null);
   const uploadMutation = useUploadTicketAttachment();
   const isUploading = uploads.some((item) => item.status === "uploading");
 
   const updateUpload = (uploadId: string, changes: Partial<UploadItem>) => {
     setUploads((current) =>
-      current.map((item) => (item.id === uploadId ? { ...item, ...changes } : item)),
+      current.map((item) =>
+        item.id === uploadId ? { ...item, ...changes } : item,
+      ),
     );
   };
 
   const uploadOne = async (item: UploadItem) => {
     const validationError = validateTicketAttachment(item.file);
     if (validationError) {
-      updateUpload(item.id, { status: "error", progress: 0, error: validationError });
+      updateUpload(item.id, {
+        status: "error",
+        progress: 0,
+        error: validationError,
+      });
       return;
     }
 
-    updateUpload(item.id, { status: "uploading", progress: 10, error: undefined });
+    updateUpload(item.id, {
+      status: "uploading",
+      progress: 10,
+      error: undefined,
+    });
     try {
       await uploadMutation.mutateAsync({
         ticketId,
@@ -136,12 +156,13 @@ const TicketAttachments = ({
 
   const uploadAll = async () => {
     for (const item of uploads) {
-      if (item.status === "pending" || item.status === "error") await uploadOne(item);
+      if (item.status === "pending" || item.status === "error")
+        await uploadOne(item);
     }
   };
 
   return (
-    <section className="rounded-box border border-base-300 bg-base-100 p-5 shadow-sm sm:p-7">
+    <section className="min-w-0 max-w-full rounded-box border border-base-300 bg-base-100 p-5 shadow-sm sm:p-7">
       <div className="flex items-start gap-3">
         <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-base-200">
           <Paperclip className="size-5" aria-hidden="true" />
@@ -149,62 +170,82 @@ const TicketAttachments = ({
         <div>
           <h2 className="text-lg font-black">Archivos</h2>
           <p className="mt-1 text-sm text-base-content/60">
-            Evidencias JPEG, PNG o WebP de hasta 5 MB por archivo.
+            Una evidencia JPEG, PNG o WebP de hasta 5 MB.
           </p>
         </div>
       </div>
 
-      <div className="mt-5 rounded-box border border-dashed border-base-300 bg-base-200 p-4">
-        <label htmlFor={`ticket-files-${ticketId}`} className="text-sm font-bold">
-          Seleccionar imágenes
-        </label>
-        <input
-          id={`ticket-files-${ticketId}`}
-          type="file"
-          className="file-input mt-2 w-full"
-          accept="image/jpeg,image/png,image/webp"
-          multiple
-          disabled={isUploading}
-          onChange={(event) => {
-            const selectedFiles = Array.from(event.target.files ?? []);
-            setBatchError(
-              selectedFiles.length > 5
-                ? "Puedes seleccionar como máximo 5 imágenes por tanda."
-                : null,
-            );
-            const nextItems = selectedFiles.slice(0, 5).map((file) => {
+      {attachments.length === 0 ? (
+        <div className="mt-5 min-w-0 max-w-full overflow-hidden rounded-box border border-dashed border-base-300 bg-base-200 p-4">
+          <label
+            htmlFor={`ticket-files-${ticketId}`}
+            className="text-sm font-bold"
+          >
+            Seleccionar imagen
+          </label>
+          <input
+            id={`ticket-files-${ticketId}`}
+            type="file"
+            className="file-input file-input-primary mt-2 block w-full min-w-0 max-w-full overflow-hidden text-ellipsis whitespace-nowrap"
+            accept="image/jpeg,image/png,image/webp"
+            disabled={isUploading}
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (!file) {
+                setUploads([]);
+                return;
+              }
+
               const error = validateTicketAttachment(file);
-              return {
-                id: crypto.randomUUID(),
-                file,
-                status: error ? "error" : "pending",
-                progress: 0,
-                error: error ?? undefined,
-              } satisfies UploadItem;
-            });
-            setUploads(nextItems);
-            event.currentTarget.value = "";
-          }}
-        />
-        <p className="mt-2 text-xs leading-relaxed text-base-content/55">
-          En teléfonos puedes elegir la cámara o una imagen de la galería.
+              setUploads([
+                {
+                  id: crypto.randomUUID(),
+                  file,
+                  status: error ? "error" : "pending",
+                  progress: 0,
+                  error: error ?? undefined,
+                },
+              ]);
+              event.currentTarget.value = "";
+            }}
+          />
+          <p className="mt-2 text-xs leading-relaxed text-base-content/55">
+            En teléfonos puedes elegir la cámara o una imagen de la galería.
+          </p>
+        </div>
+      ) : (
+        <p className="mt-5 rounded-box bg-base-200 p-4 text-sm text-base-content/65">
+          Este ticket ya tiene una imagen asociada.
         </p>
-        {batchError && <p className="mt-2 text-sm text-error">{batchError}</p>}
-      </div>
+      )}
 
       {uploads.length > 0 && (
         <div className="mt-4">
-          <ul className="grid gap-2">
+          <ul className="grid min-w-0 max-w-full gap-2">
             {uploads.map((item) => (
-              <li key={item.id} className="rounded-box border border-base-300 p-3">
-                <div className="flex min-w-0 items-center gap-3">
+              <li
+                key={item.id}
+                className="min-w-0 max-w-full overflow-hidden rounded-box border border-base-300 p-3"
+              >
+                <div className="flex w-full min-w-0 max-w-full items-center gap-3 overflow-hidden">
                   {item.status === "success" ? (
-                    <CheckCircle2 className="size-5 shrink-0 text-success" aria-hidden="true" />
+                    <CheckCircle2
+                      className="size-5 shrink-0 text-success"
+                      aria-hidden="true"
+                    />
                   ) : (
-                    <ImagePlus className="size-5 shrink-0 text-base-content/45" aria-hidden="true" />
+                    <ImagePlus
+                      className="size-5 shrink-0 text-base-content/45"
+                      aria-hidden="true"
+                    />
                   )}
                   <div className="min-w-0 grow">
-                    <p className="truncate text-sm font-bold">{item.file.name}</p>
+                    <p
+                      className="block w-full min-w-0 truncate text-sm font-bold"
+                      title={item.file.name}
+                    >
+                      {item.file.name}
+                    </p>
                     <p className="mt-1 text-xs text-base-content/55">
                       {formatFileSize(item.file.size)}
                       {item.status === "success" ? " · Subido" : ""}
@@ -213,19 +254,22 @@ const TicketAttachments = ({
                   {item.status === "error" && !isUploading && (
                     <button
                       type="button"
-                      className="btn btn-sm"
+                      className="btn btn-sm shrink-0"
                       onClick={() => uploadOne(item)}
                     >
-                      <RefreshCw className="size-3.5" aria-hidden="true" /> Reintentar
+                      <RefreshCw className="size-3.5" aria-hidden="true" />{" "}
+                      Reintentar
                     </button>
                   )}
                   {item.status === "pending" && !isUploading && (
                     <button
                       type="button"
-                      className="btn btn-ghost btn-square btn-sm"
+                      className="btn btn-ghost btn-square btn-sm shrink-0"
                       aria-label={`Quitar ${item.file.name}`}
                       onClick={() =>
-                        setUploads((current) => current.filter((upload) => upload.id !== item.id))
+                        setUploads((current) =>
+                          current.filter((upload) => upload.id !== item.id),
+                        )
                       }
                     >
                       <Trash2 className="size-4" aria-hidden="true" />
@@ -240,7 +284,11 @@ const TicketAttachments = ({
                     aria-label={`Subiendo ${item.file.name}: ${item.progress}%`}
                   />
                 )}
-                {item.error && <p className="mt-2 text-xs text-error">{item.error}</p>}
+                {item.error && (
+                  <p className="mt-2 wrap-break-word text-xs text-error">
+                    {item.error}
+                  </p>
+                )}
               </li>
             ))}
           </ul>
@@ -253,7 +301,9 @@ const TicketAttachments = ({
             >
               Limpiar selección
             </button>
-            {uploads.some((item) => item.status === "pending" || item.status === "error") && (
+            {uploads.some(
+              (item) => item.status === "pending" || item.status === "error",
+            ) && (
               <button
                 type="button"
                 className="btn btn-primary"
@@ -265,7 +315,7 @@ const TicketAttachments = ({
                 ) : (
                   <ImagePlus className="size-4" aria-hidden="true" />
                 )}
-                {isUploading ? "Subiendo..." : "Subir imágenes"}
+                {isUploading ? "Subiendo..." : "Subir imagen"}
               </button>
             )}
           </div>

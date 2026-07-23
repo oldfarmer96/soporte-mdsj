@@ -152,6 +152,9 @@ export const getStorageErrorMessage = (error: unknown) => {
   if (message.includes("row-level security") || message.includes("not authorized")) {
     return "No tienes permiso para subir archivos a este ticket.";
   }
+  if (message.includes("ticket_archivos_un_archivo_activo_por_ticket_idx")) {
+    return "Este ticket ya tiene una imagen asociada.";
+  }
   if (message.includes("limpiar la carga")) return message;
 
   return "No pudimos subir la imagen. Puedes volver a intentarlo.";
