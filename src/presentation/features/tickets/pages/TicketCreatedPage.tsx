@@ -173,7 +173,11 @@ const TicketCreatedPage = () => {
 
       <div className="mt-5 grid gap-5 xl:grid-cols-2">
         <TicketResolutionPanel resolution={ticket.resolution} />
-        <TicketAttachments ticketId={ticket.id} attachments={ticket.attachments} />
+        <TicketAttachments
+          ticketId={ticket.id}
+          attachments={ticket.attachments}
+          status={ticket.status}
+        />
       </div>
 
       <div className="mt-5">

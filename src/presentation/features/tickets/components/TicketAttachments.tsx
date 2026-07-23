@@ -1,9 +1,14 @@
 import {
   useAttachmentSignedUrl,
+  useDeleteTicketAttachment,
   useUploadTicketAttachment,
 } from "@/application/hooks/useStorage";
-import type { TicketAttachment } from "@/shared/interfaces/ticket.interface";
+import type {
+  TicketAttachment,
+  TicketStatus,
+} from "@/shared/interfaces/ticket.interface";
 import {
+  getDeleteAttachmentErrorMessage,
   getStorageErrorMessage,
   prepareTicketAttachment,
   validateTicketAttachment,
@@ -20,6 +25,15 @@ import {
 import { useState } from "react";
 
 type UploadStatus = "pending" | "uploading" | "success" | "error";
+const DELETABLE_STATUSES: TicketStatus[] = [
+  "NUEVO",
+  "ASIGNADO",
+  "EN_CURSO",
+  "REABIERTO",
+];
+
+const getDialog = (dialogId: string) =>
+  document.getElementById(dialogId) as HTMLDialogElement | null;
 
 interface UploadItem {
   id: string;
@@ -39,10 +53,21 @@ const formatFileSize = (sizeBytes: number | null) => {
 
 const AttachmentPreview = ({
   attachment,
+  ticketId,
+  canDelete,
 }: {
   attachment: TicketAttachment;
+  ticketId: string;
+  canDelete: boolean;
 }) => {
   const signedUrlQuery = useAttachmentSignedUrl(attachment);
+  const deleteMutation = useDeleteTicketAttachment();
+  const deleteDialogId = `delete-attachment-${attachment.id}`;
+
+  const openDeleteDialog = () => {
+    deleteMutation.reset();
+    getDialog(deleteDialogId)?.showModal();
+  };
 
   return (
     <li className="overflow-hidden rounded-box border border-base-300 bg-base-100">
@@ -100,7 +125,70 @@ const AttachmentPreview = ({
             {formatFileSize(attachment.sizeBytes)}
           </p>
         </div>
+        {canDelete && (
+          <button
+            type="button"
+            className="btn btn-ghost btn-square btn-sm shrink-0 text-error"
+            aria-label="Eliminar imagen"
+            onClick={openDeleteDialog}
+          >
+            <Trash2 className="size-4" aria-hidden="true" />
+          </button>
+        )}
       </div>
+
+      {canDelete && (
+        <dialog id={deleteDialogId} className="modal">
+          <div className="modal-box">
+            <span className="grid size-12 place-items-center rounded-2xl bg-error/10 text-error">
+              <Trash2 className="size-6" aria-hidden="true" />
+            </span>
+            <h3 className="mt-4 text-xl font-black">Eliminar imagen</h3>
+            <p className="mt-2 leading-relaxed text-base-content/65">
+              La imagen se eliminará del ticket. Después podrás seleccionar y
+              subir otra evidencia.
+            </p>
+
+            {deleteMutation.isError && (
+              <div className="alert alert-error alert-soft mt-5" role="alert">
+                <span>
+                  {getDeleteAttachmentErrorMessage(deleteMutation.error)}
+                </span>
+              </div>
+            )}
+
+            <div className="modal-action">
+              <button
+                type="button"
+                className="btn"
+                disabled={deleteMutation.isPending}
+                onClick={() => getDialog(deleteDialogId)?.close()}
+              >
+                Volver
+              </button>
+              <button
+                type="button"
+                className="btn btn-error"
+                disabled={deleteMutation.isPending}
+                onClick={() =>
+                  deleteMutation.mutate(
+                    { ticketId, attachment },
+                    { onSuccess: () => getDialog(deleteDialogId)?.close() },
+                  )
+                }
+              >
+                {deleteMutation.isPending && (
+                  <span className="loading loading-spinner loading-sm" />
+                )}
+                {deleteMutation.isPending ? "Eliminando..." : "Eliminar imagen"}
+              </button>
+            </div>
+          </div>
+          <form method="dialog" className="modal-backdrop">
+            <button disabled={deleteMutation.isPending}>Cerrar</button>
+          </form>
+        </dialog>
+      )}
     </li>
   );
 };
@@ -108,9 +196,11 @@ const AttachmentPreview = ({
 const TicketAttachments = ({
   ticketId,
   attachments,
+  status,
 }: {
   ticketId: string;
   attachments: TicketAttachment[];
+  status: TicketStatus;
 }) => {
   const [uploads, setUploads] = useState<UploadItem[]>([]);
   const [isOptimizing, setIsOptimizing] = useState(false);
@@ -119,6 +209,7 @@ const TicketAttachments = ({
   const uploadMutation = useUploadTicketAttachment();
   const isUploading = uploads.some((item) => item.status === "uploading");
   const isProcessing = isOptimizing || isUploading;
+  const canModify = DELETABLE_STATUSES.includes(status);
 
   const updateUpload = (uploadId: string, changes: Partial<UploadItem>) => {
     setUploads((current) =>
@@ -182,7 +273,7 @@ const TicketAttachments = ({
         </div>
       </div>
 
-      {attachments.length === 0 ? (
+      {attachments.length === 0 && canModify ? (
         <div className="mt-5 min-w-0 max-w-full overflow-hidden rounded-box border border-dashed border-base-300 bg-base-200 p-4">
           <label
             htmlFor={`ticket-files-${ticketId}`}
@@ -262,9 +353,13 @@ const TicketAttachments = ({
             </p>
           )}
         </div>
-      ) : (
+      ) : attachments.length > 0 ? (
         <p className="mt-5 rounded-box bg-base-200 p-4 text-sm text-base-content/65">
           Este ticket ya tiene una imagen asociada.
+        </p>
+      ) : (
+        <p className="mt-5 rounded-box bg-base-200 p-4 text-sm text-base-content/65">
+          Ya no se pueden agregar imágenes en el estado actual del ticket.
         </p>
       )}
 
@@ -383,7 +478,12 @@ const TicketAttachments = ({
       ) : (
         <ul className="mt-5 grid gap-3 sm:grid-cols-2">
           {attachments.map((attachment) => (
-            <AttachmentPreview key={attachment.id} attachment={attachment} />
+            <AttachmentPreview
+              key={attachment.id}
+              attachment={attachment}
+              ticketId={ticketId}
+              canDelete={canModify}
+            />
           ))}
         </ul>
       )}

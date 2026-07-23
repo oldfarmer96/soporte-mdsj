@@ -26,6 +26,11 @@ export interface UploadTicketAttachmentInput {
   onProgress?: (progress: number) => void;
 }
 
+export interface DeleteTicketAttachmentInput {
+  ticketId: string;
+  attachment: TicketAttachment;
+}
+
 export interface PreparedTicketAttachment {
   file: File;
   originalSizeBytes: number;
@@ -228,6 +233,57 @@ export const createAttachmentSignedUrl = async (attachment: TicketAttachment) =>
 
   if (error) throw error;
   return data.signedUrl;
+};
+
+export const deleteTicketAttachment = async ({
+  ticketId,
+  attachment,
+}: DeleteTicketAttachmentInput) => {
+  const { data: authData, error: authError } = await supabase.auth.getUser();
+  if (authError) throw authError;
+  if (!authData.user) throw new Error("Debes iniciar sesión para eliminar la imagen.");
+
+  const { error: storageError } = await supabase.storage
+    .from(attachment.bucket)
+    .remove([attachment.path]);
+  if (storageError) throw storageError;
+
+  const { error: metadataError } = await supabase
+    .from("ticket_archivos")
+    .update({
+      deleted_at: new Date().toISOString(),
+      eliminado_por: authData.user.id,
+    })
+    .eq("id", attachment.id)
+    .eq("id_ticket", ticketId)
+    .is("deleted_at", null)
+    .select("id")
+    .single();
+
+  if (metadataError) {
+    throw new Error(
+      "La imagen se eliminó del almacenamiento, pero no pudimos actualizar el ticket. Vuelve a intentarlo.",
+    );
+  }
+};
+
+export const getDeleteAttachmentErrorMessage = (error: unknown) => {
+  const message =
+    typeof error === "object" && error !== null && "message" in error
+      ? String(error.message)
+      : "";
+
+  if (message.includes("almacenamiento")) return message;
+  if (
+    message.includes("row-level security") ||
+    message.includes("not authorized") ||
+    message.includes("0 rows")
+  ) {
+    return "No puedes eliminar la imagen de este ticket o su estado ya no lo permite.";
+  }
+  if (message.includes("iniciar sesión")) return message;
+
+  return "No pudimos eliminar la imagen. Vuelve a intentarlo.";
 };
 
 export const getStorageErrorMessage = (error: unknown) => {

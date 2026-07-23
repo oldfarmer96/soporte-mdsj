@@ -254,7 +254,7 @@ const MyTicketsPage = () => {
             </p>
           </div>
 
-          <ul className="grid gap-3 lg:hidden" aria-label="Tickets encontrados">
+          <ul className="grid min-w-0 max-w-full gap-3 lg:hidden" aria-label="Tickets encontrados">
             {ticketsQuery.data.items.map((ticket) => (
               <TicketCard key={ticket.id} ticket={ticket} />
             ))}

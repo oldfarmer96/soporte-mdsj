@@ -124,7 +124,11 @@ const SupportTicketDetailPage = () => {
 
           <div className="grid gap-5 lg:grid-cols-2">
             <TicketResolutionPanel resolution={ticket.resolution} />
-            <TicketAttachments ticketId={ticket.id} attachments={ticket.attachments} />
+            <TicketAttachments
+              ticketId={ticket.id}
+              attachments={ticket.attachments}
+              status={ticket.status}
+            />
           </div>
           <TicketTimeline history={ticket.history} />
         </div>
