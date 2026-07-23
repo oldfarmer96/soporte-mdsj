@@ -44,7 +44,7 @@ const SupportTicketDetailPage = () => {
           onRetry={() => ticketQuery.refetch()}
         />
         <Link to="/apoyo/tickets" className="btn mt-5">
-          <ArrowLeft className="size-4" aria-hidden="true" /> Volver a la cola
+          <ArrowLeft className="size-4" aria-hidden="true" /> Volver a la lista
         </Link>
       </PageContainer>
     );
@@ -60,7 +60,7 @@ const SupportTicketDetailPage = () => {
         description="Detalle operativo, trazabilidad y acciones disponibles para esta solicitud."
         breadcrumbs={[
           { label: "Resumen", path: "/apoyo" },
-          { label: "Cola", path: "/apoyo/tickets" },
+          { label: "Lista de tickets", path: "/apoyo/tickets" },
           { label: ticket.code },
         ]}
         actions={

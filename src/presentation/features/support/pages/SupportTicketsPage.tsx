@@ -31,7 +31,8 @@ import {
 } from "../../tickets/components/TicketBadges";
 import SupportTicketCard from "../components/SupportTicketCard";
 
-const PAGE_SIZE = 15;
+const LIST_PAGE_SIZE = 15;
+const MONITOR_LIMIT = 20;
 const STATUSES: TicketStatus[] = [
   "NUEVO",
   "ASIGNADO",
@@ -80,7 +81,8 @@ const SupportTicketsPage = ({
   const [searchParams, setSearchParams] = useSearchParams();
   const isMonitor = variant === "monitor";
   const pageValue = Number(searchParams.get("pagina"));
-  const page = Number.isInteger(pageValue) && pageValue > 0 ? pageValue : 1;
+  const page =
+    !isMonitor && Number.isInteger(pageValue) && pageValue > 0 ? pageValue : 1;
   const statusValue = searchParams.get("estado");
   const priorityValue = searchParams.get("prioridad");
   const areaValue = searchParams.get("area");
@@ -118,7 +120,8 @@ const SupportTicketsPage = ({
           : undefined;
   const filters = {
     page,
-    pageSize: PAGE_SIZE,
+    pageSize: isMonitor ? MONITOR_LIMIT : LIST_PAGE_SIZE,
+    includeTotal: !isMonitor,
     ...(isMonitor
       ? {}
       : {
@@ -186,7 +189,7 @@ const SupportTicketsPage = ({
       {!isMonitor && (
         <PageHeader
           eyebrow="Personal de apoyo"
-          title={mode === "mine" ? "Mis tickets asignados" : "Cola de tickets"}
+          title={mode === "mine" ? "Mis tickets asignados" : "Lista de tickets"}
           description={
             mode === "mine"
               ? "Revisa las solicitudes que están actualmente bajo tu responsabilidad."
@@ -194,12 +197,12 @@ const SupportTicketsPage = ({
           }
           breadcrumbs={[
             { label: "Monitor", path: "/apoyo" },
-            { label: mode === "mine" ? "Mis asignados" : "Cola de tickets" },
+            { label: mode === "mine" ? "Mis asignados" : "Lista de tickets" },
           ]}
           actions={
             mode === "mine" ? (
               <Link to="/apoyo/tickets" className="btn">
-                Ver cola general
+                Ver lista general
               </Link>
             ) : (
               <Link to="/apoyo/asignados" className="btn">
@@ -215,7 +218,7 @@ const SupportTicketsPage = ({
         <Form
           key={searchParams.toString()}
           method="get"
-          aria-label="Filtros de la cola"
+          aria-label="Filtros de la lista de tickets"
         >
           <CollapsibleFilters
             activeCount={activeFilterCount}
@@ -388,7 +391,7 @@ const SupportTicketsPage = ({
 
       {ticketsQuery.isPending && (
         <div className="grid gap-3" role="status">
-          <span className="sr-only">Cargando cola de tickets...</span>
+          <span className="sr-only">Cargando lista de tickets...</span>
           {[0, 1, 2].map((item) => (
             <div key={item} className="skeleton h-48 w-full" />
           ))}
@@ -407,12 +410,12 @@ const SupportTicketsPage = ({
           }
           description={
             isPageOutOfRange
-              ? "Vuelve a la primera página para continuar revisando la cola."
+              ? "Vuelve a la primera página para continuar revisando la lista."
               : hasFilters
                 ? "Prueba con otros filtros para ampliar los resultados."
                 : mode === "mine"
                   ? "No tienes tickets asignados en este momento."
-                  : "La cola de soporte está vacía."
+                  : "La lista de soporte está vacía."
           }
           action={
             isPageOutOfRange ? (
@@ -435,7 +438,9 @@ const SupportTicketsPage = ({
         >
           <div className="mb-4 flex items-center justify-between gap-3">
             <h2 id="support-results-title" className="text-sm font-black">
-              {ticketsQuery.data.total} tickets encontrados
+              {isMonitor
+                ? `${ticketsQuery.data.items.length} tickets más recientes`
+                : `${ticketsQuery.data.total} tickets encontrados`}
             </h2>
             <p className="text-xs text-base-content/55">
               Orden: más recientes primero
@@ -515,36 +520,38 @@ const SupportTicketsPage = ({
             </table>
           </div>
 
-          <nav
-            className="mt-5 flex items-center justify-between gap-3"
-            aria-label="Paginación"
-          >
-            {page > 1 ? (
-              <Link to={pageUrl(page - 1)} className="btn">
-                <ChevronLeft className="size-4" aria-hidden="true" />
-                <span className="hidden sm:inline">Anterior</span>
-              </Link>
-            ) : (
-              <button type="button" className="btn" disabled>
-                <ChevronLeft className="size-4" aria-hidden="true" />
-                <span className="hidden sm:inline">Anterior</span>
-              </button>
-            )}
-            <span className="text-sm font-semibold">
-              {page} / {ticketsQuery.data.totalPages}
-            </span>
-            {page < ticketsQuery.data.totalPages ? (
-              <Link to={pageUrl(page + 1)} className="btn">
-                <span className="hidden sm:inline">Siguiente</span>
-                <ChevronRight className="size-4" aria-hidden="true" />
-              </Link>
-            ) : (
-              <button type="button" className="btn" disabled>
-                <span className="hidden sm:inline">Siguiente</span>
-                <ChevronRight className="size-4" aria-hidden="true" />
-              </button>
-            )}
-          </nav>
+          {!isMonitor && (
+            <nav
+              className="mt-5 flex items-center justify-between gap-3"
+              aria-label="Paginación"
+            >
+              {page > 1 ? (
+                <Link to={pageUrl(page - 1)} className="btn">
+                  <ChevronLeft className="size-4" aria-hidden="true" />
+                  <span className="hidden sm:inline">Anterior</span>
+                </Link>
+              ) : (
+                <button type="button" className="btn" disabled>
+                  <ChevronLeft className="size-4" aria-hidden="true" />
+                  <span className="hidden sm:inline">Anterior</span>
+                </button>
+              )}
+              <span className="text-sm font-semibold">
+                {page} / {ticketsQuery.data.totalPages}
+              </span>
+              {page < ticketsQuery.data.totalPages ? (
+                <Link to={pageUrl(page + 1)} className="btn">
+                  <span className="hidden sm:inline">Siguiente</span>
+                  <ChevronRight className="size-4" aria-hidden="true" />
+                </Link>
+              ) : (
+                <button type="button" className="btn" disabled>
+                  <span className="hidden sm:inline">Siguiente</span>
+                  <ChevronRight className="size-4" aria-hidden="true" />
+                </button>
+              )}
+            </nav>
+          )}
         </section>
       )}
     </PageContainer>
