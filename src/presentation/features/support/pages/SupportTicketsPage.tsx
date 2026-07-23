@@ -78,6 +78,7 @@ const SupportTicketsPage = ({
   variant = "default",
 }: SupportTicketsPageProps) => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const isMonitor = variant === "monitor";
   const pageValue = Number(searchParams.get("pagina"));
   const page = Number.isInteger(pageValue) && pageValue > 0 ? pageValue : 1;
   const statusValue = searchParams.get("estado");
@@ -94,17 +95,19 @@ const SupportTicketsPage = ({
   const categoryId = isUuid(categoryValue) ? categoryValue : undefined;
   const problemTypeId =
     categoryId && isUuid(problemTypeValue) ? problemTypeValue : undefined;
-  const areasQuery = useAreas({ includeInactive: true });
+  const areasQuery = useAreas({ includeInactive: true, enabled: !isMonitor });
   const subareasQuery = useSubareas({
     areaId: areaId ?? null,
     includeInactive: true,
+    enabled: !isMonitor,
   });
-  const categoriesQuery = useCategories({ includeInactive: true });
+  const categoriesQuery = useCategories({ includeInactive: true, enabled: !isMonitor });
   const problemTypesQuery = useProblemTypes({
     categoryId: categoryId ?? null,
     includeInactive: true,
+    enabled: !isMonitor,
   });
-  const agentsQuery = useSupportAgents();
+  const agentsQuery = useSupportAgents(!isMonitor);
   const parsedAssignment =
     assignmentValue === "sin-asignar"
       ? "unassigned"
@@ -116,31 +119,36 @@ const SupportTicketsPage = ({
   const filters = {
     page,
     pageSize: PAGE_SIZE,
-    search: searchParams.get("q")?.trim() || undefined,
-    status: isStatus(statusValue) ? statusValue : undefined,
-    priority: isPriority(priorityValue) ? priorityValue : undefined,
-    areaId,
-    subareaId,
-    categoryId,
-    problemTypeId,
-    assignment: mode === "mine" ? "mine" : parsedAssignment,
-    dateFrom: isDate(fromValue) ? fromValue : undefined,
-    dateTo: isDate(toValue) ? toValue : undefined,
+    ...(isMonitor
+      ? {}
+      : {
+          search: searchParams.get("q")?.trim() || undefined,
+          status: isStatus(statusValue) ? statusValue : undefined,
+          priority: isPriority(priorityValue) ? priorityValue : undefined,
+          areaId,
+          subareaId,
+          categoryId,
+          problemTypeId,
+          assignment: mode === "mine" ? "mine" : parsedAssignment,
+          dateFrom: isDate(fromValue) ? fromValue : undefined,
+          dateTo: isDate(toValue) ? toValue : undefined,
+        }),
   };
-  const activeFilterCount = [
-    filters.search,
-    filters.status,
-    filters.priority,
-    filters.areaId,
-    filters.subareaId,
-    filters.categoryId,
-    filters.problemTypeId,
-    mode === "queue" ? filters.assignment : undefined,
-    filters.dateFrom,
-    filters.dateTo,
-  ].filter(Boolean).length;
+  const activeFilterCount = isMonitor
+    ? 0
+    : [
+        filters.search,
+        filters.status,
+        filters.priority,
+        filters.areaId,
+        filters.subareaId,
+        filters.categoryId,
+        filters.problemTypeId,
+        mode === "queue" ? filters.assignment : undefined,
+        filters.dateFrom,
+        filters.dateTo,
+      ].filter(Boolean).length;
   const ticketsQuery = useSupportTickets(filters);
-  const isMonitor = variant === "monitor";
   const basePath = isMonitor
     ? "/apoyo"
     : mode === "mine"
@@ -153,7 +161,7 @@ const SupportTicketsPage = ({
     page > ticketsQuery.data.totalPages;
 
   const pageUrl = (nextPage: number) => {
-    const params = new URLSearchParams(searchParams);
+    const params = isMonitor ? new URLSearchParams() : new URLSearchParams(searchParams);
     if (nextPage <= 1) params.delete("pagina");
     else params.set("pagina", String(nextPage));
     const query = params.toString();
@@ -215,15 +223,16 @@ const SupportTicketsPage = ({
         }
       />
 
-      <Form
-        key={searchParams.toString()}
-        method="get"
-        aria-label="Filtros de la cola"
-      >
-        <CollapsibleFilters
-          activeCount={activeFilterCount}
-          title="Filtros operativos"
+      {!isMonitor && (
+        <Form
+          key={searchParams.toString()}
+          method="get"
+          aria-label="Filtros de la cola"
         >
+          <CollapsibleFilters
+            activeCount={activeFilterCount}
+            title="Filtros operativos"
+          >
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-10">
             <fieldset className="fieldset sm:col-span-2">
               <legend className="fieldset-legend">Código o asunto</legend>
@@ -385,8 +394,9 @@ const SupportTicketsPage = ({
               <Filter className="size-4" aria-hidden="true" /> Aplicar filtros
             </button>
           </div>
-        </CollapsibleFilters>
-      </Form>
+          </CollapsibleFilters>
+        </Form>
+      )}
 
       {ticketsQuery.isPending && (
         <div className="grid gap-3" role="status">

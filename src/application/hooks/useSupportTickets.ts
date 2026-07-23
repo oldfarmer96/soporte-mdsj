@@ -38,10 +38,11 @@ export const useSupportTickets = (filters: SupportTicketFilters) =>
     retry: 2,
   });
 
-export const useSupportAgents = () =>
+export const useSupportAgents = (enabled = true) =>
   useQuery({
     queryKey: ticketKeys.supportAgents(),
     queryFn: getSupportAgents,
+    enabled,
     staleTime: 5 * 60 * 1000,
     retry: 2,
   });
