@@ -34,7 +34,7 @@ const ToggleTheme = () => {
   };
 
   return (
-    <details className="dropdown dropdown-end relative z-[100]">
+    <details className="dropdown dropdown-end relative z-100">
       <summary
         className="btn btn-ghost gap-2"
         aria-label={`Cambiar tema. Tema actual: ${activeTheme}`}
@@ -44,7 +44,7 @@ const ToggleTheme = () => {
         <ChevronDown className="size-4 opacity-60" aria-hidden="true" />
       </summary>
 
-      <ul className="menu dropdown-content z-[100] mt-2 max-h-[min(80vh,20rem)] w-52 overflow-y-auto rounded-box border border-base-300 bg-base-100 p-2 text-base-content shadow-xl">
+      <ul className="menu dropdown-content z-100 mt-2 max-h-[min(80vh,20rem)] w-52 overflow-y-auto rounded-box border border-base-300 bg-base-100 p-2 text-base-content shadow-xl">
         {themes.map((theme) => (
           <li key={theme.value}>
             <button
