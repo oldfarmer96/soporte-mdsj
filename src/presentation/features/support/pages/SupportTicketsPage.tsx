@@ -183,45 +183,33 @@ const SupportTicketsPage = ({
 
   return (
     <PageContainer>
-      <PageHeader
-        eyebrow="Personal de apoyo"
-        title={
-          isMonitor
-            ? "Monitor de tickets"
-            : mode === "mine"
-              ? "Mis tickets asignados"
-              : "Cola de tickets"
-        }
-        description={
-          isMonitor
-            ? "Supervisa en vivo todas las solicitudes registradas en la mesa de soporte."
-            : mode === "mine"
+      {!isMonitor && (
+        <PageHeader
+          eyebrow="Personal de apoyo"
+          title={mode === "mine" ? "Mis tickets asignados" : "Cola de tickets"}
+          description={
+            mode === "mine"
               ? "Revisa las solicitudes que están actualmente bajo tu responsabilidad."
               : "Prioriza, filtra y abre las solicitudes registradas en la mesa de soporte."
-        }
-        breadcrumbs={
-          isMonitor
-            ? [{ label: "Monitor en vivo" }]
-            : [
-                { label: "Monitor", path: "/apoyo" },
-                {
-                  label: mode === "mine" ? "Mis asignados" : "Cola de tickets",
-                },
-              ]
-        }
-        actions={
-          mode === "mine" ? (
-            <Link to="/apoyo/tickets" className="btn">
-              Ver cola general
-            </Link>
-          ) : (
-            <Link to="/apoyo/asignados" className="btn">
-              <UserCheck className="size-4" aria-hidden="true" />
-              Mis asignados
-            </Link>
-          )
-        }
-      />
+          }
+          breadcrumbs={[
+            { label: "Monitor", path: "/apoyo" },
+            { label: mode === "mine" ? "Mis asignados" : "Cola de tickets" },
+          ]}
+          actions={
+            mode === "mine" ? (
+              <Link to="/apoyo/tickets" className="btn">
+                Ver cola general
+              </Link>
+            ) : (
+              <Link to="/apoyo/asignados" className="btn">
+                <UserCheck className="size-4" aria-hidden="true" />
+                Mis asignados
+              </Link>
+            )
+          }
+        />
+      )}
 
       {!isMonitor && (
         <Form
