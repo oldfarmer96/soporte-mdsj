@@ -35,14 +35,14 @@ const TicketCard = ({ ticket }: { ticket: TicketListItem }) => (
       </div>
 
       <dl className="mt-4 grid gap-2 border-t border-base-300 pt-4 text-sm text-base-content/65">
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 items-start gap-2">
           <MapPin className="size-4 shrink-0" aria-hidden="true" />
           <dt className="sr-only">Ubicación y clasificación</dt>
-          <dd className="min-w-0 truncate">
+          <dd className="min-w-0 wrap-break-word">
             {ticket.areaName} · {ticket.subareaName}
           </dd>
         </div>
-        <div className="truncate pl-6 text-xs">
+        <div className="min-w-0 wrap-break-word pl-6 text-xs">
           {ticket.categoryName} · {ticket.problemTypeName}
         </div>
         <div className="flex min-w-0 items-center gap-2">

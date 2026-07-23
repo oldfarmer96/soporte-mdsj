@@ -12,10 +12,10 @@ const dateFormatter = new Intl.DateTimeFormat("es-PE", {
 });
 
 const SupportTicketCard = ({ ticket }: { ticket: SupportTicketListItem }) => (
-  <li>
+  <li className="min-w-0 max-w-full">
     <Link
       to={`/apoyo/tickets/${ticket.id}`}
-      className="block rounded-box border border-base-300 bg-base-100 p-5 shadow-sm transition-colors hover:bg-base-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+      className="block w-full min-w-0 max-w-full rounded-box border border-base-300 bg-base-100 p-5 shadow-sm transition-colors hover:bg-base-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
@@ -38,12 +38,14 @@ const SupportTicketCard = ({ ticket }: { ticket: SupportTicketListItem }) => (
           <dt className="sr-only">Solicitante</dt>
           <dd className="truncate font-semibold">{ticket.requesterName}</dd>
         </div>
-        <div className="flex min-w-0 items-center gap-2">
+        <div className="flex min-w-0 items-start gap-2">
           <MapPin className="size-4 shrink-0" aria-hidden="true" />
           <dt className="sr-only">Ubicación</dt>
-          <dd className="truncate">{ticket.areaName} · {ticket.subareaName}</dd>
+          <dd className="min-w-0 wrap-break-word">
+            {ticket.areaName} · {ticket.subareaName}
+          </dd>
         </div>
-        <div className="truncate pl-6 text-xs">
+        <div className="min-w-0 wrap-break-word pl-6 text-xs">
           {ticket.categoryName} · {ticket.problemTypeName}
         </div>
         <div className="flex min-w-0 items-center gap-2">
