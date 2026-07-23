@@ -1,5 +1,5 @@
 import type { TicketListItem } from "@/shared/interfaces/ticket.interface";
-import { CalendarDays, ChevronRight, MapPin, UserCheck } from "lucide-react";
+import { CalendarDays, ChevronRight, MapPin, UserCheck, Wrench } from "lucide-react";
 import { Link } from "react-router-dom";
 import { TicketPriorityBadge, TicketStatusBadge } from "./TicketBadges";
 
@@ -37,13 +37,25 @@ const TicketCard = ({ ticket }: { ticket: TicketListItem }) => (
       <dl className="mt-4 grid gap-2 border-t border-base-300 pt-4 text-sm text-base-content/65">
         <div className="flex min-w-0 items-start gap-2">
           <MapPin className="size-4 shrink-0" aria-hidden="true" />
-          <dt className="sr-only">Ubicación y clasificación</dt>
-          <dd className="min-w-0 wrap-break-word">
-            {ticket.areaName} · {ticket.subareaName}
-          </dd>
+          <div className="min-w-0">
+            <dt className="text-[0.6875rem] font-bold uppercase tracking-wide text-base-content/45">
+              Ubicación
+            </dt>
+            <dd className="min-w-0 wrap-break-word font-semibold">
+              {ticket.areaName} · {ticket.subareaName}
+            </dd>
+          </div>
         </div>
-        <div className="min-w-0 wrap-break-word pl-6 text-xs">
-          {ticket.categoryName} · {ticket.problemTypeName}
+        <div className="flex min-w-0 items-start gap-2">
+          <Wrench className="size-4 shrink-0" aria-hidden="true" />
+          <div className="min-w-0">
+            <dt className="text-[0.6875rem] font-bold uppercase tracking-wide text-base-content/45">
+              Problema
+            </dt>
+            <dd className="min-w-0 wrap-break-word text-xs font-semibold">
+              {ticket.categoryName} · {ticket.problemTypeName}
+            </dd>
+          </div>
         </div>
         <div className="flex min-w-0 items-center gap-2">
           <CalendarDays className="size-4 shrink-0" aria-hidden="true" />
