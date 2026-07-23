@@ -5,7 +5,7 @@ import ToggleTheme from "../components/ToggleTheme";
 const AuthLayout = () => {
   return (
     <>
-      <header className="rounded-box bg-base-100/80 shadow-sm backdrop-blur flex  justify-between items-center px-8 py-4">
+      <header className="relative z-50 flex items-center justify-between rounded-box bg-base-100/80 px-8 py-4 shadow-sm backdrop-blur">
         <div className="flex items-center gap-3">
           <span className="grid size-11 place-items-center rounded-2xl bg-primary text-primary-content">
             <Headphones className="size-5" aria-hidden="true" />
