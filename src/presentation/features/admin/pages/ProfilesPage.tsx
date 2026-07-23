@@ -1,5 +1,6 @@
 import { useProfiles } from "@/application/hooks/useProfiles";
 import CollapsibleFilters from "@/presentation/components/CollapsibleFilters";
+import DateTimeDisplay from "@/presentation/components/DateTimeDisplay";
 import EmptyState from "@/presentation/components/EmptyState";
 import ErrorState from "@/presentation/components/ErrorState";
 import PageContainer from "@/presentation/components/PageContainer";
@@ -34,7 +35,6 @@ const STATUS_LABELS: Record<ProfileStatus, string> = {
   INACTIVO: "Inactivo",
   BLOQUEADO: "Bloqueado",
 };
-const dateFormatter = new Intl.DateTimeFormat("es-PE", { dateStyle: "medium" });
 const profileName = (firstName: string | null, lastName: string | null) =>
   `${firstName ?? ""} ${lastName ?? ""}`.trim() || "Perfil sin completar";
 
@@ -208,10 +208,16 @@ const ProfilesPage = () => {
                     <dt className="sr-only">Teléfono</dt>
                     <dd>{profile.phone ?? "Sin teléfono"}</dd>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-start gap-2">
                     <ShieldCheck className="size-4" aria-hidden="true" />
-                    <dt className="sr-only">Fecha de registro</dt>
-                    <dd>Registrado {dateFormatter.format(new Date(profile.createdAt))}</dd>
+                    <div>
+                      <dt className="text-[0.6875rem] font-bold uppercase tracking-wide text-base-content/45">
+                        Registrado
+                      </dt>
+                      <dd>
+                        <DateTimeDisplay value={profile.createdAt} />
+                      </dd>
+                    </div>
                   </div>
                 </dl>
                 <div className="mt-4 border-t border-base-300 pt-4">
@@ -249,7 +255,7 @@ const ProfilesPage = () => {
                     <td>{profile.phone ?? "Sin teléfono"}</td>
                     <td><ProfileRoleBadge role={profile.role} /></td>
                     <td><ProfileStatusBadge status={profile.status} /></td>
-                    <td><time dateTime={profile.createdAt}>{dateFormatter.format(new Date(profile.createdAt))}</time></td>
+                    <td><DateTimeDisplay value={profile.createdAt} /></td>
                     <td>
                       <Link className="btn btn-sm" to={`/admin/usuarios/${profile.id}`}>
                         <Settings2 className="size-4" aria-hidden="true" /> Gestionar

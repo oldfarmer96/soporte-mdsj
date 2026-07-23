@@ -1,5 +1,6 @@
 import { useMyTickets } from "@/application/hooks/useTickets";
 import CollapsibleFilters from "@/presentation/components/CollapsibleFilters";
+import DateTimeDisplay from "@/presentation/components/DateTimeDisplay";
 import EmptyState from "@/presentation/components/EmptyState";
 import ErrorState from "@/presentation/components/ErrorState";
 import PageContainer from "@/presentation/components/PageContainer";
@@ -47,10 +48,6 @@ const PRIORITY_LABELS: Record<TicketPriority, string> = {
   ALTO: "Alta",
   CRITICO: "Crítica",
 };
-
-const dateFormatter = new Intl.DateTimeFormat("es-PE", {
-  dateStyle: "medium",
-});
 
 const isTicketStatus = (value: string | null): value is TicketStatus =>
   value !== null && TICKET_STATUSES.includes(value as TicketStatus);
@@ -293,9 +290,7 @@ const MyTicketsPage = () => {
                     <td><TicketStatusBadge status={ticket.status} /></td>
                     <td><TicketPriorityBadge priority={ticket.priority} /></td>
                     <td>
-                      <time dateTime={ticket.updatedAt}>
-                        {dateFormatter.format(new Date(ticket.updatedAt))}
-                      </time>
+                      <DateTimeDisplay value={ticket.updatedAt} />
                     </td>
                     <td>
                       <Link

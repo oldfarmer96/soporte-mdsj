@@ -11,6 +11,7 @@ import {
 import EmptyState from "@/presentation/components/EmptyState";
 import ErrorState from "@/presentation/components/ErrorState";
 import CollapsibleFilters from "@/presentation/components/CollapsibleFilters";
+import DateTimeDisplay from "@/presentation/components/DateTimeDisplay";
 import PageContainer from "@/presentation/components/PageContainer";
 import PageHeader from "@/presentation/components/PageHeader";
 import type { TicketPriority } from "@/shared/interfaces/catalog.interface";
@@ -58,8 +59,6 @@ const PRIORITY_LABELS: Record<TicketPriority, string> = {
   ALTO: "Alta",
   CRITICO: "Crítica",
 };
-const dateFormatter = new Intl.DateTimeFormat("es-PE", { dateStyle: "medium" });
-
 interface SupportTicketsPageProps {
   mode?: "queue" | "mine";
   variant?: "default" | "monitor";
@@ -501,9 +500,7 @@ const SupportTicketsPage = ({
                     </td>
                     <td>{ticket.assignedAgentName ?? "Sin asignar"}</td>
                     <td>
-                      <time dateTime={ticket.createdAt}>
-                        {dateFormatter.format(new Date(ticket.createdAt))}
-                      </time>
+                      <DateTimeDisplay value={ticket.createdAt} />
                     </td>
                     <td>
                       <Link

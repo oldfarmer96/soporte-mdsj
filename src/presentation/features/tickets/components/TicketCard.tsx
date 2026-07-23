@@ -1,12 +1,8 @@
 import type { TicketListItem } from "@/shared/interfaces/ticket.interface";
+import DateTimeDisplay from "@/presentation/components/DateTimeDisplay";
 import { CalendarDays, ChevronRight, MapPin, UserCheck, Wrench } from "lucide-react";
 import { Link } from "react-router-dom";
 import { TicketPriorityBadge, TicketStatusBadge } from "./TicketBadges";
-
-const shortDateFormatter = new Intl.DateTimeFormat("es-PE", {
-  dateStyle: "medium",
-  timeStyle: "short",
-});
 
 const TicketCard = ({ ticket }: { ticket: TicketListItem }) => (
   <li className="min-w-0 max-w-full">
@@ -57,12 +53,16 @@ const TicketCard = ({ ticket }: { ticket: TicketListItem }) => (
             </dd>
           </div>
         </div>
-        <div className="flex min-w-0 items-center gap-2">
+        <div className="flex min-w-0 items-start gap-2">
           <CalendarDays className="size-4 shrink-0" aria-hidden="true" />
-          <dt className="sr-only">Última actualización</dt>
-          <dd className="min-w-0 wrap-break-word">
-            Actualizado {shortDateFormatter.format(new Date(ticket.updatedAt))}
-          </dd>
+          <div className="min-w-0">
+            <dt className="text-[0.6875rem] font-bold uppercase tracking-wide text-base-content/45">
+              Actualizado
+            </dt>
+            <dd className="min-w-0">
+              <DateTimeDisplay value={ticket.updatedAt} />
+            </dd>
+          </div>
         </div>
         {ticket.isAssigned && (
           <div className="flex items-center gap-2 font-semibold">

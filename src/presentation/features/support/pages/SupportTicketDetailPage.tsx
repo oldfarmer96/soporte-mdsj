@@ -1,5 +1,6 @@
 import { useSupportTicketDetail } from "@/application/hooks/useSupportTickets";
 import ErrorState from "@/presentation/components/ErrorState";
+import DateTimeDisplay from "@/presentation/components/DateTimeDisplay";
 import PageContainer from "@/presentation/components/PageContainer";
 import PageHeader from "@/presentation/components/PageHeader";
 import PageSkeleton from "@/presentation/components/PageSkeleton";
@@ -24,11 +25,6 @@ import {
 import TicketResolutionPanel from "../../tickets/components/TicketResolutionPanel";
 import TicketTimeline from "../../tickets/components/TicketTimeline";
 import SupportTicketActions from "../components/SupportTicketActions";
-
-const dateFormatter = new Intl.DateTimeFormat("es-PE", {
-  dateStyle: "medium",
-  timeStyle: "short",
-});
 
 const SupportTicketDetailPage = () => {
   const { ticketId = "" } = useParams();
@@ -108,7 +104,7 @@ const SupportTicketDetailPage = () => {
                   <CalendarDays className="size-4" aria-hidden="true" /> Creado
                 </dt>
                 <dd className="mt-2 font-semibold">
-                  {dateFormatter.format(new Date(ticket.createdAt))}
+                  <DateTimeDisplay value={ticket.createdAt} />
                 </dd>
               </div>
               <div className="bg-base-200 p-4">

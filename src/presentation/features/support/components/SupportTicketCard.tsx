@@ -1,15 +1,11 @@
 import type { SupportTicketListItem } from "@/shared/interfaces/supportTicket.interface";
+import DateTimeDisplay from "@/presentation/components/DateTimeDisplay";
 import { CalendarDays, ChevronRight, MapPin, UserRound, Wrench } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   TicketPriorityBadge,
   TicketStatusBadge,
 } from "../../tickets/components/TicketBadges";
-
-const dateFormatter = new Intl.DateTimeFormat("es-PE", {
-  dateStyle: "medium",
-  timeStyle: "short",
-});
 
 const SupportTicketCard = ({ ticket }: { ticket: SupportTicketListItem }) => (
   <li className="min-w-0 max-w-full">
@@ -53,10 +49,16 @@ const SupportTicketCard = ({ ticket }: { ticket: SupportTicketListItem }) => (
           <dt className="sr-only">Personal asignado</dt>
           <dd className="truncate">{ticket.assignedAgentName ?? "Sin asignar"}</dd>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-start gap-2">
           <CalendarDays className="size-4 shrink-0" aria-hidden="true" />
-          <dt className="sr-only">Fecha de creación</dt>
-          <dd>Creado {dateFormatter.format(new Date(ticket.createdAt))}</dd>
+          <div>
+            <dt className="text-[0.6875rem] font-bold uppercase tracking-wide text-base-content/45">
+              Creado
+            </dt>
+            <dd>
+              <DateTimeDisplay value={ticket.createdAt} />
+            </dd>
+          </div>
         </div>
       </dl>
     </Link>
