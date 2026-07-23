@@ -5,6 +5,7 @@ import {
 import type { TicketAttachment } from "@/shared/interfaces/ticket.interface";
 import {
   getStorageErrorMessage,
+  prepareTicketAttachment,
   validateTicketAttachment,
 } from "@/services/storage.service";
 import {
@@ -25,6 +26,8 @@ interface UploadItem {
   file: File;
   status: UploadStatus;
   progress: number;
+  originalSizeBytes: number;
+  wasOptimized: boolean;
   error?: string;
 }
 
@@ -110,8 +113,12 @@ const TicketAttachments = ({
   attachments: TicketAttachment[];
 }) => {
   const [uploads, setUploads] = useState<UploadItem[]>([]);
+  const [isOptimizing, setIsOptimizing] = useState(false);
+  const [optimizationProgress, setOptimizationProgress] = useState(0);
+  const [selectionError, setSelectionError] = useState<string | null>(null);
   const uploadMutation = useUploadTicketAttachment();
   const isUploading = uploads.some((item) => item.status === "uploading");
+  const isProcessing = isOptimizing || isUploading;
 
   const updateUpload = (uploadId: string, changes: Partial<UploadItem>) => {
     setUploads((current) =>
@@ -168,7 +175,7 @@ const TicketAttachments = ({
           <Paperclip className="size-5" aria-hidden="true" />
         </span>
         <div>
-          <h2 className="text-lg font-black">Archivos</h2>
+          <h2 className="text-lg font-black">Imagen</h2>
           <p className="mt-1 text-sm text-base-content/60">
             Una evidencia JPEG, PNG o WebP de hasta 5 MB.
           </p>
@@ -188,30 +195,72 @@ const TicketAttachments = ({
             type="file"
             className="file-input file-input-primary mt-2 block w-full min-w-0 max-w-full overflow-hidden text-ellipsis whitespace-nowrap"
             accept="image/jpeg,image/png,image/webp"
-            disabled={isUploading}
-            onChange={(event) => {
+            disabled={isProcessing}
+            onChange={async (event) => {
               const file = event.target.files?.[0];
+              event.currentTarget.value = "";
               if (!file) {
                 setUploads([]);
                 return;
               }
 
-              const error = validateTicketAttachment(file);
-              setUploads([
-                {
-                  id: crypto.randomUUID(),
+              const uploadId = crypto.randomUUID();
+              setUploads([]);
+              setSelectionError(null);
+              setOptimizationProgress(0);
+              setIsOptimizing(true);
+
+              try {
+                const prepared = await prepareTicketAttachment(
                   file,
-                  status: error ? "error" : "pending",
-                  progress: 0,
-                  error: error ?? undefined,
-                },
-              ]);
-              event.currentTarget.value = "";
+                  ticketId,
+                  uploadId,
+                  setOptimizationProgress,
+                );
+                setUploads([
+                  {
+                    id: uploadId,
+                    file: prepared.file,
+                    status: "pending",
+                    progress: 0,
+                    originalSizeBytes: prepared.originalSizeBytes,
+                    wasOptimized: prepared.wasOptimized,
+                  },
+                ]);
+              } catch (error) {
+                setSelectionError(
+                  error instanceof Error
+                    ? error.message
+                    : "No pudimos procesar la imagen seleccionada.",
+                );
+              } finally {
+                setIsOptimizing(false);
+              }
             }}
           />
           <p className="mt-2 text-xs leading-relaxed text-base-content/55">
-            En teléfonos puedes elegir la cámara o una imagen de la galería.
+            Puedes elegir una imagen de hasta 30 MB. Las fotografías grandes se
+            optimizan automáticamente antes de subirlas.
           </p>
+          {isOptimizing && (
+            <div className="mt-3" role="status">
+              <div className="flex items-center justify-between gap-3 text-xs font-semibold">
+                <span>Optimizando imagen...</span>
+                <span>{Math.round(optimizationProgress)}%</span>
+              </div>
+              <progress
+                className="progress progress-primary mt-2 w-full"
+                value={optimizationProgress}
+                max="100"
+                aria-label={`Optimizando imagen: ${Math.round(optimizationProgress)}%`}
+              />
+            </div>
+          )}
+          {selectionError && (
+            <p className="mt-3 wrap-break-word text-sm text-error" role="alert">
+              {selectionError}
+            </p>
+          )}
         </div>
       ) : (
         <p className="mt-5 rounded-box bg-base-200 p-4 text-sm text-base-content/65">
@@ -247,7 +296,9 @@ const TicketAttachments = ({
                       {item.file.name}
                     </p>
                     <p className="mt-1 text-xs text-base-content/55">
-                      {formatFileSize(item.file.size)}
+                      {item.wasOptimized
+                        ? `Original ${formatFileSize(item.originalSizeBytes)} / Optimizada ${formatFileSize(item.file.size)}`
+                        : formatFileSize(item.file.size)}
                       {item.status === "success" ? " · Subido" : ""}
                     </p>
                   </div>
@@ -296,8 +347,11 @@ const TicketAttachments = ({
             <button
               type="button"
               className="btn btn-ghost"
-              disabled={isUploading}
-              onClick={() => setUploads([])}
+              disabled={isProcessing}
+              onClick={() => {
+                setUploads([]);
+                setSelectionError(null);
+              }}
             >
               Limpiar selección
             </button>
@@ -307,7 +361,7 @@ const TicketAttachments = ({
               <button
                 type="button"
                 className="btn btn-primary"
-                disabled={isUploading}
+                disabled={isProcessing}
                 onClick={uploadAll}
               >
                 {isUploading ? (
@@ -324,7 +378,7 @@ const TicketAttachments = ({
 
       {attachments.length === 0 ? (
         <p className="mt-5 rounded-box bg-base-200 p-4 text-sm text-base-content/65">
-          Este ticket no tiene archivos asociados.
+          Este ticket no tiene una imagen asociada.
         </p>
       ) : (
         <ul className="mt-5 grid gap-3 sm:grid-cols-2">

@@ -1,8 +1,11 @@
 import type { TicketAttachment } from "@/shared/interfaces/ticket.interface";
 import { supabase } from "@/shared/utils/supabase";
+import imageCompressionWorkerUrl from "browser-image-compression/dist/browser-image-compression.js?url";
 
 const BUCKET = "ticket-archivos";
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const MAX_SOURCE_FILE_SIZE = 30 * 1024 * 1024;
+const COMPRESSION_TARGET_MB = 4.5;
 const SIGNED_URL_SECONDS = 5 * 60;
 const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 
@@ -21,6 +24,12 @@ export interface UploadTicketAttachmentInput {
   file: File;
   uploadId: string;
   onProgress?: (progress: number) => void;
+}
+
+export interface PreparedTicketAttachment {
+  file: File;
+  originalSizeBytes: number;
+  wasOptimized: boolean;
 }
 
 const mapAttachment = (attachment: AttachmentRow): TicketAttachment => ({
@@ -43,10 +52,89 @@ export const validateTicketAttachment = (file: File): string | null => {
   return null;
 };
 
+const validateTicketAttachmentSource = (file: File): string | null => {
+  if (!ALLOWED_FILE_TYPES.includes(file.type as (typeof ALLOWED_FILE_TYPES)[number])) {
+    return "Selecciona una imagen JPEG, PNG o WebP.";
+  }
+  if (file.size === 0) return "El archivo está vacío.";
+  if (file.size > MAX_SOURCE_FILE_SIZE) {
+    return "La imagen original supera el límite de 30 MB.";
+  }
+  return null;
+};
+
 const getFileExtension = (fileType: string) => {
   if (fileType === "image/jpeg") return "jpg";
   if (fileType === "image/png") return "png";
   return "webp";
+};
+
+const createAttachmentName = (
+  ticketId: string,
+  uploadId: string,
+  fileType: string,
+) => {
+  const ticketReference = ticketId.replaceAll("-", "").slice(0, 8);
+  const randomReference = uploadId.replaceAll("-", "").slice(0, 10);
+  return `evidencia-${ticketReference}-${randomReference}.${getFileExtension(fileType)}`;
+};
+
+export const prepareTicketAttachment = async (
+  sourceFile: File,
+  ticketId: string,
+  uploadId: string,
+  onProgress?: (progress: number) => void,
+): Promise<PreparedTicketAttachment> => {
+  const sourceValidationError = validateTicketAttachmentSource(sourceFile);
+  if (sourceValidationError) throw new Error(sourceValidationError);
+
+  let preparedFile = sourceFile;
+  let wasOptimized = false;
+
+  if (sourceFile.size > MAX_FILE_SIZE) {
+    try {
+      const { default: imageCompression } = await import(
+        "browser-image-compression"
+      );
+      preparedFile = await imageCompression(sourceFile, {
+        maxSizeMB: COMPRESSION_TARGET_MB,
+        maxWidthOrHeight: 1920,
+        initialQuality: 0.85,
+        fileType: "image/jpeg",
+        useWebWorker: true,
+        libURL: imageCompressionWorkerUrl,
+        onProgress,
+      });
+      wasOptimized = true;
+    } catch {
+      throw new Error(
+        "No pudimos optimizar la imagen. Intenta con otra fotografía.",
+      );
+    }
+  }
+
+  const file = new File(
+    [preparedFile],
+    createAttachmentName(ticketId, uploadId, preparedFile.type),
+    {
+      type: preparedFile.type,
+      lastModified: Date.now(),
+    },
+  );
+  const validationError = validateTicketAttachment(file);
+  if (validationError) {
+    throw new Error(
+      file.size > MAX_FILE_SIZE
+        ? "No pudimos reducir la imagen a menos de 5 MB. Intenta con otra fotografía."
+        : validationError,
+    );
+  }
+
+  return {
+    file,
+    originalSizeBytes: sourceFile.size,
+    wasOptimized,
+  };
 };
 
 const findAttachmentByPath = async (path: string): Promise<TicketAttachment | null> => {
