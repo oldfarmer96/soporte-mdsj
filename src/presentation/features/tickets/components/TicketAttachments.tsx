@@ -272,7 +272,7 @@ const TicketAttachments = ({
         <div>
           <h2 className="text-lg font-black">Imagen</h2>
           <p className="mt-1 text-sm text-base-content/60">
-            Una evidencia JPEG, PNG o WebP de hasta 5 MB.
+            Evidencia en formato JPEG, PNG o WebP.
           </p>
         </div>
       </div>
@@ -334,7 +334,7 @@ const TicketAttachments = ({
             }}
           />
           <p className="mt-2 text-xs leading-relaxed text-base-content/55">
-            Puedes elegir una imagen de hasta 30 MB. Las fotografías grandes se
+            Puedes elegir una imagen de hasta 30 MB. Las imágenes mayores a 0.5 MB se
             optimizan automáticamente antes de subirlas.
           </p>
           {isOptimizing && (

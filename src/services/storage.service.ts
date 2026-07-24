@@ -5,6 +5,7 @@ import imageCompressionWorkerUrl from "browser-image-compression/dist/browser-im
 const BUCKET = "ticket-archivos";
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const MAX_SOURCE_FILE_SIZE = 30 * 1024 * 1024;
+const COMPRESSION_THRESHOLD = 0.5 * 1024 * 1024;
 const COMPRESSION_TARGET_MB = 4.5;
 const SIGNED_URL_SECONDS = 5 * 60;
 const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
@@ -52,7 +53,9 @@ export const validateTicketAttachment = (file: File): string | null => {
     return "Selecciona una imagen JPEG, PNG o WebP.";
   }
   if (file.size === 0) return "El archivo está vacío.";
-  if (file.size > MAX_FILE_SIZE) return "La imagen supera el límite de 5 MB.";
+  if (file.size > MAX_FILE_SIZE) {
+    return "No pudimos preparar la imagen para subirla. Intenta con otra fotografía.";
+  }
   if (file.name.length > 255) return "El nombre del archivo es demasiado largo.";
   return null;
 };
@@ -96,7 +99,7 @@ export const prepareTicketAttachment = async (
   let preparedFile = sourceFile;
   let wasOptimized = false;
 
-  if (sourceFile.size > MAX_FILE_SIZE) {
+  if (sourceFile.size > COMPRESSION_THRESHOLD) {
     try {
       const { default: imageCompression } = await import(
         "browser-image-compression"
@@ -130,7 +133,7 @@ export const prepareTicketAttachment = async (
   if (validationError) {
     throw new Error(
       file.size > MAX_FILE_SIZE
-        ? "No pudimos reducir la imagen a menos de 5 MB. Intenta con otra fotografía."
+        ? "No pudimos optimizar la imagen. Intenta con otra fotografía."
         : validationError,
     );
   }
@@ -292,7 +295,7 @@ export const getStorageErrorMessage = (error: unknown) => {
       ? String(error.message)
       : "";
 
-  if (message.includes("5 MB") || message.includes("JPEG")) return message;
+  if (message.includes("JPEG")) return message;
   if (message.includes("row-level security") || message.includes("not authorized")) {
     return "No tienes permiso para subir archivos a este ticket.";
   }
