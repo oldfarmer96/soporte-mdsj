@@ -1,6 +1,12 @@
 import type { TicketListItem } from "@/shared/interfaces/ticket.interface";
 import DateTimeDisplay from "@/presentation/components/DateTimeDisplay";
-import { CalendarDays, ChevronRight, MapPin, UserCheck, Wrench } from "lucide-react";
+import {
+  CalendarDays,
+  ChevronRight,
+  MapPin,
+  UserCheck,
+  Wrench,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { TicketPriorityBadge, TicketStatusBadge } from "./TicketBadges";
 

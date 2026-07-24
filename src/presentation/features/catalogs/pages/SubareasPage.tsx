@@ -27,7 +27,9 @@ const SubareasPage = () => {
   const areaNames = new Map(
     areasQuery.data?.map((area) => [area.id, area.name]),
   );
-  const deferredSearch = useDeferredValue(search.trim().toLocaleLowerCase("es"));
+  const deferredSearch = useDeferredValue(
+    search.trim().toLocaleLowerCase("es"),
+  );
   const filteredSubareas = subareasQuery.data?.filter(
     (subarea) =>
       subarea.name.toLocaleLowerCase("es").includes(deferredSearch) &&
@@ -85,7 +87,9 @@ const SubareasPage = () => {
           onRetry={() => areasQuery.refetch()}
         />
       )}
-      {!areasQuery.isError && subareasQuery.isPending && <CatalogListSkeleton />}
+      {!areasQuery.isError && subareasQuery.isPending && (
+        <CatalogListSkeleton />
+      )}
       {!areasQuery.isError && subareasQuery.isError && (
         <ErrorState onRetry={() => subareasQuery.refetch()} />
       )}

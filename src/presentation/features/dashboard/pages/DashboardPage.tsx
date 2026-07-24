@@ -79,7 +79,9 @@ const MetricBars = ({
           {items.map((item) => (
             <div key={item.key}>
               <div className="mb-1.5 flex items-center justify-between gap-3 text-sm">
-                <dt className="truncate font-semibold">{labels?.[item.key] ?? item.key}</dt>
+                <dt className="truncate font-semibold">
+                  {labels?.[item.key] ?? item.key}
+                </dt>
                 <dd className="font-black">{item.count}</dd>
               </div>
               <progress
@@ -98,9 +100,21 @@ const MetricBars = ({
 
 const SummaryCards = ({ metrics }: { metrics: SupportDashboardMetrics }) => {
   const cards = [
-    { label: "Creados en el periodo", value: metrics.summary.created, icon: Tickets },
-    { label: "Resueltos en el periodo", value: metrics.summary.resolved, icon: TicketCheck },
-    { label: "Activos actualmente", value: metrics.summary.active, icon: Activity },
+    {
+      label: "Creados en el periodo",
+      value: metrics.summary.created,
+      icon: Tickets,
+    },
+    {
+      label: "Resueltos en el periodo",
+      value: metrics.summary.resolved,
+      icon: TicketCheck,
+    },
+    {
+      label: "Activos actualmente",
+      value: metrics.summary.active,
+      icon: Activity,
+    },
     { label: "Sin asignar", value: metrics.summary.unassigned, icon: Inbox },
   ];
 
@@ -109,13 +123,20 @@ const SummaryCards = ({ metrics }: { metrics: SupportDashboardMetrics }) => {
       {cards.map((card) => {
         const Icon = card.icon;
         return (
-          <div key={card.label} className="stats border border-base-300 bg-base-100 shadow-sm">
+          <div
+            key={card.label}
+            className="stats border border-base-300 bg-base-100 shadow-sm"
+          >
             <div className="stat min-w-0">
               <div className="stat-figure text-base-content/45">
                 <Icon className="size-6" aria-hidden="true" />
               </div>
-              <div className="stat-title whitespace-normal text-sm">{card.label}</div>
-              <div className="stat-value text-2xl sm:text-3xl">{card.value}</div>
+              <div className="stat-title whitespace-normal text-sm">
+                {card.label}
+              </div>
+              <div className="stat-value text-2xl sm:text-3xl">
+                {card.value}
+              </div>
             </div>
           </div>
         );
@@ -143,7 +164,9 @@ const DashboardPage = ({ role }: { role: "APOYO" | "ADMIN" }) => {
   const dailyMax = metricsQuery.data
     ? Math.max(
         1,
-        ...metricsQuery.data.daily.map((item) => Math.max(item.created, item.resolved)),
+        ...metricsQuery.data.daily.map((item) =>
+          Math.max(item.created, item.resolved),
+        ),
       )
     : 1;
 
@@ -167,14 +190,25 @@ const DashboardPage = ({ role }: { role: "APOYO" | "ADMIN" }) => {
           <div className="sm:flex sm:items-end sm:gap-3">
             <fieldset className="fieldset grow">
               <legend className="fieldset-legend">Desde</legend>
-              <input type="date" name="desde" className="input w-full" defaultValue={range.from} />
+              <input
+                type="date"
+                name="desde"
+                className="input w-full"
+                defaultValue={range.from}
+              />
             </fieldset>
             <fieldset className="fieldset grow">
               <legend className="fieldset-legend">Hasta</legend>
-              <input type="date" name="hasta" className="input w-full" defaultValue={range.to} />
+              <input
+                type="date"
+                name="hasta"
+                className="input w-full"
+                defaultValue={range.to}
+              />
             </fieldset>
             <button type="submit" className="btn mt-3 sm:mt-0">
-              <CalendarDays className="size-4" aria-hidden="true" /> Actualizar periodo
+              <CalendarDays className="size-4" aria-hidden="true" /> Actualizar
+              periodo
             </button>
           </div>
         </CollapsibleFilters>
@@ -215,7 +249,10 @@ const DashboardPage = ({ role }: { role: "APOYO" | "ADMIN" }) => {
               items={metricsQuery.data.byPriority}
               labels={PRIORITY_LABELS}
             />
-            <MetricBars title="Áreas con más tickets" items={metricsQuery.data.byArea} />
+            <MetricBars
+              title="Áreas con más tickets"
+              items={metricsQuery.data.byArea}
+            />
             <MetricBars
               title="Subáreas con más tickets"
               items={metricsQuery.data.bySubarea}
@@ -235,26 +272,48 @@ const DashboardPage = ({ role }: { role: "APOYO" | "ADMIN" }) => {
               <div>
                 <h2 className="text-lg font-black">Tendencia diaria</h2>
                 <p className="mt-1 text-sm text-base-content/60">
-                  Últimos {Math.min(31, metricsQuery.data.daily.length)} días del rango.
+                  Últimos {Math.min(31, metricsQuery.data.daily.length)} días
+                  del rango.
                 </p>
               </div>
               <div className="mt-2 flex gap-4 text-xs font-semibold sm:mt-0">
-                <span className="flex items-center gap-1.5"><span className="status status-info" /> Creados</span>
-                <span className="flex items-center gap-1.5"><span className="status status-success" /> Resueltos</span>
+                <span className="flex items-center gap-1.5">
+                  <span className="status status-info" /> Creados
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="status status-success" /> Resueltos
+                </span>
               </div>
             </div>
             <div className="mt-5 grid gap-3">
               {metricsQuery.data.daily.slice(-31).map((day) => {
                 return (
-                  <div key={day.date} className="grid grid-cols-[4.5rem_minmax(0,1fr)_2.5rem] items-center gap-3 text-xs">
+                  <div
+                    key={day.date}
+                    className="grid grid-cols-[4.5rem_minmax(0,1fr)_2.5rem] items-center gap-3 text-xs"
+                  >
                     <time dateTime={day.date} className="font-semibold">
-                      {dateLabelFormatter.format(new Date(`${day.date}T00:00:00Z`))}
+                      {dateLabelFormatter.format(
+                        new Date(`${day.date}T00:00:00Z`),
+                      )}
                     </time>
                     <div className="grid gap-1">
-                      <progress className="progress progress-info h-2 w-full" value={day.created} max={dailyMax} aria-label={`${day.date}: ${day.created} creados`} />
-                      <progress className="progress progress-success h-2 w-full" value={day.resolved} max={dailyMax} aria-label={`${day.date}: ${day.resolved} resueltos`} />
+                      <progress
+                        className="progress progress-info h-2 w-full"
+                        value={day.created}
+                        max={dailyMax}
+                        aria-label={`${day.date}: ${day.created} creados`}
+                      />
+                      <progress
+                        className="progress progress-success h-2 w-full"
+                        value={day.resolved}
+                        max={dailyMax}
+                        aria-label={`${day.date}: ${day.resolved} resueltos`}
+                      />
                     </div>
-                    <span className="text-right font-bold">{day.created}/{day.resolved}</span>
+                    <span className="text-right font-bold">
+                      {day.created}/{day.resolved}
+                    </span>
                   </div>
                 );
               })}
@@ -278,7 +337,13 @@ const DashboardPage = ({ role }: { role: "APOYO" | "ADMIN" }) => {
             ) : (
               <div className="mt-5 overflow-hidden rounded-box border border-base-300">
                 <table className="table">
-                  <thead><tr><th>Personal</th><th>Asignados</th><th>En curso</th></tr></thead>
+                  <thead>
+                    <tr>
+                      <th>Personal</th>
+                      <th>Asignados</th>
+                      <th>En curso</th>
+                    </tr>
+                  </thead>
                   <tbody>
                     {metricsQuery.data.workload.map((item) => (
                       <tr key={item.agent}>

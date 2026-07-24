@@ -10,7 +10,9 @@ import AreaFormDialog from "../components/AreaFormDialog";
 import { CatalogStatusBadge } from "../components/CatalogBadges";
 import CatalogListSkeleton from "../components/CatalogListSkeleton";
 import CatalogStatusAction from "../components/CatalogStatusAction";
-import CatalogToolbar, { type CatalogStatusFilter } from "../components/CatalogToolbar";
+import CatalogToolbar, {
+  type CatalogStatusFilter,
+} from "../components/CatalogToolbar";
 
 const formatFloor = (floor: number | null) => {
   if (floor === null) return "Piso no especificado";
@@ -24,7 +26,9 @@ const AreasPage = () => {
   const statusMutation = useSetAreaActive();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<CatalogStatusFilter>("all");
-  const deferredSearch = useDeferredValue(search.trim().toLocaleLowerCase("es"));
+  const deferredSearch = useDeferredValue(
+    search.trim().toLocaleLowerCase("es"),
+  );
   const filteredAreas = areasQuery.data?.filter(
     (area) =>
       area.name.toLocaleLowerCase("es").includes(deferredSearch) &&
@@ -102,7 +106,10 @@ const AreasPage = () => {
                     name={area.name}
                     isActive={area.isActive}
                     onConfirm={() =>
-                      statusMutation.mutateAsync({ id: area.id, isActive: !area.isActive })
+                      statusMutation.mutateAsync({
+                        id: area.id,
+                        isActive: !area.isActive,
+                      })
                     }
                   />
                 </div>

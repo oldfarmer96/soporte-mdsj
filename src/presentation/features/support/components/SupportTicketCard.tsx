@@ -1,6 +1,12 @@
 import type { SupportTicketListItem } from "@/shared/interfaces/supportTicket.interface";
 import DateTimeDisplay from "@/presentation/components/DateTimeDisplay";
-import { CalendarDays, ChevronRight, MapPin, UserRound, Wrench } from "lucide-react";
+import {
+  CalendarDays,
+  ChevronRight,
+  MapPin,
+  UserRound,
+  Wrench,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   TicketPriorityBadge,
@@ -18,9 +24,12 @@ const SupportTicketCard = ({ ticket }: { ticket: SupportTicketListItem }) => (
           <p className="text-xs font-black uppercase tracking-wide text-base-content/50">
             {ticket.code}
           </p>
-          <h2 className="mt-1 break-words font-black">{ticket.subject}</h2>
+          <h2 className="mt-1 wrap-break-word font-black">{ticket.subject}</h2>
         </div>
-        <ChevronRight className="size-5 shrink-0 text-base-content/40" aria-hidden="true" />
+        <ChevronRight
+          className="size-5 shrink-0 text-base-content/40"
+          aria-hidden="true"
+        />
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
@@ -47,7 +56,9 @@ const SupportTicketCard = ({ ticket }: { ticket: SupportTicketListItem }) => (
         <div className="flex min-w-0 items-center gap-2">
           <Wrench className="size-4 shrink-0" aria-hidden="true" />
           <dt className="sr-only">Personal asignado</dt>
-          <dd className="truncate">{ticket.assignedAgentName ?? "Sin asignar"}</dd>
+          <dd className="truncate">
+            {ticket.assignedAgentName ?? "Sin asignar"}
+          </dd>
         </div>
         <div className="flex items-start gap-2">
           <CalendarDays className="size-4 shrink-0" aria-hidden="true" />

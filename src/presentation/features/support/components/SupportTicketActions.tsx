@@ -109,11 +109,15 @@ const SupportTicketActions = ({ ticket }: { ticket: SupportTicketDetail }) => {
               name="agentId"
               className="select w-full min-w-0 truncate"
               defaultValue={ticket.assignedAgent?.id ?? ""}
-              disabled={agentsQuery.isPending || agentsQuery.isError || isMutating}
+              disabled={
+                agentsQuery.isPending || agentsQuery.isError || isMutating
+              }
               required
             >
               <option value="" disabled>
-                {agentsQuery.isPending ? "Cargando personal..." : "Selecciona una persona"}
+                {agentsQuery.isPending
+                  ? "Cargando personal..."
+                  : "Selecciona una persona"}
               </option>
               {agentsQuery.data?.map((agent) => (
                 <option key={agent.id} value={agent.id}>
@@ -123,7 +127,9 @@ const SupportTicketActions = ({ ticket }: { ticket: SupportTicketDetail }) => {
             </select>
           </div>
           {agentsQuery.isError && (
-            <p className="mt-2 text-sm text-error">No pudimos cargar el personal disponible.</p>
+            <p className="mt-2 text-sm text-error">
+              No pudimos cargar el personal disponible.
+            </p>
           )}
         </form>
       )}
@@ -208,19 +214,28 @@ const SupportTicketActions = ({ ticket }: { ticket: SupportTicketDetail }) => {
             <div>
               <h2 className="text-xl font-black">Cancelar ticket</h2>
               <p className="mt-2 text-sm leading-relaxed text-base-content/65">
-                Esta acción detiene la atención y no puede revertirse con las reglas actuales.
+                Esta acción detiene la atención y no puede revertirse con las
+                reglas actuales.
               </p>
             </div>
             <form method="dialog">
-              <button className="btn btn-ghost btn-square btn-sm" aria-label="Cerrar">
+              <button
+                className="btn btn-ghost btn-square btn-sm"
+                aria-label="Cerrar"
+              >
                 <X className="size-4" aria-hidden="true" />
               </button>
             </form>
           </div>
-          <form className="mt-5" onSubmit={cancelForm.handleSubmit(cancelTicket)} noValidate>
+          <form
+            className="mt-5"
+            onSubmit={cancelForm.handleSubmit(cancelTicket)}
+            noValidate
+          >
             <fieldset className="fieldset">
               <legend className="fieldset-legend">
-                Motivo <span className="font-normal opacity-55">(opcional)</span>
+                Motivo{" "}
+                <span className="font-normal opacity-55">(opcional)</span>
               </legend>
               <textarea
                 {...cancelForm.register("detail")}
@@ -231,23 +246,40 @@ const SupportTicketActions = ({ ticket }: { ticket: SupportTicketDetail }) => {
                 placeholder="Explica por qué se cancela la solicitud"
                 aria-invalid={Boolean(cancelForm.formState.errors.detail)}
                 aria-describedby={
-                  cancelForm.formState.errors.detail ? "cancel-detail-error" : undefined
+                  cancelForm.formState.errors.detail
+                    ? "cancel-detail-error"
+                    : undefined
                 }
               />
-              <FieldInfo id="cancel-detail-error" error={cancelForm.formState.errors.detail} />
+              <FieldInfo
+                id="cancel-detail-error"
+                error={cancelForm.formState.errors.detail}
+              />
             </fieldset>
             <div className="modal-action">
-              <button type="button" className="btn" onClick={() => getDialog(CANCEL_DIALOG_ID)?.close()}>
+              <button
+                type="button"
+                className="btn"
+                onClick={() => getDialog(CANCEL_DIALOG_ID)?.close()}
+              >
                 Volver
               </button>
-              <button type="submit" className="btn btn-error" disabled={stateMutation.isPending}>
-                {stateMutation.isPending && <span className="loading loading-spinner loading-sm" />}
+              <button
+                type="submit"
+                className="btn btn-error"
+                disabled={stateMutation.isPending}
+              >
+                {stateMutation.isPending && (
+                  <span className="loading loading-spinner loading-sm" />
+                )}
                 Confirmar cancelación
               </button>
             </div>
           </form>
         </div>
-        <form method="dialog" className="modal-backdrop"><button>Cerrar</button></form>
+        <form method="dialog" className="modal-backdrop">
+          <button>Cerrar</button>
+        </form>
       </dialog>
 
       <dialog id={CLOSE_DIALOG_ID} className="modal">
@@ -256,12 +288,16 @@ const SupportTicketActions = ({ ticket }: { ticket: SupportTicketDetail }) => {
             <div>
               <h2 className="text-xl font-black">Cerrar sin confirmación</h2>
               <p className="mt-2 text-sm leading-relaxed text-base-content/65">
-                El ticket se cerrará aunque el solicitante todavía no haya confirmado la
-                solución. Esta acción quedará registrada en el historial.
+                El ticket se cerrará aunque el solicitante todavía no haya
+                confirmado la solución. Esta acción quedará registrada en el
+                historial.
               </p>
             </div>
             <form method="dialog">
-              <button className="btn btn-ghost btn-square btn-sm" aria-label="Cerrar">
+              <button
+                className="btn btn-ghost btn-square btn-sm"
+                aria-label="Cerrar"
+              >
                 <X className="size-4" aria-hidden="true" />
               </button>
             </form>
@@ -299,19 +335,28 @@ const SupportTicketActions = ({ ticket }: { ticket: SupportTicketDetail }) => {
             <div>
               <h2 className="text-xl font-black">Registrar solución</h2>
               <p className="mt-2 text-sm leading-relaxed text-base-content/65">
-                El ticket pasará a resuelto y quedará pendiente de confirmación del solicitante.
+                El ticket pasará a resuelto y quedará pendiente de confirmación
+                del solicitante.
               </p>
             </div>
             <form method="dialog">
-              <button className="btn btn-ghost btn-square btn-sm" aria-label="Cerrar">
+              <button
+                className="btn btn-ghost btn-square btn-sm"
+                aria-label="Cerrar"
+              >
                 <X className="size-4" aria-hidden="true" />
               </button>
             </form>
           </div>
-          <form className="mt-5 space-y-4" onSubmit={resolveForm.handleSubmit(resolveTicket)} noValidate>
+          <form
+            className="mt-5 space-y-4"
+            onSubmit={resolveForm.handleSubmit(resolveTicket)}
+            noValidate
+          >
             <fieldset className="fieldset">
               <legend className="fieldset-legend">
-                Diagnóstico <span className="font-normal opacity-55">(opcional)</span>
+                Diagnóstico{" "}
+                <span className="font-normal opacity-55">(opcional)</span>
               </legend>
               <textarea
                 {...resolveForm.register("diagnosis")}
@@ -338,7 +383,9 @@ const SupportTicketActions = ({ ticket }: { ticket: SupportTicketDetail }) => {
                 placeholder="Describe claramente cómo se resolvió"
                 aria-invalid={Boolean(resolveForm.formState.errors.solution)}
                 aria-describedby={
-                  resolveForm.formState.errors.solution ? "resolve-solution-error" : undefined
+                  resolveForm.formState.errors.solution
+                    ? "resolve-solution-error"
+                    : undefined
                 }
               />
               <FieldInfo
@@ -347,17 +394,29 @@ const SupportTicketActions = ({ ticket }: { ticket: SupportTicketDetail }) => {
               />
             </fieldset>
             <div className="modal-action">
-              <button type="button" className="btn" onClick={() => getDialog(RESOLVE_DIALOG_ID)?.close()}>
+              <button
+                type="button"
+                className="btn"
+                onClick={() => getDialog(RESOLVE_DIALOG_ID)?.close()}
+              >
                 Volver
               </button>
-              <button type="submit" className="btn btn-primary" disabled={resolveMutation.isPending}>
-                {resolveMutation.isPending && <span className="loading loading-spinner loading-sm" />}
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={resolveMutation.isPending}
+              >
+                {resolveMutation.isPending && (
+                  <span className="loading loading-spinner loading-sm" />
+                )}
                 Marcar como resuelto
               </button>
             </div>
           </form>
         </div>
-        <form method="dialog" className="modal-backdrop"><button>Cerrar</button></form>
+        <form method="dialog" className="modal-backdrop">
+          <button>Cerrar</button>
+        </form>
       </dialog>
     </section>
   );

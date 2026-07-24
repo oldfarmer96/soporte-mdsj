@@ -65,7 +65,10 @@ const TicketResolutionPanel = ({
         {status === "CERRADO" && resolution.requesterConfirmed === null && (
           <div className="alert alert-info alert-soft">
             <CheckCircle2 className="size-5" aria-hidden="true" />
-            <span>El personal de apoyo cerró el ticket sin confirmación del solicitante.</span>
+            <span>
+              El personal de apoyo cerró el ticket sin confirmación del
+              solicitante.
+            </span>
           </div>
         )}
       </div>

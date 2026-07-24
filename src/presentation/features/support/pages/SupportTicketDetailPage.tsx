@@ -38,7 +38,10 @@ const SupportTicketDetailPage = () => {
   if (ticketQuery.isError) {
     return (
       <PageContainer size="narrow">
-        <PageHeader eyebrow="Personal de apoyo" title="No pudimos abrir el ticket" />
+        <PageHeader
+          eyebrow="Personal de apoyo"
+          title="No pudimos abrir el ticket"
+        />
         <ErrorState
           description={getSupportTicketErrorMessage(ticketQuery.error)}
           onRetry={() => ticketQuery.refetch()}
@@ -81,7 +84,7 @@ const SupportTicketDetailPage = () => {
             <h2 className="flex items-center gap-2 text-lg font-black">
               <FileText className="size-5" aria-hidden="true" /> Descripción
             </h2>
-            <p className="mt-4 whitespace-pre-wrap break-words leading-relaxed">
+            <p className="mt-4 whitespace-pre-wrap wrap-break-word leading-relaxed">
               {ticket.description ?? "Sin descripción adicional."}
             </p>
             <dl className="mt-6 grid gap-px overflow-hidden rounded-box bg-base-300 sm:grid-cols-2">
@@ -123,7 +126,10 @@ const SupportTicketDetailPage = () => {
           </section>
 
           <div className="grid gap-5 lg:grid-cols-2">
-            <TicketResolutionPanel resolution={ticket.resolution} status={ticket.status} />
+            <TicketResolutionPanel
+              resolution={ticket.resolution}
+              status={ticket.status}
+            />
             <TicketAttachments
               ticketId={ticket.id}
               attachments={ticket.attachments}
@@ -141,16 +147,30 @@ const SupportTicketDetailPage = () => {
             <h2 className="text-lg font-black">Solicitante</h2>
             <dl className="mt-4 grid gap-3 text-sm">
               <div className="flex items-start gap-3">
-                <UserRound className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-                <div><dt className="text-base-content/50">Nombre</dt><dd className="font-semibold">{ticket.requester.name}</dd></div>
+                <UserRound
+                  className="mt-0.5 size-4 shrink-0"
+                  aria-hidden="true"
+                />
+                <div>
+                  <dt className="text-base-content/50">Nombre</dt>
+                  <dd className="font-semibold">{ticket.requester.name}</dd>
+                </div>
               </div>
               <div className="flex items-start gap-3">
                 <IdCard className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-                <div><dt className="text-base-content/50">DNI</dt><dd className="font-semibold">{ticket.requester.dni}</dd></div>
+                <div>
+                  <dt className="text-base-content/50">DNI</dt>
+                  <dd className="font-semibold">{ticket.requester.dni}</dd>
+                </div>
               </div>
               <div className="flex items-start gap-3">
                 <Phone className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-                <div><dt className="text-base-content/50">Teléfono</dt><dd className="font-semibold">{ticket.requester.phone ?? "No registrado"}</dd></div>
+                <div>
+                  <dt className="text-base-content/50">Teléfono</dt>
+                  <dd className="font-semibold">
+                    {ticket.requester.phone ?? "No registrado"}
+                  </dd>
+                </div>
               </div>
             </dl>
           </section>

@@ -72,7 +72,9 @@ const TicketTimeline = ({ history }: { history: TicketHistoryEvent[] }) => (
                   </p>
                 )}
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {event.newStatus && <TicketStatusBadge status={event.newStatus} />}
+                  {event.newStatus && (
+                    <TicketStatusBadge status={event.newStatus} />
+                  )}
                   {event.newPriority && (
                     <TicketPriorityBadge priority={event.newPriority} />
                   )}

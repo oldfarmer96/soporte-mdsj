@@ -16,10 +16,14 @@ const CatalogToolbar = ({
   onSearchChange,
   onStatusChange,
 }: CatalogToolbarProps) => {
-  const activeFilterCount = Number(Boolean(search.trim())) + Number(status !== "all");
+  const activeFilterCount =
+    Number(Boolean(search.trim())) + Number(status !== "all");
 
   return (
-    <CollapsibleFilters activeCount={activeFilterCount} title="Buscar y filtrar">
+    <CollapsibleFilters
+      activeCount={activeFilterCount}
+      title="Buscar y filtrar"
+    >
       <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem]">
         <fieldset className="fieldset">
           <legend className="fieldset-legend">Buscar por nombre</legend>
@@ -39,7 +43,9 @@ const CatalogToolbar = ({
           <select
             className="select w-full"
             value={status}
-            onChange={(event) => onStatusChange(event.target.value as CatalogStatusFilter)}
+            onChange={(event) =>
+              onStatusChange(event.target.value as CatalogStatusFilter)
+            }
           >
             <option value="all">Todos</option>
             <option value="active">Activos</option>

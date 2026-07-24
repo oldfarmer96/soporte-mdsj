@@ -62,7 +62,8 @@ const ProblemTypeFormDialog = ({
         if (!problemType) form.reset();
       },
     };
-    if (problemType) updateMutation.mutate({ id: problemType.id, payload }, options);
+    if (problemType)
+      updateMutation.mutate({ id: problemType.id, payload }, options);
     else createMutation.mutate(payload, options);
   };
 
@@ -95,19 +96,28 @@ const ProblemTypeFormDialog = ({
           <div className="flex items-start justify-between gap-4">
             <div>
               <h2 className="text-xl font-black">
-                {problemType ? "Editar tipo de problema" : "Nuevo tipo de problema"}
+                {problemType
+                  ? "Editar tipo de problema"
+                  : "Nuevo tipo de problema"}
               </h2>
               <p className="mt-2 text-sm text-base-content/65">
                 Asocia el tipo a una categoría y define su prioridad base.
               </p>
             </div>
             <form method="dialog">
-              <button className="btn btn-ghost btn-square btn-sm" aria-label="Cerrar">
+              <button
+                className="btn btn-ghost btn-square btn-sm"
+                aria-label="Cerrar"
+              >
                 <X className="size-4" aria-hidden="true" />
               </button>
             </form>
           </div>
-          <form className="mt-5 space-y-4" onSubmit={form.handleSubmit(submit)} noValidate>
+          <form
+            className="mt-5 space-y-4"
+            onSubmit={form.handleSubmit(submit)}
+            noValidate
+          >
             <fieldset className="fieldset">
               <legend className="fieldset-legend">Categoría</legend>
               <Controller
@@ -121,7 +131,8 @@ const ProblemTypeFormDialog = ({
                     <option value="">Selecciona una categoría</option>
                     {categories.map((category) => (
                       <option key={category.id} value={category.id}>
-                        {category.name}{category.isActive ? "" : " (inactiva)"}
+                        {category.name}
+                        {category.isActive ? "" : " (inactiva)"}
                       </option>
                     ))}
                   </select>
@@ -145,7 +156,10 @@ const ProblemTypeFormDialog = ({
                   />
                 )}
               />
-              <FieldInfo id="problem-name-error" error={form.formState.errors.name} />
+              <FieldInfo
+                id="problem-name-error"
+                error={form.formState.errors.name}
+              />
             </fieldset>
             <fieldset className="fieldset">
               <legend className="fieldset-legend">Descripción</legend>
@@ -173,7 +187,9 @@ const ProblemTypeFormDialog = ({
                 render={({ field }) => (
                   <select {...field} className="select w-full">
                     {PRIORITIES.map((priority) => (
-                      <option key={priority.value} value={priority.value}>{priority.label}</option>
+                      <option key={priority.value} value={priority.value}>
+                        {priority.label}
+                      </option>
                     ))}
                   </select>
                 )}
@@ -186,17 +202,24 @@ const ProblemTypeFormDialog = ({
               </div>
             )}
             <div className="modal-action">
-              <button type="button" className="btn" onClick={() => getDialog(dialogId)?.close()}>
+              <button
+                type="button"
+                className="btn"
+                onClick={() => getDialog(dialogId)?.close()}
+              >
                 Cancelar
               </button>
               <button
                 type="submit"
                 className="btn btn-primary"
                 disabled={
-                  mutation.isPending || Boolean(problemType && !form.formState.isDirty)
+                  mutation.isPending ||
+                  Boolean(problemType && !form.formState.isDirty)
                 }
               >
-                {mutation.isPending && <span className="loading loading-spinner loading-sm" />}
+                {mutation.isPending && (
+                  <span className="loading loading-spinner loading-sm" />
+                )}
                 {problemType && !form.formState.isDirty
                   ? "Sin cambios"
                   : problemType
@@ -206,7 +229,9 @@ const ProblemTypeFormDialog = ({
             </div>
           </form>
         </div>
-        <form method="dialog" className="modal-backdrop"><button>Cerrar</button></form>
+        <form method="dialog" className="modal-backdrop">
+          <button>Cerrar</button>
+        </form>
       </dialog>
     </>
   );

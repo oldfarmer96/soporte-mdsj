@@ -20,7 +20,10 @@ import {
   X,
 } from "lucide-react";
 import { Form, Link, useSearchParams } from "react-router-dom";
-import { ProfileRoleBadge, ProfileStatusBadge } from "../components/ProfileBadges";
+import {
+  ProfileRoleBadge,
+  ProfileStatusBadge,
+} from "../components/ProfileBadges";
 
 const PAGE_SIZE = 20;
 const ROLES: RoleT[] = ["SOLICITANTE", "APOYO", "ADMIN"];
@@ -57,7 +60,11 @@ const ProfilesPage = () => {
     status: isStatus(statusValue) ? statusValue : undefined,
   };
   const profilesQuery = useProfiles(filters);
-  const activeFilterCount = [filters.search, filters.role, filters.status].filter(Boolean).length;
+  const activeFilterCount = [
+    filters.search,
+    filters.role,
+    filters.status,
+  ].filter(Boolean).length;
   const hasFilters = activeFilterCount > 0;
   const isPageOutOfRange =
     profilesQuery.isSuccess &&
@@ -89,43 +96,56 @@ const ProfilesPage = () => {
         method="get"
         aria-label="Filtros de usuarios"
       >
-        <CollapsibleFilters activeCount={activeFilterCount} title="Buscar y filtrar">
+        <CollapsibleFilters
+          activeCount={activeFilterCount}
+          title="Buscar y filtrar"
+        >
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_14rem_14rem]">
-          <fieldset className="fieldset sm:col-span-2 lg:col-span-1">
-            <legend className="fieldset-legend">DNI, nombres o apellidos</legend>
-            <label className="input w-full">
-              <Search className="size-4 opacity-45" aria-hidden="true" />
-              <input
-                type="search"
-                name="q"
-                defaultValue={filters.search}
-                maxLength={100}
-                placeholder="Buscar usuario"
-              />
-            </label>
-          </fieldset>
-          <fieldset className="fieldset">
-            <legend className="fieldset-legend">Rol</legend>
-            <select name="rol" className="select w-full" defaultValue={filters.role ?? ""}>
-              <option value="">Todos los roles</option>
-              {ROLES.map((role) => (
-                <option key={role} value={role}>{ROLE_LABELS[role]}</option>
-              ))}
-            </select>
-          </fieldset>
-          <fieldset className="fieldset">
-            <legend className="fieldset-legend">Estado</legend>
-            <select
-              name="estado"
-              className="select w-full"
-              defaultValue={filters.status ?? ""}
-            >
-              <option value="">Todos los estados</option>
-              {STATUSES.map((status) => (
-                <option key={status} value={status}>{STATUS_LABELS[status]}</option>
-              ))}
-            </select>
-          </fieldset>
+            <fieldset className="fieldset sm:col-span-2 lg:col-span-1">
+              <legend className="fieldset-legend">
+                DNI, nombres o apellidos
+              </legend>
+              <label className="input w-full">
+                <Search className="size-4 opacity-45" aria-hidden="true" />
+                <input
+                  type="search"
+                  name="q"
+                  defaultValue={filters.search}
+                  maxLength={100}
+                  placeholder="Buscar usuario"
+                />
+              </label>
+            </fieldset>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend">Rol</legend>
+              <select
+                name="rol"
+                className="select w-full"
+                defaultValue={filters.role ?? ""}
+              >
+                <option value="">Todos los roles</option>
+                {ROLES.map((role) => (
+                  <option key={role} value={role}>
+                    {ROLE_LABELS[role]}
+                  </option>
+                ))}
+              </select>
+            </fieldset>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend">Estado</legend>
+              <select
+                name="estado"
+                className="select w-full"
+                defaultValue={filters.status ?? ""}
+              >
+                <option value="">Todos los estados</option>
+                {STATUSES.map((status) => (
+                  <option key={status} value={status}>
+                    {STATUS_LABELS[status]}
+                  </option>
+                ))}
+              </select>
+            </fieldset>
           </div>
           <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             {hasFilters && (
@@ -143,14 +163,22 @@ const ProfilesPage = () => {
       {profilesQuery.isPending && (
         <div className="grid gap-3" role="status">
           <span className="sr-only">Cargando usuarios...</span>
-          {[0, 1, 2].map((item) => <div key={item} className="skeleton h-44 w-full" />)}
+          {[0, 1, 2].map((item) => (
+            <div key={item} className="skeleton h-44 w-full" />
+          ))}
         </div>
       )}
-      {profilesQuery.isError && <ErrorState onRetry={() => profilesQuery.refetch()} />}
+      {profilesQuery.isError && (
+        <ErrorState onRetry={() => profilesQuery.refetch()} />
+      )}
       {profilesQuery.isSuccess && profilesQuery.data.items.length === 0 && (
         <EmptyState
           icon={UsersRound}
-          title={isPageOutOfRange ? "Esta página ya no está disponible" : "No encontramos usuarios"}
+          title={
+            isPageOutOfRange
+              ? "Esta página ya no está disponible"
+              : "No encontramos usuarios"
+          }
           description={
             isPageOutOfRange
               ? "Vuelve a la primera página para continuar consultando el directorio."
@@ -160,9 +188,13 @@ const ProfilesPage = () => {
           }
           action={
             isPageOutOfRange ? (
-              <Link to={pageUrl(1)} className="btn">Primera página</Link>
+              <Link to={pageUrl(1)} className="btn">
+                Primera página
+              </Link>
             ) : hasFilters ? (
-              <Link to="/admin/usuarios" className="btn">Limpiar filtros</Link>
+              <Link to="/admin/usuarios" className="btn">
+                Limpiar filtros
+              </Link>
             ) : undefined
           }
         />
@@ -182,9 +214,15 @@ const ProfilesPage = () => {
             </p>
           </div>
 
-          <ul className="grid gap-3 lg:hidden" aria-label="Usuarios registrados">
+          <ul
+            className="grid gap-3 lg:hidden"
+            aria-label="Usuarios registrados"
+          >
             {profilesQuery.data.items.map((profile) => (
-              <li key={profile.id} className="rounded-box border border-base-300 bg-base-100 p-5 shadow-sm">
+              <li
+                key={profile.id}
+                className="rounded-box border border-base-300 bg-base-100 p-5 shadow-sm"
+              >
                 <div className="flex items-start gap-3">
                   <span className="avatar avatar-placeholder">
                     <span className="grid size-11 place-items-center rounded-xl bg-neutral font-black text-neutral-content">
@@ -194,8 +232,12 @@ const ProfilesPage = () => {
                     </span>
                   </span>
                   <div className="min-w-0 grow">
-                    <h3 className="font-black">{profileName(profile.firstName, profile.lastName)}</h3>
-                    <p className="mt-1 text-sm text-base-content/55">DNI {profile.dni}</p>
+                    <h3 className="font-black">
+                      {profileName(profile.firstName, profile.lastName)}
+                    </h3>
+                    <p className="mt-1 text-sm text-base-content/55">
+                      DNI {profile.dni}
+                    </p>
                   </div>
                 </div>
                 <div className="mt-4 flex flex-wrap gap-2">
@@ -221,8 +263,12 @@ const ProfilesPage = () => {
                   </div>
                 </dl>
                 <div className="mt-4 border-t border-base-300 pt-4">
-                  <Link className="btn btn-sm" to={`/admin/usuarios/${profile.id}`}>
-                    <Settings2 className="size-4" aria-hidden="true" /> Gestionar
+                  <Link
+                    className="btn btn-sm"
+                    to={`/admin/usuarios/${profile.id}`}
+                  >
+                    <Settings2 className="size-4" aria-hidden="true" />{" "}
+                    Gestionar
                   </Link>
                 </div>
               </li>
@@ -238,8 +284,10 @@ const ProfilesPage = () => {
                   <th>Teléfono</th>
                   <th>Rol</th>
                   <th>Estado</th>
-                   <th>Registrado</th>
-                   <th><span className="sr-only">Acciones</span></th>
+                  <th>Registrado</th>
+                  <th>
+                    <span className="sr-only">Acciones</span>
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -253,12 +301,22 @@ const ProfilesPage = () => {
                     </td>
                     <td>{profile.dni}</td>
                     <td>{profile.phone ?? "Sin teléfono"}</td>
-                    <td><ProfileRoleBadge role={profile.role} /></td>
-                    <td><ProfileStatusBadge status={profile.status} /></td>
-                    <td><DateTimeDisplay value={profile.createdAt} /></td>
                     <td>
-                      <Link className="btn btn-sm" to={`/admin/usuarios/${profile.id}`}>
-                        <Settings2 className="size-4" aria-hidden="true" /> Gestionar
+                      <ProfileRoleBadge role={profile.role} />
+                    </td>
+                    <td>
+                      <ProfileStatusBadge status={profile.status} />
+                    </td>
+                    <td>
+                      <DateTimeDisplay value={profile.createdAt} />
+                    </td>
+                    <td>
+                      <Link
+                        className="btn btn-sm"
+                        to={`/admin/usuarios/${profile.id}`}
+                      >
+                        <Settings2 className="size-4" aria-hidden="true" />{" "}
+                        Gestionar
                       </Link>
                     </td>
                   </tr>
@@ -267,7 +325,10 @@ const ProfilesPage = () => {
             </table>
           </div>
 
-          <nav className="mt-5 flex items-center justify-between gap-3" aria-label="Paginación">
+          <nav
+            className="mt-5 flex items-center justify-between gap-3"
+            aria-label="Paginación"
+          >
             {page > 1 ? (
               <Link to={pageUrl(page - 1)} className="btn">
                 <ChevronLeft className="size-4" aria-hidden="true" />
@@ -279,7 +340,9 @@ const ProfilesPage = () => {
                 <span className="hidden sm:inline">Anterior</span>
               </button>
             )}
-            <span className="text-sm font-semibold">{page} / {profilesQuery.data.totalPages}</span>
+            <span className="text-sm font-semibold">
+              {page} / {profilesQuery.data.totalPages}
+            </span>
             {page < profilesQuery.data.totalPages ? (
               <Link to={pageUrl(page + 1)} className="btn">
                 <span className="hidden sm:inline">Siguiente</span>

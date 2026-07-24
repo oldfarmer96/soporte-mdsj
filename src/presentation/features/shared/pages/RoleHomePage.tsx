@@ -17,7 +17,8 @@ const RoleHomePage = ({ role, description, children }: RoleHomePageProps) => {
   const user = useAuthStore((state) => state.user);
   const navigation = NAVIGATION_BY_ROLE[role];
   const destinations = navigation.items.filter(
-    (item) => item.path !== navigation.homePath && item.path !== navigation.profilePath,
+    (item) =>
+      item.path !== navigation.homePath && item.path !== navigation.profilePath,
   );
   const profileNeedsAttention =
     !user?.name ||
@@ -34,7 +35,10 @@ const RoleHomePage = ({ role, description, children }: RoleHomePageProps) => {
       />
 
       {profileNeedsAttention && (
-        <div role="alert" className="alert alert-warning alert-soft mb-6 sm:alert-horizontal">
+        <div
+          role="alert"
+          className="alert alert-warning alert-soft mb-6 sm:alert-horizontal"
+        >
           <UserRoundPen className="size-5" aria-hidden="true" />
           <div className="grow">
             <h2 className="font-bold">Completa tu perfil</h2>
@@ -87,7 +91,9 @@ const RoleHomePage = ({ role, description, children }: RoleHomePageProps) => {
                 <h3 className="mt-5 font-black">{item.label}</h3>
                 <p
                   className={`mt-1 text-sm leading-relaxed ${
-                    index === 0 ? "text-primary-content/75" : "text-base-content/60"
+                    index === 0
+                      ? "text-primary-content/75"
+                      : "text-base-content/60"
                   }`}
                 >
                   {item.description}

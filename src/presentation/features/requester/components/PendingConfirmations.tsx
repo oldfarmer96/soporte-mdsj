@@ -28,7 +28,8 @@ const PendingConfirmations = () => {
               : `Tienes ${ticketsQuery.data.total} soluciones pendientes de confirmación`}
           </h2>
           <p className="mt-1 text-sm text-base-content/65">
-            Revisa el resultado informado por apoyo y confirma si el problema terminó.
+            Revisa el resultado informado por apoyo y confirma si el problema
+            terminó.
           </p>
         </div>
       </div>
@@ -41,13 +42,20 @@ const PendingConfirmations = () => {
               className="flex min-w-0 items-center gap-3 rounded-box border border-base-300 bg-base-100 p-4 transition-colors hover:bg-base-200"
             >
               <div className="min-w-0 grow">
-                <p className="text-xs font-bold text-base-content/50">{ticket.code}</p>
-                <h3 className="mt-1 wrap-break-word font-black">{ticket.subject}</h3>
+                <p className="text-xs font-bold text-base-content/50">
+                  {ticket.code}
+                </p>
+                <h3 className="mt-1 wrap-break-word font-black">
+                  {ticket.subject}
+                </h3>
                 <div className="mt-2 text-sm text-base-content/65">
                   <DateTimeDisplay value={ticket.updatedAt} />
                 </div>
               </div>
-              <ArrowRight className="size-5 shrink-0 text-base-content/45" aria-hidden="true" />
+              <ArrowRight
+                className="size-5 shrink-0 text-base-content/45"
+                aria-hidden="true"
+              />
             </Link>
           </li>
         ))}

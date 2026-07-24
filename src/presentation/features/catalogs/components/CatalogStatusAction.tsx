@@ -26,7 +26,7 @@ const CatalogStatusAction = ({
       await onConfirm();
       getDialog(dialogId)?.close();
     } catch {
-      // The mutation displays the domain error and keeps the dialog open.
+      // wadafa
     } finally {
       setIsPending(false);
     }
@@ -61,7 +61,10 @@ const CatalogStatusAction = ({
               </p>
             </div>
             <form method="dialog">
-              <button className="btn btn-ghost btn-square btn-sm" aria-label="Cerrar">
+              <button
+                className="btn btn-ghost btn-square btn-sm"
+                aria-label="Cerrar"
+              >
                 <X className="size-4" aria-hidden="true" />
               </button>
             </form>
@@ -69,11 +72,18 @@ const CatalogStatusAction = ({
           {isActive && (
             <div className="alert alert-warning alert-soft mt-5 items-start">
               <AlertTriangle className="size-5 shrink-0" aria-hidden="true" />
-              <span>Confirma que este registro ya no debe usarse en nuevas solicitudes.</span>
+              <span>
+                Confirma que este registro ya no debe usarse en nuevas
+                solicitudes.
+              </span>
             </div>
           )}
           <div className="modal-action">
-            <button type="button" className="btn" onClick={() => getDialog(dialogId)?.close()}>
+            <button
+              type="button"
+              className="btn"
+              onClick={() => getDialog(dialogId)?.close()}
+            >
               Cancelar
             </button>
             <button
@@ -82,12 +92,16 @@ const CatalogStatusAction = ({
               disabled={isPending}
               onClick={confirm}
             >
-              {isPending && <span className="loading loading-spinner loading-sm" />}
+              {isPending && (
+                <span className="loading loading-spinner loading-sm" />
+              )}
               {isActive ? "Confirmar desactivación" : "Confirmar activación"}
             </button>
           </div>
         </div>
-        <form method="dialog" className="modal-backdrop"><button>Cerrar</button></form>
+        <form method="dialog" className="modal-backdrop">
+          <button>Cerrar</button>
+        </form>
       </dialog>
     </>
   );

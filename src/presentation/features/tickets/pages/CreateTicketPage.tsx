@@ -105,7 +105,10 @@ const CreateTicketPage = () => {
     const problemType = catalogs.problemTypesQuery.data?.find(
       (item) => item.id === form.problemTypeId,
     );
-    if ((category?.isOther || problemType?.isOther) && form.description.length < 5) {
+    if (
+      (category?.isOther || problemType?.isOther) &&
+      form.description.length < 5
+    ) {
       setError("description", {
         message: "Describe el problema al seleccionar una opción Otro",
       });
@@ -223,7 +226,9 @@ const CreateTicketPage = () => {
                 <select
                   {...register("subareaId", {
                     onChange: (event) =>
-                      catalogs.selectSubarea(String(event.target.value) || null),
+                      catalogs.selectSubarea(
+                        String(event.target.value) || null,
+                      ),
                   })}
                   className={`select w-full pl-10 ${errors.subareaId ? "select-error" : ""}`}
                   disabled={

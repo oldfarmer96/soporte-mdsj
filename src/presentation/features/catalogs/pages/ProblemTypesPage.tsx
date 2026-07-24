@@ -12,7 +12,9 @@ import { useDeferredValue, useState } from "react";
 import { CatalogStatusBadge, PriorityBadge } from "../components/CatalogBadges";
 import CatalogListSkeleton from "../components/CatalogListSkeleton";
 import CatalogStatusAction from "../components/CatalogStatusAction";
-import CatalogToolbar, { type CatalogStatusFilter } from "../components/CatalogToolbar";
+import CatalogToolbar, {
+  type CatalogStatusFilter,
+} from "../components/CatalogToolbar";
 import ProblemTypeFormDialog from "../components/ProblemTypeFormDialog";
 
 const ProblemTypesPage = () => {
@@ -28,7 +30,9 @@ const ProblemTypesPage = () => {
   const categoryNames = new Map(
     categoriesQuery.data?.map((category) => [category.id, category.name]),
   );
-  const deferredSearch = useDeferredValue(search.trim().toLocaleLowerCase("es"));
+  const deferredSearch = useDeferredValue(
+    search.trim().toLocaleLowerCase("es"),
+  );
   const filteredProblemTypes = problemTypesQuery.data?.filter(
     (problemType) =>
       problemType.name.toLocaleLowerCase("es").includes(deferredSearch) &&

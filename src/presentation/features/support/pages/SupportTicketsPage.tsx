@@ -102,7 +102,10 @@ const SupportTicketsPage = ({
     includeInactive: true,
     enabled: !isMonitor,
   });
-  const categoriesQuery = useCategories({ includeInactive: true, enabled: !isMonitor });
+  const categoriesQuery = useCategories({
+    includeInactive: true,
+    enabled: !isMonitor,
+  });
   const problemTypesQuery = useProblemTypes({
     categoryId: categoryId ?? null,
     includeInactive: true,
@@ -163,7 +166,9 @@ const SupportTicketsPage = ({
     page > ticketsQuery.data.totalPages;
 
   const pageUrl = (nextPage: number) => {
-    const params = isMonitor ? new URLSearchParams() : new URLSearchParams(searchParams);
+    const params = isMonitor
+      ? new URLSearchParams()
+      : new URLSearchParams(searchParams);
     if (nextPage <= 1) params.delete("pagina");
     else params.set("pagina", String(nextPage));
     const query = params.toString();
@@ -223,167 +228,167 @@ const SupportTicketsPage = ({
             activeCount={activeFilterCount}
             title="Filtros operativos"
           >
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-10">
-            <fieldset className="fieldset sm:col-span-2">
-              <legend className="fieldset-legend">Código o asunto</legend>
-              <label className="input w-full">
-                <Search className="size-4 opacity-45" aria-hidden="true" />
-                <input
-                  type="search"
-                  name="q"
-                  defaultValue={filters.search}
-                  maxLength={100}
-                  placeholder="Buscar ticket"
-                />
-              </label>
-            </fieldset>
-            <fieldset className="fieldset">
-              <legend className="fieldset-legend">Estado</legend>
-              <select
-                name="estado"
-                className="select w-full"
-                defaultValue={filters.status ?? ""}
-              >
-                <option value="">Todos</option>
-                {STATUSES.map((status) => (
-                  <option key={status} value={status}>
-                    {STATUS_LABELS[status]}
-                  </option>
-                ))}
-              </select>
-            </fieldset>
-            <fieldset className="fieldset">
-              <legend className="fieldset-legend">Prioridad</legend>
-              <select
-                name="prioridad"
-                className="select w-full"
-                defaultValue={filters.priority ?? ""}
-              >
-                <option value="">Todas</option>
-                {PRIORITIES.map((priority) => (
-                  <option key={priority} value={priority}>
-                    {PRIORITY_LABELS[priority]}
-                  </option>
-                ))}
-              </select>
-            </fieldset>
-            <fieldset className="fieldset">
-              <legend className="fieldset-legend">Área</legend>
-              <select
-                name="area"
-                className="select w-full"
-                value={filters.areaId ?? ""}
-                onChange={(event) =>
-                  selectParentFilter("area", "subarea", event.target.value)
-                }
-              >
-                <option value="">Todas</option>
-                {areasQuery.data?.map((area) => (
-                  <option key={area.id} value={area.id}>
-                    {area.name}
-                  </option>
-                ))}
-              </select>
-            </fieldset>
-            <fieldset className="fieldset">
-              <legend className="fieldset-legend">Subárea</legend>
-              <select
-                name="subarea"
-                className="select w-full"
-                defaultValue={filters.subareaId ?? ""}
-                disabled={!filters.areaId || subareasQuery.isPending}
-              >
-                <option value="">Todas</option>
-                {subareasQuery.data?.map((subarea) => (
-                  <option key={subarea.id} value={subarea.id}>
-                    {subarea.name}
-                  </option>
-                ))}
-              </select>
-            </fieldset>
-            <fieldset className="fieldset">
-              <legend className="fieldset-legend">Categoría</legend>
-              <select
-                name="categoria"
-                className="select w-full"
-                value={filters.categoryId ?? ""}
-                onChange={(event) =>
-                  selectParentFilter("categoria", "tipo", event.target.value)
-                }
-              >
-                <option value="">Todas</option>
-                {categoriesQuery.data?.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </fieldset>
-            <fieldset className="fieldset">
-              <legend className="fieldset-legend">Tipo</legend>
-              <select
-                name="tipo"
-                className="select w-full"
-                defaultValue={filters.problemTypeId ?? ""}
-                disabled={!filters.categoryId || problemTypesQuery.isPending}
-              >
-                <option value="">Todos</option>
-                {problemTypesQuery.data?.map((problemType) => (
-                  <option key={problemType.id} value={problemType.id}>
-                    {problemType.name}
-                  </option>
-                ))}
-              </select>
-            </fieldset>
-            {mode === "queue" && (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-10">
               <fieldset className="fieldset sm:col-span-2">
-                <legend className="fieldset-legend">Asignación</legend>
+                <legend className="fieldset-legend">Código o asunto</legend>
+                <label className="input w-full">
+                  <Search className="size-4 opacity-45" aria-hidden="true" />
+                  <input
+                    type="search"
+                    name="q"
+                    defaultValue={filters.search}
+                    maxLength={100}
+                    placeholder="Buscar ticket"
+                  />
+                </label>
+              </fieldset>
+              <fieldset className="fieldset">
+                <legend className="fieldset-legend">Estado</legend>
                 <select
-                  name="asignado"
+                  name="estado"
                   className="select w-full"
-                  defaultValue={assignmentValue ?? ""}
-                  disabled={agentsQuery.isPending || agentsQuery.isError}
+                  defaultValue={filters.status ?? ""}
                 >
-                  <option value="">Cualquier asignación</option>
-                  <option value="sin-asignar">Sin asignar</option>
-                  <option value="mios">Asignados a mí</option>
-                  {agentsQuery.data?.map((agent) => (
-                    <option key={agent.id} value={agent.id}>
-                      {agent.name}
+                  <option value="">Todos</option>
+                  {STATUSES.map((status) => (
+                    <option key={status} value={status}>
+                      {STATUS_LABELS[status]}
                     </option>
                   ))}
                 </select>
               </fieldset>
-            )}
-            <fieldset className="fieldset">
-              <legend className="fieldset-legend">Desde</legend>
-              <input
-                type="date"
-                name="desde"
-                className="input w-full"
-                defaultValue={filters.dateFrom}
-              />
-            </fieldset>
-            <fieldset className="fieldset">
-              <legend className="fieldset-legend">Hasta</legend>
-              <input
-                type="date"
-                name="hasta"
-                className="input w-full"
-                defaultValue={filters.dateTo}
-              />
-            </fieldset>
-          </div>
-          <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            {hasFilters && (
-              <Link to={basePath} className="btn btn-ghost">
-                <X className="size-4" aria-hidden="true" /> Limpiar
-              </Link>
-            )}
-            <button type="submit" className="btn">
-              <Filter className="size-4" aria-hidden="true" /> Aplicar filtros
-            </button>
-          </div>
+              <fieldset className="fieldset">
+                <legend className="fieldset-legend">Prioridad</legend>
+                <select
+                  name="prioridad"
+                  className="select w-full"
+                  defaultValue={filters.priority ?? ""}
+                >
+                  <option value="">Todas</option>
+                  {PRIORITIES.map((priority) => (
+                    <option key={priority} value={priority}>
+                      {PRIORITY_LABELS[priority]}
+                    </option>
+                  ))}
+                </select>
+              </fieldset>
+              <fieldset className="fieldset">
+                <legend className="fieldset-legend">Área</legend>
+                <select
+                  name="area"
+                  className="select w-full"
+                  value={filters.areaId ?? ""}
+                  onChange={(event) =>
+                    selectParentFilter("area", "subarea", event.target.value)
+                  }
+                >
+                  <option value="">Todas</option>
+                  {areasQuery.data?.map((area) => (
+                    <option key={area.id} value={area.id}>
+                      {area.name}
+                    </option>
+                  ))}
+                </select>
+              </fieldset>
+              <fieldset className="fieldset">
+                <legend className="fieldset-legend">Subárea</legend>
+                <select
+                  name="subarea"
+                  className="select w-full"
+                  defaultValue={filters.subareaId ?? ""}
+                  disabled={!filters.areaId || subareasQuery.isPending}
+                >
+                  <option value="">Todas</option>
+                  {subareasQuery.data?.map((subarea) => (
+                    <option key={subarea.id} value={subarea.id}>
+                      {subarea.name}
+                    </option>
+                  ))}
+                </select>
+              </fieldset>
+              <fieldset className="fieldset">
+                <legend className="fieldset-legend">Categoría</legend>
+                <select
+                  name="categoria"
+                  className="select w-full"
+                  value={filters.categoryId ?? ""}
+                  onChange={(event) =>
+                    selectParentFilter("categoria", "tipo", event.target.value)
+                  }
+                >
+                  <option value="">Todas</option>
+                  {categoriesQuery.data?.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </fieldset>
+              <fieldset className="fieldset">
+                <legend className="fieldset-legend">Tipo</legend>
+                <select
+                  name="tipo"
+                  className="select w-full"
+                  defaultValue={filters.problemTypeId ?? ""}
+                  disabled={!filters.categoryId || problemTypesQuery.isPending}
+                >
+                  <option value="">Todos</option>
+                  {problemTypesQuery.data?.map((problemType) => (
+                    <option key={problemType.id} value={problemType.id}>
+                      {problemType.name}
+                    </option>
+                  ))}
+                </select>
+              </fieldset>
+              {mode === "queue" && (
+                <fieldset className="fieldset sm:col-span-2">
+                  <legend className="fieldset-legend">Asignación</legend>
+                  <select
+                    name="asignado"
+                    className="select w-full"
+                    defaultValue={assignmentValue ?? ""}
+                    disabled={agentsQuery.isPending || agentsQuery.isError}
+                  >
+                    <option value="">Cualquier asignación</option>
+                    <option value="sin-asignar">Sin asignar</option>
+                    <option value="mios">Asignados a mí</option>
+                    {agentsQuery.data?.map((agent) => (
+                      <option key={agent.id} value={agent.id}>
+                        {agent.name}
+                      </option>
+                    ))}
+                  </select>
+                </fieldset>
+              )}
+              <fieldset className="fieldset">
+                <legend className="fieldset-legend">Desde</legend>
+                <input
+                  type="date"
+                  name="desde"
+                  className="input w-full"
+                  defaultValue={filters.dateFrom}
+                />
+              </fieldset>
+              <fieldset className="fieldset">
+                <legend className="fieldset-legend">Hasta</legend>
+                <input
+                  type="date"
+                  name="hasta"
+                  className="input w-full"
+                  defaultValue={filters.dateTo}
+                />
+              </fieldset>
+            </div>
+            <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              {hasFilters && (
+                <Link to={basePath} className="btn btn-ghost">
+                  <X className="size-4" aria-hidden="true" /> Limpiar
+                </Link>
+              )}
+              <button type="submit" className="btn">
+                <Filter className="size-4" aria-hidden="true" /> Aplicar filtros
+              </button>
+            </div>
           </CollapsibleFilters>
         </Form>
       )}

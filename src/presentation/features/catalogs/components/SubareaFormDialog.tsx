@@ -204,7 +204,8 @@ const SubareaFormDialog = ({
                 type="submit"
                 className="btn btn-primary"
                 disabled={
-                  mutation.isPending || Boolean(subarea && !form.formState.isDirty)
+                  mutation.isPending ||
+                  Boolean(subarea && !form.formState.isDirty)
                 }
               >
                 {mutation.isPending && (

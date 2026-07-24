@@ -10,7 +10,8 @@ interface DateTimeDisplayProps {
 
 const DateTimeDisplay = ({ value, className }: DateTimeDisplayProps) => {
   const formatted = getLimaDateTimeParts(value);
-  const classes = `inline-flex flex-col leading-tight ${className ?? ""}`.trim();
+  const classes =
+    `inline-flex flex-col leading-tight ${className ?? ""}`.trim();
 
   if (!formatted.iso) return <span className={classes}>{formatted.date}</span>;
 

@@ -16,10 +16,12 @@ const UserMenu = () => {
 
   if (!user) return null;
 
-  const displayName = `${user.name} ${user.lastName}`.trim() || `DNI ${user.dni}`;
-  const initials = user.name && user.lastName
-    ? `${user.name.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase()
-    : "?";
+  const displayName =
+    `${user.name} ${user.lastName}`.trim() || `DNI ${user.dni}`;
+  const initials =
+    user.name && user.lastName
+      ? `${user.name.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase()
+      : "?";
 
   return (
     <details className="dropdown dropdown-end">

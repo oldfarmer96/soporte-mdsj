@@ -120,9 +120,7 @@ const TicketCreatedPage = () => {
               <CircleHelp className="size-4" aria-hidden="true" />
               Tipo e impacto
             </dt>
-            <dd className="mt-2 font-semibold">
-              {ticket.problemTypeName}
-            </dd>
+            <dd className="mt-2 font-semibold">{ticket.problemTypeName}</dd>
             <dd className="mt-1 text-sm text-base-content/60">
               {IMPACT_LABELS[ticket.impact]}
               {ticket.workStopped ? " · Trabajo detenido" : ""}
@@ -168,7 +166,10 @@ const TicketCreatedPage = () => {
       )}
 
       <div className="mt-5 grid gap-5 xl:grid-cols-2">
-        <TicketResolutionPanel resolution={ticket.resolution} status={ticket.status} />
+        <TicketResolutionPanel
+          resolution={ticket.resolution}
+          status={ticket.status}
+        />
         <TicketAttachments
           ticketId={ticket.id}
           attachments={ticket.attachments}

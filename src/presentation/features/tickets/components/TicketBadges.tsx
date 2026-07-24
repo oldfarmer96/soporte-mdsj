@@ -35,12 +35,18 @@ const STATUS_STYLES: Record<TicketStatus, string> = {
   REABIERTO: "badge-accent badge-soft",
 };
 
-export const TicketPriorityBadge = ({ priority }: { priority: TicketPriority }) => (
+export const TicketPriorityBadge = ({
+  priority,
+}: {
+  priority: TicketPriority;
+}) => (
   <span className={`badge ${PRIORITY_STYLES[priority]}`}>
     {PRIORITY_LABELS[priority]}
   </span>
 );
 
 export const TicketStatusBadge = ({ status }: { status: TicketStatus }) => (
-  <span className={`badge ${STATUS_STYLES[status]}`}>{STATUS_LABELS[status]}</span>
+  <span className={`badge ${STATUS_STYLES[status]}`}>
+    {STATUS_LABELS[status]}
+  </span>
 );

@@ -61,7 +61,9 @@ const SupportRealtimeControls = () => {
         void playAlert().catch(() => {
           localStorage.setItem(SOUND_STORAGE_KEY, "false");
           setSoundEnabled(false);
-          toast.error("El navegador bloqueó la alerta sonora. Actívala nuevamente.");
+          toast.error(
+            "El navegador bloqueó la alerta sonora. Actívala nuevamente.",
+          );
         });
       }
     }
@@ -78,12 +80,16 @@ const SupportRealtimeControls = () => {
       .subscribe((status) => {
         if (status === "SUBSCRIBED") {
           setConnectionStatus("connected");
-          queryClient.invalidateQueries({ queryKey: ticketKeys.supportLists() });
+          queryClient.invalidateQueries({
+            queryKey: ticketKeys.supportLists(),
+          });
           return;
         }
 
         setConnectionStatus(
-          status === "CHANNEL_ERROR" || status === "TIMED_OUT" ? "error" : "connecting",
+          status === "CHANNEL_ERROR" || status === "TIMED_OUT"
+            ? "error"
+            : "connecting",
         );
       });
 
@@ -124,7 +130,11 @@ const SupportRealtimeControls = () => {
         className={`btn btn-ghost btn-sm ${soundEnabled ? "btn-active" : ""}`}
         onClick={() => void toggleSound()}
         aria-pressed={soundEnabled}
-        aria-label={soundEnabled ? "Desactivar alertas sonoras" : "Activar alertas sonoras"}
+        aria-label={
+          soundEnabled
+            ? "Desactivar alertas sonoras"
+            : "Activar alertas sonoras"
+        }
         title={soundEnabled ? "Desactivar sonido" : "Activar sonido"}
       >
         {soundEnabled ? (
@@ -132,7 +142,9 @@ const SupportRealtimeControls = () => {
         ) : (
           <BellOff className="size-4" aria-hidden="true" />
         )}
-        <span className="hidden xl:inline">{soundEnabled ? "Sonido activo" : "Activar sonido"}</span>
+        <span className="hidden xl:inline">
+          {soundEnabled ? "Sonido activo" : "Activar sonido"}
+        </span>
       </button>
     </div>
   );
