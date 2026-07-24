@@ -4,14 +4,16 @@ import PageHeader from "@/presentation/components/PageHeader";
 import { NAVIGATION_BY_ROLE } from "@/presentation/navigation/navigation";
 import type { RoleT } from "@/shared/types/role.types";
 import { ArrowRight, UserRoundPen } from "lucide-react";
+import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 
 interface RoleHomePageProps {
   role: RoleT;
   description: string;
+  children?: ReactNode;
 }
 
-const RoleHomePage = ({ role, description }: RoleHomePageProps) => {
+const RoleHomePage = ({ role, description, children }: RoleHomePageProps) => {
   const user = useAuthStore((state) => state.user);
   const navigation = NAVIGATION_BY_ROLE[role];
   const destinations = navigation.items.filter(
@@ -95,6 +97,8 @@ const RoleHomePage = ({ role, description }: RoleHomePageProps) => {
           })}
         </div>
       </section>
+
+      {children}
     </PageContainer>
   );
 };

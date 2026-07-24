@@ -52,7 +52,7 @@ const SupportRealtimeControls = () => {
   };
 
   const handleTicketChange = useEffectEvent((eventType: string) => {
-    queryClient.invalidateQueries({ queryKey: ticketKeys.support() });
+    queryClient.invalidateQueries({ queryKey: ticketKeys.supportLists() });
 
     if (eventType === "INSERT") {
       toast.info("Nuevo ticket recibido");
@@ -78,7 +78,7 @@ const SupportRealtimeControls = () => {
       .subscribe((status) => {
         if (status === "SUBSCRIBED") {
           setConnectionStatus("connected");
-          queryClient.invalidateQueries({ queryKey: ticketKeys.support() });
+          queryClient.invalidateQueries({ queryKey: ticketKeys.supportLists() });
           return;
         }
 

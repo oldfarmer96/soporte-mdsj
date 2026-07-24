@@ -197,10 +197,14 @@ const TicketAttachments = ({
   ticketId,
   attachments,
   status,
+  canUpload = true,
+  canDelete = true,
 }: {
   ticketId: string;
   attachments: TicketAttachment[];
   status: TicketStatus;
+  canUpload?: boolean;
+  canDelete?: boolean;
 }) => {
   const [uploads, setUploads] = useState<UploadItem[]>([]);
   const [isOptimizing, setIsOptimizing] = useState(false);
@@ -273,7 +277,7 @@ const TicketAttachments = ({
         </div>
       </div>
 
-      {attachments.length === 0 && canModify ? (
+      {attachments.length === 0 && canModify && canUpload ? (
         <div className="mt-5 min-w-0 max-w-full overflow-hidden rounded-box border border-dashed border-base-300 bg-base-200 p-4">
           <label
             htmlFor={`ticket-files-${ticketId}`}
@@ -357,11 +361,11 @@ const TicketAttachments = ({
         <p className="mt-5 rounded-box bg-base-200 p-4 text-sm text-base-content/65">
           Este ticket ya tiene una imagen asociada.
         </p>
-      ) : (
+      ) : canUpload ? (
         <p className="mt-5 rounded-box bg-base-200 p-4 text-sm text-base-content/65">
           Ya no se pueden agregar imágenes en el estado actual del ticket.
         </p>
-      )}
+      ) : null}
 
       {uploads.length > 0 && (
         <div className="mt-4">
@@ -482,7 +486,7 @@ const TicketAttachments = ({
               key={attachment.id}
               attachment={attachment}
               ticketId={ticketId}
-              canDelete={canModify}
+              canDelete={canModify && canDelete}
             />
           ))}
         </ul>

@@ -1,10 +1,15 @@
-import type { TicketResolution } from "@/shared/interfaces/ticket.interface";
+import type {
+  TicketResolution,
+  TicketStatus,
+} from "@/shared/interfaces/ticket.interface";
 import { CheckCircle2, Clock3, Wrench } from "lucide-react";
 
 const TicketResolutionPanel = ({
   resolution,
+  status,
 }: {
   resolution: TicketResolution | null;
+  status: TicketStatus;
 }) => (
   <section className="rounded-box border border-base-300 bg-base-100 p-5 shadow-sm sm:p-7">
     <div className="flex items-start gap-3">
@@ -55,6 +60,12 @@ const TicketResolutionPanel = ({
                 <p className="mt-1 text-sm">{resolution.requesterComment}</p>
               )}
             </div>
+          </div>
+        )}
+        {status === "CERRADO" && resolution.requesterConfirmed === null && (
+          <div className="alert alert-info alert-soft">
+            <CheckCircle2 className="size-5" aria-hidden="true" />
+            <span>El personal de apoyo cerró el ticket sin confirmación del solicitante.</span>
           </div>
         )}
       </div>

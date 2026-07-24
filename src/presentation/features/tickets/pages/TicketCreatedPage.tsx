@@ -1,4 +1,5 @@
 import { useTicketDetail } from "@/application/hooks/useTickets";
+import { useTicketDetailRealtime } from "@/application/hooks/useTicketRealtime";
 import ErrorState from "@/presentation/components/ErrorState";
 import DateTimeDisplay from "@/presentation/components/DateTimeDisplay";
 import PageContainer from "@/presentation/components/PageContainer";
@@ -36,6 +37,7 @@ const IMPACT_LABELS: Record<TicketImpact, string> = {
 
 const TicketCreatedPage = () => {
   const { ticketId = "" } = useParams();
+  useTicketDetailRealtime(ticketId, "requester");
   const ticketQuery = useTicketDetail(ticketId);
 
   if (ticketQuery.isPending) return <PageSkeleton />;
@@ -166,7 +168,7 @@ const TicketCreatedPage = () => {
       )}
 
       <div className="mt-5 grid gap-5 xl:grid-cols-2">
-        <TicketResolutionPanel resolution={ticket.resolution} />
+        <TicketResolutionPanel resolution={ticket.resolution} status={ticket.status} />
         <TicketAttachments
           ticketId={ticket.id}
           attachments={ticket.attachments}

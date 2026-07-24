@@ -1,9 +1,11 @@
 import {
   useAssignSupportTicket,
   useChangeSupportTicketState,
+  useCloseSupportTicket,
   useResolveSupportTicket,
   useSupportAgents,
 } from "@/application/hooks/useSupportTickets";
+import { useAuthStore } from "@/application/store/auth-store";
 import FieldInfo from "@/presentation/components/FieldInfo";
 import type { SupportTicketDetail } from "@/shared/interfaces/supportTicket.interface";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,15 +24,18 @@ const RESOLVABLE_STATES = ["ASIGNADO", "EN_CURSO", "REABIERTO"];
 const CANCELLABLE_STATES = ["NUEVO", "ASIGNADO", "EN_CURSO", "REABIERTO"];
 const CANCEL_DIALOG_ID = "cancel-support-ticket-dialog";
 const RESOLVE_DIALOG_ID = "resolve-support-ticket-dialog";
+const CLOSE_DIALOG_ID = "close-support-ticket-dialog";
 
 const getDialog = (dialogId: string) =>
   document.getElementById(dialogId) as HTMLDialogElement | null;
 
 const SupportTicketActions = ({ ticket }: { ticket: SupportTicketDetail }) => {
+  const userId = useAuthStore((state) => state.user?.id);
   const agentsQuery = useSupportAgents();
   const assignMutation = useAssignSupportTicket();
   const stateMutation = useChangeSupportTicketState();
   const resolveMutation = useResolveSupportTicket();
+  const closeMutation = useCloseSupportTicket();
   const cancelForm = useForm<CancelTicketForm>({
     resolver: zodResolver(cancelTicketSchema),
     defaultValues: { detail: "" },
@@ -40,11 +45,16 @@ const SupportTicketActions = ({ ticket }: { ticket: SupportTicketDetail }) => {
     defaultValues: { diagnosis: "", solution: "" },
   });
   const isMutating =
-    assignMutation.isPending || stateMutation.isPending || resolveMutation.isPending;
+    assignMutation.isPending ||
+    stateMutation.isPending ||
+    resolveMutation.isPending ||
+    closeMutation.isPending;
   const canAssign = ASSIGNABLE_STATES.includes(ticket.status);
   const canStart = STARTABLE_STATES.includes(ticket.status);
   const canResolve = RESOLVABLE_STATES.includes(ticket.status);
   const canCancel = CANCELLABLE_STATES.includes(ticket.status);
+  const canClose =
+    ticket.status === "RESUELTO" && ticket.assignedAgent?.id === userId;
 
   const assignTicket = (formData: FormData) => {
     const agentId = String(formData.get("agentId") ?? "");
@@ -68,6 +78,12 @@ const SupportTicketActions = ({ ticket }: { ticket: SupportTicketDetail }) => {
       },
       { onSuccess: () => getDialog(RESOLVE_DIALOG_ID)?.close() },
     );
+  };
+
+  const closeTicket = () => {
+    closeMutation.mutate(ticket.id, {
+      onSuccess: () => getDialog(CLOSE_DIALOG_ID)?.close(),
+    });
   };
 
   return (
@@ -156,9 +172,20 @@ const SupportTicketActions = ({ ticket }: { ticket: SupportTicketDetail }) => {
             Cancelar ticket
           </button>
         )}
+        {canClose && (
+          <button
+            type="button"
+            className="btn sm:col-span-2"
+            disabled={isMutating}
+            onClick={() => getDialog(CLOSE_DIALOG_ID)?.showModal()}
+          >
+            <CheckCircle2 className="size-4" aria-hidden="true" />
+            Cerrar sin confirmación
+          </button>
+        )}
       </div>
 
-      {!canAssign && !canStart && !canResolve && !canCancel && (
+      {!canAssign && !canStart && !canResolve && !canCancel && !canClose && (
         <p className="mt-5 rounded-box bg-base-200 p-4 text-sm text-base-content/65">
           Este ticket no admite acciones operativas desde su estado actual.
         </p>
@@ -210,6 +237,49 @@ const SupportTicketActions = ({ ticket }: { ticket: SupportTicketDetail }) => {
           </form>
         </div>
         <form method="dialog" className="modal-backdrop"><button>Cerrar</button></form>
+      </dialog>
+
+      <dialog id={CLOSE_DIALOG_ID} className="modal">
+        <div className="modal-box">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-black">Cerrar sin confirmación</h2>
+              <p className="mt-2 text-sm leading-relaxed text-base-content/65">
+                El ticket se cerrará aunque el solicitante todavía no haya confirmado la
+                solución. Esta acción quedará registrada en el historial.
+              </p>
+            </div>
+            <form method="dialog">
+              <button className="btn btn-ghost btn-square btn-sm" aria-label="Cerrar">
+                <X className="size-4" aria-hidden="true" />
+              </button>
+            </form>
+          </div>
+          <div className="modal-action">
+            <button
+              type="button"
+              className="btn"
+              disabled={closeMutation.isPending}
+              onClick={() => getDialog(CLOSE_DIALOG_ID)?.close()}
+            >
+              Volver
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary"
+              disabled={closeMutation.isPending}
+              onClick={closeTicket}
+            >
+              {closeMutation.isPending && (
+                <span className="loading loading-spinner loading-sm" />
+              )}
+              Confirmar cierre
+            </button>
+          </div>
+        </div>
+        <form method="dialog" className="modal-backdrop">
+          <button>Cerrar</button>
+        </form>
       </dialog>
 
       <dialog id={RESOLVE_DIALOG_ID} className="modal">

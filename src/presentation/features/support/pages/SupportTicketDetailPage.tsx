@@ -1,4 +1,6 @@
 import { useSupportTicketDetail } from "@/application/hooks/useSupportTickets";
+import { useTicketDetailRealtime } from "@/application/hooks/useTicketRealtime";
+import { useAuthStore } from "@/application/store/auth-store";
 import ErrorState from "@/presentation/components/ErrorState";
 import DateTimeDisplay from "@/presentation/components/DateTimeDisplay";
 import PageContainer from "@/presentation/components/PageContainer";
@@ -28,6 +30,8 @@ import SupportTicketActions from "../components/SupportTicketActions";
 
 const SupportTicketDetailPage = () => {
   const { ticketId = "" } = useParams();
+  const userId = useAuthStore((state) => state.user?.id);
+  useTicketDetailRealtime(ticketId, "support");
   const ticketQuery = useSupportTicketDetail(ticketId);
 
   if (ticketQuery.isPending) return <PageSkeleton />;
@@ -119,11 +123,13 @@ const SupportTicketDetailPage = () => {
           </section>
 
           <div className="grid gap-5 lg:grid-cols-2">
-            <TicketResolutionPanel resolution={ticket.resolution} />
+            <TicketResolutionPanel resolution={ticket.resolution} status={ticket.status} />
             <TicketAttachments
               ticketId={ticket.id}
               attachments={ticket.attachments}
               status={ticket.status}
+              canUpload={false}
+              canDelete={ticket.assignedAgent?.id === userId}
             />
           </div>
           <TicketTimeline history={ticket.history} />
