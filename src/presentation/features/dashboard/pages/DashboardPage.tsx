@@ -12,15 +12,11 @@ import {
   Activity,
   CalendarDays,
   Inbox,
-  Sheet,
   TicketCheck,
   Tickets,
   UsersRound,
 } from "lucide-react";
-import { useState } from "react";
 import { Form, useSearchParams } from "react-router-dom";
-import { toast } from "sonner";
-import { downloadDashboardExcel } from "../utils/dashboardExports";
 
 const STATUS_LABELS: Record<string, string> = {
   NUEVO: "Nuevo",
@@ -130,7 +126,6 @@ const SummaryCards = ({ metrics }: { metrics: SupportDashboardMetrics }) => {
 
 const DashboardPage = ({ role }: { role: "APOYO" | "ADMIN" }) => {
   const [searchParams] = useSearchParams();
-  const [isExporting, setIsExporting] = useState(false);
   const today = getLimaToday();
   const fromParam = searchParams.get("desde");
   const toParam = searchParams.get("hasta");
@@ -152,42 +147,12 @@ const DashboardPage = ({ role }: { role: "APOYO" | "ADMIN" }) => {
       )
     : 1;
 
-  const exportReport = async () => {
-    if (!metricsQuery.data) return;
-    setIsExporting(true);
-    try {
-      await downloadDashboardExcel(metricsQuery.data);
-      toast.success("Reporte Excel generado correctamente");
-    } catch {
-      toast.error("No pudimos generar el reporte Excel. Inténtalo nuevamente.");
-    } finally {
-      setIsExporting(false);
-    }
-  };
-
   return (
     <PageContainer>
       <PageHeader
         eyebrow={role === "ADMIN" ? "Administración" : "Personal de apoyo"}
         title="Resumen operativo"
         description="Indicadores agregados de la mesa de soporte en horario de Lima."
-        actions={
-          metricsQuery.isSuccess ? (
-            <button
-              type="button"
-              className="btn"
-              disabled={isExporting}
-              onClick={() => void exportReport()}
-            >
-              {isExporting ? (
-                <span className="loading loading-spinner loading-sm" />
-              ) : (
-                <Sheet className="size-4" aria-hidden="true" />
-              )}
-              Excel
-            </button>
-          ) : undefined
-        }
       />
 
       <Form
