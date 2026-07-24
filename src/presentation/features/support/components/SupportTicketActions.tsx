@@ -94,16 +94,20 @@ const SupportTicketActions = ({ ticket }: { ticket: SupportTicketDetail }) => {
       </p>
 
       {canAssign && (
-        <form action={assignTicket} className="mt-5 rounded-box bg-base-200 p-4">
+        <form
+          id="assign-support-ticket"
+          action={assignTicket}
+          className="mt-5 rounded-box bg-base-200 p-4"
+        >
           <label htmlFor="support-agent" className="text-sm font-bold">
             Asignar personal
           </label>
-          <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+          <div className="mt-2 min-w-0">
             <select
               key={ticket.assignedAgent?.id ?? "unassigned"}
               id="support-agent"
               name="agentId"
-              className="select w-full"
+              className="select w-full min-w-0 truncate"
               defaultValue={ticket.assignedAgent?.id ?? ""}
               disabled={agentsQuery.isPending || agentsQuery.isError || isMutating}
               required
@@ -117,14 +121,6 @@ const SupportTicketActions = ({ ticket }: { ticket: SupportTicketDetail }) => {
                 </option>
               ))}
             </select>
-            <button type="submit" className="btn" disabled={isMutating || agentsQuery.isError}>
-              {assignMutation.isPending ? (
-                <span className="loading loading-spinner loading-sm" />
-              ) : (
-                <UserCheck className="size-4" aria-hidden="true" />
-              )}
-              Guardar
-            </button>
           </div>
           {agentsQuery.isError && (
             <p className="mt-2 text-sm text-error">No pudimos cargar el personal disponible.</p>
@@ -133,6 +129,21 @@ const SupportTicketActions = ({ ticket }: { ticket: SupportTicketDetail }) => {
       )}
 
       <div className="mt-4 grid gap-2 sm:grid-cols-2">
+        {canAssign && (
+          <button
+            type="submit"
+            form="assign-support-ticket"
+            className="btn"
+            disabled={isMutating || agentsQuery.isError}
+          >
+            {assignMutation.isPending ? (
+              <span className="loading loading-spinner loading-sm" />
+            ) : (
+              <UserCheck className="size-4" aria-hidden="true" />
+            )}
+            Guardar asignación
+          </button>
+        )}
         {canStart && (
           <button
             type="button"
