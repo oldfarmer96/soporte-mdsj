@@ -133,9 +133,11 @@ const SubareasPage = () => {
                   </p>
                 )}
                 <div className="mt-4 flex flex-wrap gap-2 border-t border-base-300 pt-4">
-                  {subarea.isOther ? (
+                  {subarea.isOther || subarea.isNoSubarea ? (
                     <span className="text-xs text-base-content/55">
-                      Opción administrada por el sistema
+                      {subarea.isNoSubarea
+                        ? "Opción técnica administrada por el sistema"
+                        : "Opción administrada por el sistema"}
                     </span>
                   ) : (
                     <>

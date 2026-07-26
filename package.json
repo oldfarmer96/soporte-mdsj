@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "db:lint:local": "supabase db lint --local",
+    "db:reset:local": "supabase db reset --local",
     "lint": "eslint .",
     "preview": "vite preview"
   },

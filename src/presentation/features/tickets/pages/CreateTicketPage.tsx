@@ -16,6 +16,7 @@ import {
   Send,
   Tags,
 } from "lucide-react";
+import { useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import {
   createTicketSchema,
@@ -72,6 +73,19 @@ const CreateTicketPage = () => {
     },
   });
   const description = useWatch({ control, name: "description" });
+  const subareaId = useWatch({ control, name: "subareaId" });
+  const noSubareaId = catalogs.subareasQuery.data?.find(
+    (subarea) =>
+      subarea.areaId === catalogs.areaId && subarea.isNoSubarea,
+  )?.id;
+
+  useEffect(() => {
+    if (!noSubareaId || subareaId) return;
+
+    setValue("subareaId", noSubareaId, { shouldValidate: true });
+    catalogs.selectSubarea(noSubareaId);
+  }, [catalogs, noSubareaId, setValue, subareaId]);
+
   const catalogsUnavailable =
     catalogs.areasQuery.isError ||
     catalogs.subareasQuery.isError ||

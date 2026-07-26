@@ -31,6 +31,7 @@ interface SubareaRow {
   nombre_corto: string | null;
   descripcion: string | null;
   es_otro: boolean;
+  es_sin_subarea: boolean;
   activo: boolean;
 }
 
@@ -59,6 +60,8 @@ export const getAreas = async ({
   let query = supabase
     .from("areas")
     .select("id, nombre, nombre_corto, piso, referencia, es_otro, activo")
+    .order("es_otro", { ascending: true })
+    .order("orden", { ascending: true })
     .order("nombre", { ascending: true });
 
   if (!includeInactive) query = query.eq("activo", true);
@@ -84,9 +87,10 @@ export const getSubareas = async ({
   let query = supabase
     .from("subareas")
     .select(
-      "id, id_area, nombre, nombre_corto, descripcion, es_otro, activo",
+      "id, id_area, nombre, nombre_corto, descripcion, es_otro, es_sin_subarea, activo",
     )
     .order("es_otro", { ascending: true })
+    .order("orden", { ascending: true })
     .order("nombre", { ascending: true });
 
   if (areaId) query = query.eq("id_area", areaId);
@@ -102,6 +106,7 @@ export const getSubareas = async ({
     shortName: subarea.nombre_corto,
     description: subarea.descripcion,
     isOther: subarea.es_otro,
+    isNoSubarea: subarea.es_sin_subarea,
     isActive: subarea.activo,
   }));
 };
@@ -112,6 +117,8 @@ export const getCategories = async ({
   let query = supabase
     .from("categorias")
     .select("id, nombre, descripcion, es_critico, es_otro, activo")
+    .order("es_otro", { ascending: true })
+    .order("orden", { ascending: true })
     .order("nombre", { ascending: true });
 
   if (!includeInactive) query = query.eq("activo", true);
@@ -139,6 +146,7 @@ export const getProblemTypes = async ({
       "id, id_categoria, nombre, descripcion, prioridad, es_otro, activo",
     )
     .order("es_otro", { ascending: true })
+    .order("orden", { ascending: true })
     .order("nombre", { ascending: true });
 
   if (categoryId) query = query.eq("id_categoria", categoryId);
