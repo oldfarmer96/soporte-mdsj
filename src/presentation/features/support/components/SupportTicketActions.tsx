@@ -1,9 +1,11 @@
 import {
   useAssignSupportTicket,
   useChangeSupportTicketState,
+  useCloseSupportTicket,
   useResolveSupportTicket,
   useSupportAgents,
 } from "@/application/hooks/useSupportTickets";
+import { useAuthStore } from "@/application/store/auth-store";
 import FieldInfo from "@/presentation/components/FieldInfo";
 import type { SupportTicketDetail } from "@/shared/interfaces/supportTicket.interface";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,15 +24,18 @@ const RESOLVABLE_STATES = ["ASIGNADO", "EN_CURSO", "REABIERTO"];
 const CANCELLABLE_STATES = ["NUEVO", "ASIGNADO", "EN_CURSO", "REABIERTO"];
 const CANCEL_DIALOG_ID = "cancel-support-ticket-dialog";
 const RESOLVE_DIALOG_ID = "resolve-support-ticket-dialog";
+const CLOSE_DIALOG_ID = "close-support-ticket-dialog";
 
 const getDialog = (dialogId: string) =>
   document.getElementById(dialogId) as HTMLDialogElement | null;
 
 const SupportTicketActions = ({ ticket }: { ticket: SupportTicketDetail }) => {
+  const userId = useAuthStore((state) => state.user?.id);
   const agentsQuery = useSupportAgents();
   const assignMutation = useAssignSupportTicket();
   const stateMutation = useChangeSupportTicketState();
   const resolveMutation = useResolveSupportTicket();
+  const closeMutation = useCloseSupportTicket();
   const cancelForm = useForm<CancelTicketForm>({
     resolver: zodResolver(cancelTicketSchema),
     defaultValues: { detail: "" },
@@ -40,11 +45,16 @@ const SupportTicketActions = ({ ticket }: { ticket: SupportTicketDetail }) => {
     defaultValues: { diagnosis: "", solution: "" },
   });
   const isMutating =
-    assignMutation.isPending || stateMutation.isPending || resolveMutation.isPending;
+    assignMutation.isPending ||
+    stateMutation.isPending ||
+    resolveMutation.isPending ||
+    closeMutation.isPending;
   const canAssign = ASSIGNABLE_STATES.includes(ticket.status);
   const canStart = STARTABLE_STATES.includes(ticket.status);
   const canResolve = RESOLVABLE_STATES.includes(ticket.status);
   const canCancel = CANCELLABLE_STATES.includes(ticket.status);
+  const canClose =
+    ticket.status === "RESUELTO" && ticket.assignedAgent?.id === userId;
 
   const assignTicket = (formData: FormData) => {
     const agentId = String(formData.get("agentId") ?? "");
@@ -70,6 +80,12 @@ const SupportTicketActions = ({ ticket }: { ticket: SupportTicketDetail }) => {
     );
   };
 
+  const closeTicket = () => {
+    closeMutation.mutate(ticket.id, {
+      onSuccess: () => getDialog(CLOSE_DIALOG_ID)?.close(),
+    });
+  };
+
   return (
     <section className="rounded-box border border-base-300 bg-base-100 p-5 shadow-sm sm:p-6">
       <h2 className="text-lg font-black">Operación</h2>
@@ -78,22 +94,30 @@ const SupportTicketActions = ({ ticket }: { ticket: SupportTicketDetail }) => {
       </p>
 
       {canAssign && (
-        <form action={assignTicket} className="mt-5 rounded-box bg-base-200 p-4">
+        <form
+          id="assign-support-ticket"
+          action={assignTicket}
+          className="mt-5 rounded-box bg-base-200 p-4"
+        >
           <label htmlFor="support-agent" className="text-sm font-bold">
             Asignar personal
           </label>
-          <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+          <div className="mt-2 min-w-0">
             <select
               key={ticket.assignedAgent?.id ?? "unassigned"}
               id="support-agent"
               name="agentId"
-              className="select w-full"
+              className="select w-full min-w-0 truncate"
               defaultValue={ticket.assignedAgent?.id ?? ""}
-              disabled={agentsQuery.isPending || agentsQuery.isError || isMutating}
+              disabled={
+                agentsQuery.isPending || agentsQuery.isError || isMutating
+              }
               required
             >
               <option value="" disabled>
-                {agentsQuery.isPending ? "Cargando personal..." : "Selecciona una persona"}
+                {agentsQuery.isPending
+                  ? "Cargando personal..."
+                  : "Selecciona una persona"}
               </option>
               {agentsQuery.data?.map((agent) => (
                 <option key={agent.id} value={agent.id}>
@@ -101,22 +125,31 @@ const SupportTicketActions = ({ ticket }: { ticket: SupportTicketDetail }) => {
                 </option>
               ))}
             </select>
-            <button type="submit" className="btn" disabled={isMutating || agentsQuery.isError}>
-              {assignMutation.isPending ? (
-                <span className="loading loading-spinner loading-sm" />
-              ) : (
-                <UserCheck className="size-4" aria-hidden="true" />
-              )}
-              Guardar
-            </button>
           </div>
           {agentsQuery.isError && (
-            <p className="mt-2 text-sm text-error">No pudimos cargar el personal disponible.</p>
+            <p className="mt-2 text-sm text-error">
+              No pudimos cargar el personal disponible.
+            </p>
           )}
         </form>
       )}
 
       <div className="mt-4 grid gap-2 sm:grid-cols-2">
+        {canAssign && (
+          <button
+            type="submit"
+            form="assign-support-ticket"
+            className="btn"
+            disabled={isMutating || agentsQuery.isError}
+          >
+            {assignMutation.isPending ? (
+              <span className="loading loading-spinner loading-sm" />
+            ) : (
+              <UserCheck className="size-4" aria-hidden="true" />
+            )}
+            Guardar asignación
+          </button>
+        )}
         {canStart && (
           <button
             type="button"
@@ -156,9 +189,20 @@ const SupportTicketActions = ({ ticket }: { ticket: SupportTicketDetail }) => {
             Cancelar ticket
           </button>
         )}
+        {canClose && (
+          <button
+            type="button"
+            className="btn sm:col-span-2"
+            disabled={isMutating}
+            onClick={() => getDialog(CLOSE_DIALOG_ID)?.showModal()}
+          >
+            <CheckCircle2 className="size-4" aria-hidden="true" />
+            Cerrar sin confirmación
+          </button>
+        )}
       </div>
 
-      {!canAssign && !canStart && !canResolve && !canCancel && (
+      {!canAssign && !canStart && !canResolve && !canCancel && !canClose && (
         <p className="mt-5 rounded-box bg-base-200 p-4 text-sm text-base-content/65">
           Este ticket no admite acciones operativas desde su estado actual.
         </p>
@@ -170,19 +214,28 @@ const SupportTicketActions = ({ ticket }: { ticket: SupportTicketDetail }) => {
             <div>
               <h2 className="text-xl font-black">Cancelar ticket</h2>
               <p className="mt-2 text-sm leading-relaxed text-base-content/65">
-                Esta acción detiene la atención y no puede revertirse con las reglas actuales.
+                Esta acción detiene la atención y no puede revertirse con las
+                reglas actuales.
               </p>
             </div>
             <form method="dialog">
-              <button className="btn btn-ghost btn-square btn-sm" aria-label="Cerrar">
+              <button
+                className="btn btn-ghost btn-square btn-sm"
+                aria-label="Cerrar"
+              >
                 <X className="size-4" aria-hidden="true" />
               </button>
             </form>
           </div>
-          <form className="mt-5" onSubmit={cancelForm.handleSubmit(cancelTicket)} noValidate>
+          <form
+            className="mt-5"
+            onSubmit={cancelForm.handleSubmit(cancelTicket)}
+            noValidate
+          >
             <fieldset className="fieldset">
               <legend className="fieldset-legend">
-                Motivo <span className="font-normal opacity-55">(opcional)</span>
+                Motivo{" "}
+                <span className="font-normal opacity-55">(opcional)</span>
               </legend>
               <textarea
                 {...cancelForm.register("detail")}
@@ -193,23 +246,87 @@ const SupportTicketActions = ({ ticket }: { ticket: SupportTicketDetail }) => {
                 placeholder="Explica por qué se cancela la solicitud"
                 aria-invalid={Boolean(cancelForm.formState.errors.detail)}
                 aria-describedby={
-                  cancelForm.formState.errors.detail ? "cancel-detail-error" : undefined
+                  cancelForm.formState.errors.detail
+                    ? "cancel-detail-error"
+                    : undefined
                 }
               />
-              <FieldInfo id="cancel-detail-error" error={cancelForm.formState.errors.detail} />
+              <FieldInfo
+                id="cancel-detail-error"
+                error={cancelForm.formState.errors.detail}
+              />
             </fieldset>
             <div className="modal-action">
-              <button type="button" className="btn" onClick={() => getDialog(CANCEL_DIALOG_ID)?.close()}>
+              <button
+                type="button"
+                className="btn"
+                onClick={() => getDialog(CANCEL_DIALOG_ID)?.close()}
+              >
                 Volver
               </button>
-              <button type="submit" className="btn btn-error" disabled={stateMutation.isPending}>
-                {stateMutation.isPending && <span className="loading loading-spinner loading-sm" />}
+              <button
+                type="submit"
+                className="btn btn-error"
+                disabled={stateMutation.isPending}
+              >
+                {stateMutation.isPending && (
+                  <span className="loading loading-spinner loading-sm" />
+                )}
                 Confirmar cancelación
               </button>
             </div>
           </form>
         </div>
-        <form method="dialog" className="modal-backdrop"><button>Cerrar</button></form>
+        <form method="dialog" className="modal-backdrop">
+          <button>Cerrar</button>
+        </form>
+      </dialog>
+
+      <dialog id={CLOSE_DIALOG_ID} className="modal">
+        <div className="modal-box">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-black">Cerrar sin confirmación</h2>
+              <p className="mt-2 text-sm leading-relaxed text-base-content/65">
+                El ticket se cerrará aunque el solicitante todavía no haya
+                confirmado la solución. Esta acción quedará registrada en el
+                historial.
+              </p>
+            </div>
+            <form method="dialog">
+              <button
+                className="btn btn-ghost btn-square btn-sm"
+                aria-label="Cerrar"
+              >
+                <X className="size-4" aria-hidden="true" />
+              </button>
+            </form>
+          </div>
+          <div className="modal-action">
+            <button
+              type="button"
+              className="btn"
+              disabled={closeMutation.isPending}
+              onClick={() => getDialog(CLOSE_DIALOG_ID)?.close()}
+            >
+              Volver
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary"
+              disabled={closeMutation.isPending}
+              onClick={closeTicket}
+            >
+              {closeMutation.isPending && (
+                <span className="loading loading-spinner loading-sm" />
+              )}
+              Confirmar cierre
+            </button>
+          </div>
+        </div>
+        <form method="dialog" className="modal-backdrop">
+          <button>Cerrar</button>
+        </form>
       </dialog>
 
       <dialog id={RESOLVE_DIALOG_ID} className="modal">
@@ -218,19 +335,28 @@ const SupportTicketActions = ({ ticket }: { ticket: SupportTicketDetail }) => {
             <div>
               <h2 className="text-xl font-black">Registrar solución</h2>
               <p className="mt-2 text-sm leading-relaxed text-base-content/65">
-                El ticket pasará a resuelto y quedará pendiente de confirmación del solicitante.
+                El ticket pasará a resuelto y quedará pendiente de confirmación
+                del solicitante.
               </p>
             </div>
             <form method="dialog">
-              <button className="btn btn-ghost btn-square btn-sm" aria-label="Cerrar">
+              <button
+                className="btn btn-ghost btn-square btn-sm"
+                aria-label="Cerrar"
+              >
                 <X className="size-4" aria-hidden="true" />
               </button>
             </form>
           </div>
-          <form className="mt-5 space-y-4" onSubmit={resolveForm.handleSubmit(resolveTicket)} noValidate>
+          <form
+            className="mt-5 space-y-4"
+            onSubmit={resolveForm.handleSubmit(resolveTicket)}
+            noValidate
+          >
             <fieldset className="fieldset">
               <legend className="fieldset-legend">
-                Diagnóstico <span className="font-normal opacity-55">(opcional)</span>
+                Diagnóstico{" "}
+                <span className="font-normal opacity-55">(opcional)</span>
               </legend>
               <textarea
                 {...resolveForm.register("diagnosis")}
@@ -257,7 +383,9 @@ const SupportTicketActions = ({ ticket }: { ticket: SupportTicketDetail }) => {
                 placeholder="Describe claramente cómo se resolvió"
                 aria-invalid={Boolean(resolveForm.formState.errors.solution)}
                 aria-describedby={
-                  resolveForm.formState.errors.solution ? "resolve-solution-error" : undefined
+                  resolveForm.formState.errors.solution
+                    ? "resolve-solution-error"
+                    : undefined
                 }
               />
               <FieldInfo
@@ -266,17 +394,29 @@ const SupportTicketActions = ({ ticket }: { ticket: SupportTicketDetail }) => {
               />
             </fieldset>
             <div className="modal-action">
-              <button type="button" className="btn" onClick={() => getDialog(RESOLVE_DIALOG_ID)?.close()}>
+              <button
+                type="button"
+                className="btn"
+                onClick={() => getDialog(RESOLVE_DIALOG_ID)?.close()}
+              >
                 Volver
               </button>
-              <button type="submit" className="btn btn-primary" disabled={resolveMutation.isPending}>
-                {resolveMutation.isPending && <span className="loading loading-spinner loading-sm" />}
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={resolveMutation.isPending}
+              >
+                {resolveMutation.isPending && (
+                  <span className="loading loading-spinner loading-sm" />
+                )}
                 Marcar como resuelto
               </button>
             </div>
           </form>
         </div>
-        <form method="dialog" className="modal-backdrop"><button>Cerrar</button></form>
+        <form method="dialog" className="modal-backdrop">
+          <button>Cerrar</button>
+        </form>
       </dialog>
     </section>
   );

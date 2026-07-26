@@ -27,7 +27,11 @@ const PageHeader = ({
         <ul>
           {breadcrumbs.map((item) => (
             <li key={`${item.label}-${item.path ?? "current"}`}>
-              {item.path ? <Link to={item.path}>{item.label}</Link> : item.label}
+              {item.path ? (
+                <Link to={item.path}>{item.label}</Link>
+              ) : (
+                item.label
+              )}
             </li>
           ))}
         </ul>
@@ -38,14 +42,18 @@ const PageHeader = ({
         {eyebrow && (
           <p className="mb-1 text-sm font-bold text-primary">{eyebrow}</p>
         )}
-        <h1 className="text-2xl font-black tracking-tight sm:text-3xl">{title}</h1>
+        <h1 className="text-2xl font-black tracking-tight sm:text-3xl">
+          {title}
+        </h1>
         {description && (
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-base-content/65 sm:text-base">
             {description}
           </p>
         )}
       </div>
-      {actions && <div className="flex shrink-0 flex-wrap gap-2">{actions}</div>}
+      {actions && (
+        <div className="flex shrink-0 flex-wrap gap-2">{actions}</div>
+      )}
     </div>
   </header>
 );

@@ -2,11 +2,20 @@ import { Check, ChevronDown, Palette } from "lucide-react";
 import { useState } from "react";
 
 const themes = [
+  { value: "light", label: "Light" },
   { value: "cupcake", label: "Cupcake" },
   { value: "dark", label: "Dark" },
   { value: "nord", label: "Nord" },
   { value: "night", label: "Night" },
   { value: "valentine", label: "Valentine" },
+  { value: "abyss", label: "Abyss" },
+  { value: "emerald", label: "Emerald" },
+  { value: "retro", label: "Retro" },
+  { value: "garden", label: "Garden" },
+  { value: "forest", label: "Forest" },
+  { value: "lemonade", label: "Lemonade" },
+  { value: "sunset", label: "Sunset" },
+  { value: "caramellatte", label: "Caramellatte" },
 ] as const;
 
 type Theme = (typeof themes)[number]["value"];
@@ -16,7 +25,7 @@ const isTheme = (value: string | null): value is Theme =>
 
 const getInitialTheme = (): Theme => {
   const currentTheme = document.documentElement.getAttribute("data-theme");
-  return isTheme(currentTheme) ? currentTheme : "cupcake";
+  return isTheme(currentTheme) ? currentTheme : "sunset";
 };
 
 const ToggleTheme = () => {
@@ -34,7 +43,7 @@ const ToggleTheme = () => {
   };
 
   return (
-    <details className="dropdown dropdown-end">
+    <details className="dropdown dropdown-end relative z-100">
       <summary
         className="btn btn-ghost gap-2"
         aria-label={`Cambiar tema. Tema actual: ${activeTheme}`}
@@ -44,7 +53,7 @@ const ToggleTheme = () => {
         <ChevronDown className="size-4 opacity-60" aria-hidden="true" />
       </summary>
 
-      <ul className="menu dropdown-content z-50 mt-2 w-52 rounded-box border border-base-300 bg-base-100 p-2 text-base-content shadow-xl">
+      <ul className="menu dropdown-content z-100 mt-2 max-h-64 w-52 overflow-y-auto rounded-box border border-base-300 bg-base-100 p-2 text-base-content shadow-xl">
         {themes.map((theme) => (
           <li key={theme.value}>
             <button

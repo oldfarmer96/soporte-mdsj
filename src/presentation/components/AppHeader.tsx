@@ -11,7 +11,12 @@ interface AppHeaderProps {
   tools?: ReactNode;
 }
 
-const AppHeader = ({ activeItem, drawerId, section, tools }: AppHeaderProps) => (
+const AppHeader = ({
+  activeItem,
+  drawerId,
+  section,
+  tools,
+}: AppHeaderProps) => (
   <header className="sticky top-0 z-30 border-b border-base-300 bg-base-100/95 backdrop-blur">
     <div className="navbar mx-auto min-h-16 max-w-[100rem] gap-2 px-3 sm:px-5 lg:px-8">
       <div className="navbar-start min-w-0 gap-2">

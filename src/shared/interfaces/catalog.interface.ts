@@ -17,6 +17,7 @@ export interface Subarea {
   shortName: string | null;
   description: string | null;
   isOther: boolean;
+  isNoSubarea: boolean;
   isActive: boolean;
 }
 

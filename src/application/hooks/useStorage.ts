@@ -2,7 +2,9 @@ import { ticketKeys } from "@/application/queryKeys/ticket.queryKeys";
 import type { TicketAttachment } from "@/shared/interfaces/ticket.interface";
 import {
   createAttachmentSignedUrl,
+  deleteTicketAttachment,
   uploadTicketAttachment,
+  type DeleteTicketAttachmentInput,
   type UploadTicketAttachmentInput,
 } from "@/services/storage.service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -30,3 +32,23 @@ export const useAttachmentSignedUrl = (attachment: TicketAttachment) =>
     refetchInterval: 4 * 60 * 1000,
     retry: 1,
   });
+
+export const useDeleteTicketAttachment = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ["delete-ticket-attachment"],
+    mutationFn: (input: DeleteTicketAttachmentInput) =>
+      deleteTicketAttachment(input),
+    onSuccess: (_, variables) => {
+      queryClient.removeQueries({
+        queryKey: ticketKeys.attachmentPreview(variables.attachment.id),
+      });
+      queryClient.invalidateQueries({
+        queryKey: ticketKeys.detail(variables.ticketId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: ticketKeys.supportDetail(variables.ticketId),
+      });
+    },
+  });
+};

@@ -7,6 +7,7 @@ import type {
 import {
   assignSupportTicket,
   changeSupportTicketState,
+  closeSupportTicket,
   getSupportAgents,
   getSupportTicketDetail,
   getSupportTicketErrorMessage,
@@ -38,10 +39,11 @@ export const useSupportTickets = (filters: SupportTicketFilters) =>
     retry: 2,
   });
 
-export const useSupportAgents = () =>
+export const useSupportAgents = (enabled = true) =>
   useQuery({
     queryKey: ticketKeys.supportAgents(),
     queryFn: getSupportAgents,
+    enabled,
     staleTime: 5 * 60 * 1000,
     retry: 2,
   });
@@ -101,6 +103,22 @@ export const useResolveSupportTicket = () => {
     onError: (error, variables) => {
       toast.error(getSupportTicketErrorMessage(error));
       refresh(variables.ticketId);
+    },
+  });
+};
+
+export const useCloseSupportTicket = () => {
+  const refresh = useRefreshSupportTickets();
+  return useMutation({
+    mutationKey: ["close-support-ticket"],
+    mutationFn: (ticketId: string) => closeSupportTicket(ticketId),
+    onSuccess: (_, ticketId) => {
+      toast.success("Ticket cerrado sin confirmación del solicitante");
+      refresh(ticketId);
+    },
+    onError: (error, ticketId) => {
+      toast.error(getSupportTicketErrorMessage(error));
+      refresh(ticketId);
     },
   });
 };

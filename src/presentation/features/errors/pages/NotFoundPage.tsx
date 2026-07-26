@@ -9,8 +9,8 @@ const NotFoundPage = () => {
   const destination = user ? roleBasedRedirection(user.role) : "/login";
 
   return (
-    <main className="relative grid min-h-screen place-items-center overflow-hidden bg-base-200 px-5 py-16 text-base-content">
-      <div className="absolute right-4 top-4 rounded-box bg-base-100/80 shadow-sm backdrop-blur sm:right-6 sm:top-6">
+    <main className="relative grid min-h-screen place-items-center overflow-x-clip bg-base-200 px-5 py-16 text-base-content">
+      <div className="absolute right-4 top-4 z-100 rounded-box bg-base-100/80 shadow-sm backdrop-blur sm:right-6 sm:top-6">
         <ToggleTheme />
       </div>
 

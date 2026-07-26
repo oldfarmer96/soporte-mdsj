@@ -27,7 +27,9 @@ const SubareasPage = () => {
   const areaNames = new Map(
     areasQuery.data?.map((area) => [area.id, area.name]),
   );
-  const deferredSearch = useDeferredValue(search.trim().toLocaleLowerCase("es"));
+  const deferredSearch = useDeferredValue(
+    search.trim().toLocaleLowerCase("es"),
+  );
   const filteredSubareas = subareasQuery.data?.filter(
     (subarea) =>
       subarea.name.toLocaleLowerCase("es").includes(deferredSearch) &&
@@ -85,7 +87,9 @@ const SubareasPage = () => {
           onRetry={() => areasQuery.refetch()}
         />
       )}
-      {!areasQuery.isError && subareasQuery.isPending && <CatalogListSkeleton />}
+      {!areasQuery.isError && subareasQuery.isPending && (
+        <CatalogListSkeleton />
+      )}
       {!areasQuery.isError && subareasQuery.isError && (
         <ErrorState onRetry={() => subareasQuery.refetch()} />
       )}
@@ -129,9 +133,11 @@ const SubareasPage = () => {
                   </p>
                 )}
                 <div className="mt-4 flex flex-wrap gap-2 border-t border-base-300 pt-4">
-                  {subarea.isOther ? (
+                  {subarea.isOther || subarea.isNoSubarea ? (
                     <span className="text-xs text-base-content/55">
-                      Opción administrada por el sistema
+                      {subarea.isNoSubarea
+                        ? "Opción técnica administrada por el sistema"
+                        : "Opción administrada por el sistema"}
                     </span>
                   ) : (
                     <>

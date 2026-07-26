@@ -53,7 +53,9 @@ const Sidebar = ({ navigation, drawerId, onNavigate }: SidebarProps) => {
                 <Link
                   to={item.path}
                   onClick={onNavigate}
-                  aria-current={activeItem?.path === item.path ? "page" : undefined}
+                  aria-current={
+                    activeItem?.path === item.path ? "page" : undefined
+                  }
                   className={`min-h-12 gap-3 rounded-xl ${
                     activeItem?.path === item.path
                       ? "menu-active font-bold"

@@ -92,11 +92,12 @@ export const getSupportTickets = async (
 ): Promise<PaginatedSupportTickets> => {
   const from = (filters.page - 1) * filters.pageSize;
   const to = from + filters.pageSize - 1;
+  const countMethod = filters.includeTotal === false ? undefined : "exact";
   let query = supabase
     .from("tickets")
     .select(
       "id, codigo, asunto, impacto, prioridad, estado, created_at, updated_at, area:areas(nombre), subarea:subareas!tickets_area_subarea_fk(nombre), categoria:categorias(nombre), tipo_problema:ticket_tipos_problemas!tickets_categoria_tipo_problema_fk(nombre), solicitante:perfiles!tickets_id_solicitante_fkey(id, dni, nombres, apellidos), asignado:perfiles!tickets_asignado_a_fkey(id, dni, nombres, apellidos)",
-      { count: "exact" },
+      { count: countMethod },
     )
     .order("created_at", { ascending: false })
     .order("id", { ascending: false });
@@ -151,7 +152,7 @@ export const getSupportTickets = async (
     createdAt: ticket.created_at,
     updatedAt: ticket.updated_at,
   }));
-  const total = count ?? 0;
+  const total = count ?? items.length;
 
   return {
     items,
@@ -260,6 +261,13 @@ export const resolveSupportTicket = async ({
   if (error) throw error;
 };
 
+export const closeSupportTicket = async (ticketId: string) => {
+  const { error } = await supabase.rpc("cerrar_ticket_apoyo", {
+    p_id_ticket: ticketId,
+  });
+  if (error) throw error;
+};
+
 export const getSupportTicketErrorMessage = (error: unknown) => {
   const message =
     typeof error === "object" && error !== null && "message" in error
@@ -268,6 +276,9 @@ export const getSupportTicketErrorMessage = (error: unknown) => {
 
   if (message.includes("personal seleccionado")) {
     return "El personal seleccionado ya no está disponible.";
+  }
+  if (message.includes("solo el personal asignado")) {
+    return "Solo el personal asignado puede cerrar este ticket.";
   }
   if (
     message.includes("no se permite cambiar") ||

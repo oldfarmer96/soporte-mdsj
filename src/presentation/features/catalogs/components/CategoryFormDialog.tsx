@@ -19,7 +19,9 @@ const getDialog = (dialogId: string) =>
 const CategoryFormDialog = ({ category }: { category?: Category }) => {
   const createMutation = useCreateCategory();
   const updateMutation = useUpdateCategory();
-  const dialogId = category ? `edit-category-${category.id}` : "create-category";
+  const dialogId = category
+    ? `edit-category-${category.id}`
+    : "create-category";
   const form = useForm<CategoryForm>({
     resolver: zodResolver(categoryFormSchema),
     defaultValues: {
@@ -76,16 +78,24 @@ const CategoryFormDialog = ({ category }: { category?: Category }) => {
                 {category ? "Editar categoría" : "Nueva categoría"}
               </h2>
               <p className="mt-2 text-sm text-base-content/65">
-                Las categorías críticas asignan prioridad crítica automáticamente.
+                Las categorías críticas asignan prioridad crítica
+                automáticamente.
               </p>
             </div>
             <form method="dialog">
-              <button className="btn btn-ghost btn-square btn-sm" aria-label="Cerrar">
+              <button
+                className="btn btn-ghost btn-square btn-sm"
+                aria-label="Cerrar"
+              >
                 <X className="size-4" aria-hidden="true" />
               </button>
             </form>
           </div>
-          <form className="mt-5 space-y-4" onSubmit={form.handleSubmit(submit)} noValidate>
+          <form
+            className="mt-5 space-y-4"
+            onSubmit={form.handleSubmit(submit)}
+            noValidate
+          >
             <fieldset className="fieldset">
               <legend className="fieldset-legend">Nombre</legend>
               <Controller
@@ -99,7 +109,10 @@ const CategoryFormDialog = ({ category }: { category?: Category }) => {
                   />
                 )}
               />
-              <FieldInfo id="category-name-error" error={form.formState.errors.name} />
+              <FieldInfo
+                id="category-name-error"
+                error={form.formState.errors.name}
+              />
             </fieldset>
             <fieldset className="fieldset">
               <legend className="fieldset-legend">Descripción</legend>
@@ -121,9 +134,12 @@ const CategoryFormDialog = ({ category }: { category?: Category }) => {
             </fieldset>
             <label className="flex cursor-pointer items-center justify-between gap-4 rounded-box bg-base-200 p-4">
               <span>
-                <span className="block text-sm font-bold">Categoría crítica</span>
+                <span className="block text-sm font-bold">
+                  Categoría crítica
+                </span>
                 <span className="mt-1 block text-xs text-base-content/60">
-                  Los nuevos tickets de esta categoría tendrán prioridad crítica.
+                  Los nuevos tickets de esta categoría tendrán prioridad
+                  crítica.
                 </span>
               </span>
               <Controller
@@ -148,17 +164,24 @@ const CategoryFormDialog = ({ category }: { category?: Category }) => {
               </div>
             )}
             <div className="modal-action">
-              <button type="button" className="btn" onClick={() => getDialog(dialogId)?.close()}>
+              <button
+                type="button"
+                className="btn"
+                onClick={() => getDialog(dialogId)?.close()}
+              >
                 Cancelar
               </button>
               <button
                 type="submit"
                 className="btn btn-primary"
                 disabled={
-                  mutation.isPending || Boolean(category && !form.formState.isDirty)
+                  mutation.isPending ||
+                  Boolean(category && !form.formState.isDirty)
                 }
               >
-                {mutation.isPending && <span className="loading loading-spinner loading-sm" />}
+                {mutation.isPending && (
+                  <span className="loading loading-spinner loading-sm" />
+                )}
                 {category && !form.formState.isDirty
                   ? "Sin cambios"
                   : category
@@ -168,7 +191,9 @@ const CategoryFormDialog = ({ category }: { category?: Category }) => {
             </div>
           </form>
         </div>
-        <form method="dialog" className="modal-backdrop"><button>Cerrar</button></form>
+        <form method="dialog" className="modal-backdrop">
+          <button>Cerrar</button>
+        </form>
       </dialog>
     </>
   );

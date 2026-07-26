@@ -14,7 +14,13 @@ import {
 } from "@/presentation/features/shared/schemas/profile.schema";
 import { NAVIGATION_BY_ROLE } from "@/presentation/navigation/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { IdCard, LockKeyhole, Phone, ShieldCheck, UserRound } from "lucide-react";
+import {
+  IdCard,
+  LockKeyhole,
+  Phone,
+  ShieldCheck,
+  UserRound,
+} from "lucide-react";
 import { useForm } from "react-hook-form";
 
 const ProfilePage = () => {
@@ -37,10 +43,12 @@ const ProfilePage = () => {
   if (!user) return null;
 
   const roleLabel = NAVIGATION_BY_ROLE[user.role].shortLabel;
-  const displayName = `${user.name} ${user.lastName}`.trim() || "Perfil sin completar";
-  const initials = user.name && user.lastName
-    ? `${user.name.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase()
-    : "?";
+  const displayName =
+    `${user.name} ${user.lastName}`.trim() || "Perfil sin completar";
+  const initials =
+    user.name && user.lastName
+      ? `${user.name.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase()
+      : "?";
 
   const submitPassword = (data: ChangePasswordT) => {
     if (data.password === user.dni) {
@@ -84,44 +92,79 @@ const ProfilePage = () => {
       <div className="grid gap-6 lg:grid-cols-2">
         <form
           className="rounded-box border border-base-300 bg-base-100 p-5 shadow-sm sm:p-6"
-          onSubmit={personalForm.handleSubmit((data) => updateProfile.mutate(data))}
+          onSubmit={personalForm.handleSubmit((data) =>
+            updateProfile.mutate(data),
+          )}
           noValidate
         >
           <h2 className="text-lg font-black">Datos personales</h2>
-          <p className="mt-1 text-sm text-base-content/60">El DNI y el rol no pueden modificarse.</p>
+          <p className="mt-1 text-sm text-base-content/60">
+            El DNI y el rol no pueden modificarse.
+          </p>
 
           <fieldset className="fieldset mt-4">
             <legend className="fieldset-legend">Nombres</legend>
-            <label className={`input w-full ${personalForm.formState.errors.nombres ? "input-error" : ""}`}>
+            <label
+              className={`input w-full ${personalForm.formState.errors.nombres ? "input-error" : ""}`}
+            >
               <UserRound className="size-4 opacity-45" aria-hidden="true" />
-              <input {...personalForm.register("nombres")} autoComplete="given-name" />
+              <input
+                {...personalForm.register("nombres")}
+                autoComplete="given-name"
+              />
             </label>
-            <FieldInfo id="profile-name-error" error={personalForm.formState.errors.nombres} />
+            <FieldInfo
+              id="profile-name-error"
+              error={personalForm.formState.errors.nombres}
+            />
           </fieldset>
 
           <fieldset className="fieldset">
             <legend className="fieldset-legend">Apellidos</legend>
-            <label className={`input w-full ${personalForm.formState.errors.apellidos ? "input-error" : ""}`}>
+            <label
+              className={`input w-full ${personalForm.formState.errors.apellidos ? "input-error" : ""}`}
+            >
               <UserRound className="size-4 opacity-45" aria-hidden="true" />
-              <input {...personalForm.register("apellidos")} autoComplete="family-name" />
+              <input
+                {...personalForm.register("apellidos")}
+                autoComplete="family-name"
+              />
             </label>
-            <FieldInfo id="profile-last-name-error" error={personalForm.formState.errors.apellidos} />
+            <FieldInfo
+              id="profile-last-name-error"
+              error={personalForm.formState.errors.apellidos}
+            />
           </fieldset>
 
           <fieldset className="fieldset">
             <legend className="fieldset-legend">Teléfono</legend>
-            <label className={`input w-full ${personalForm.formState.errors.telefono ? "input-error" : ""}`}>
+            <label
+              className={`input w-full ${personalForm.formState.errors.telefono ? "input-error" : ""}`}
+            >
               <Phone className="size-4 opacity-45" aria-hidden="true" />
-              <input {...personalForm.register("telefono")} type="tel" inputMode="tel" autoComplete="tel" />
+              <input
+                {...personalForm.register("telefono")}
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+              />
             </label>
-            <FieldInfo id="profile-phone-error" error={personalForm.formState.errors.telefono} />
+            <FieldInfo
+              id="profile-phone-error"
+              error={personalForm.formState.errors.telefono}
+            />
           </fieldset>
 
           <div className="mt-4 flex items-center gap-2 text-xs text-base-content/55">
             <IdCard className="size-4" aria-hidden="true" /> DNI {user.dni}
           </div>
-          <button className="btn btn-primary mt-5 w-full" disabled={updateProfile.isPending}>
-            {updateProfile.isPending && <span className="loading loading-spinner loading-sm" />}
+          <button
+            className="btn btn-primary mt-5 w-full"
+            disabled={updateProfile.isPending}
+          >
+            {updateProfile.isPending && (
+              <span className="loading loading-spinner loading-sm" />
+            )}
             Guardar datos
           </button>
         </form>
@@ -132,34 +175,62 @@ const ProfilePage = () => {
           noValidate
         >
           <h2 className="text-lg font-black">Contraseña</h2>
-          <p className="mt-1 text-sm text-base-content/60">Usa una contraseña distinta de tu DNI.</p>
+          <p className="mt-1 text-sm text-base-content/60">
+            Usa una contraseña distinta de tu DNI.
+          </p>
 
           <fieldset className="fieldset mt-4">
             <legend className="fieldset-legend">Nueva contraseña</legend>
-            <label className={`input w-full ${passwordForm.formState.errors.password ? "input-error" : ""}`}>
+            <label
+              className={`input w-full ${passwordForm.formState.errors.password ? "input-error" : ""}`}
+            >
               <LockKeyhole className="size-4 opacity-45" aria-hidden="true" />
-              <input {...passwordForm.register("password")} type="password" autoComplete="new-password" />
+              <input
+                {...passwordForm.register("password")}
+                type="password"
+                autoComplete="new-password"
+              />
             </label>
-            <FieldInfo id="profile-password-error" error={passwordForm.formState.errors.password} />
+            <FieldInfo
+              id="profile-password-error"
+              error={passwordForm.formState.errors.password}
+            />
           </fieldset>
 
           <fieldset className="fieldset">
             <legend className="fieldset-legend">Confirmar contraseña</legend>
-            <label className={`input w-full ${passwordForm.formState.errors.confirmPassword ? "input-error" : ""}`}>
+            <label
+              className={`input w-full ${passwordForm.formState.errors.confirmPassword ? "input-error" : ""}`}
+            >
               <LockKeyhole className="size-4 opacity-45" aria-hidden="true" />
-              <input {...passwordForm.register("confirmPassword")} type="password" autoComplete="new-password" />
+              <input
+                {...passwordForm.register("confirmPassword")}
+                type="password"
+                autoComplete="new-password"
+              />
             </label>
-            <FieldInfo id="profile-confirm-password-error" error={passwordForm.formState.errors.confirmPassword} />
+            <FieldInfo
+              id="profile-confirm-password-error"
+              error={passwordForm.formState.errors.confirmPassword}
+            />
           </fieldset>
 
           {user.mustChangePassword && (
-            <div role="alert" className="alert alert-warning alert-soft mt-4 text-sm">
+            <div
+              role="alert"
+              className="alert alert-warning alert-soft mt-4 text-sm"
+            >
               Tu cuenta todavía usa la contraseña temporal.
             </div>
           )}
 
-          <button className="btn mt-5 w-full" disabled={changePassword.isPending}>
-            {changePassword.isPending && <span className="loading loading-spinner loading-sm" />}
+          <button
+            className="btn mt-5 w-full"
+            disabled={changePassword.isPending}
+          >
+            {changePassword.isPending && (
+              <span className="loading loading-spinner loading-sm" />
+            )}
             Cambiar contraseña
           </button>
         </form>

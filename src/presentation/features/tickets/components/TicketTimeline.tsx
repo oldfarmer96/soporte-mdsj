@@ -2,6 +2,7 @@ import type {
   TicketEventType,
   TicketHistoryEvent,
 } from "@/shared/interfaces/ticket.interface";
+import DateTimeDisplay from "@/presentation/components/DateTimeDisplay";
 import {
   Check,
   CircleDot,
@@ -36,11 +37,6 @@ const EVENT_ICONS = {
   COMENTARIO: MessageSquare,
 } satisfies Record<TicketEventType, typeof CircleDot>;
 
-const timelineDateFormatter = new Intl.DateTimeFormat("es-PE", {
-  dateStyle: "medium",
-  timeStyle: "short",
-});
-
 const TicketTimeline = ({ history }: { history: TicketHistoryEvent[] }) => (
   <section className="rounded-box border border-base-300 bg-base-100 p-5 shadow-sm sm:p-7">
     <h2 className="text-lg font-black">Historial</h2>
@@ -65,9 +61,10 @@ const TicketTimeline = ({ history }: { history: TicketHistoryEvent[] }) => (
                 </span>
               </div>
               <div className="timeline-end timeline-box mb-5 w-full border-base-300 bg-base-100 shadow-none">
-                <time className="text-xs font-semibold text-base-content/50" dateTime={event.createdAt}>
-                  {timelineDateFormatter.format(new Date(event.createdAt))}
-                </time>
+                <DateTimeDisplay
+                  value={event.createdAt}
+                  className="text-xs font-semibold text-base-content/50"
+                />
                 <h3 className="mt-1 font-black">{EVENT_LABELS[event.type]}</h3>
                 {event.detail && event.detail !== "Ticket creado" && (
                   <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-base-content/65">
@@ -75,7 +72,9 @@ const TicketTimeline = ({ history }: { history: TicketHistoryEvent[] }) => (
                   </p>
                 )}
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {event.newStatus && <TicketStatusBadge status={event.newStatus} />}
+                  {event.newStatus && (
+                    <TicketStatusBadge status={event.newStatus} />
+                  )}
                   {event.newPriority && (
                     <TicketPriorityBadge priority={event.newPriority} />
                   )}

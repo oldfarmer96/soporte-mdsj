@@ -7,7 +7,6 @@ import { Link } from "react-router-dom";
 import { loginSchema, type LoginT } from "../schemas/login.schema";
 
 const LoginPage = () => {
-  // const [showPassword, setShowPassword] = useState(false);
   const login = useLogin();
 
   const {

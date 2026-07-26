@@ -1,5 +1,7 @@
 import { useTicketDetail } from "@/application/hooks/useTickets";
+import { useTicketDetailRealtime } from "@/application/hooks/useTicketRealtime";
 import ErrorState from "@/presentation/components/ErrorState";
+import DateTimeDisplay from "@/presentation/components/DateTimeDisplay";
 import PageContainer from "@/presentation/components/PageContainer";
 import PageHeader from "@/presentation/components/PageHeader";
 import PageSkeleton from "@/presentation/components/PageSkeleton";
@@ -33,13 +35,9 @@ const IMPACT_LABELS: Record<TicketImpact, string> = {
   SERVICIO_INTERRUMPIDO: "Servicio interrumpido",
 };
 
-const dateFormatter = new Intl.DateTimeFormat("es-PE", {
-  dateStyle: "long",
-  timeStyle: "short",
-});
-
 const TicketCreatedPage = () => {
   const { ticketId = "" } = useParams();
+  useTicketDetailRealtime(ticketId, "requester");
   const ticketQuery = useTicketDetail(ticketId);
 
   if (ticketQuery.isPending) return <PageSkeleton />;
@@ -122,9 +120,7 @@ const TicketCreatedPage = () => {
               <CircleHelp className="size-4" aria-hidden="true" />
               Tipo e impacto
             </dt>
-            <dd className="mt-2 font-semibold">
-              {ticket.problemTypeName}
-            </dd>
+            <dd className="mt-2 font-semibold">{ticket.problemTypeName}</dd>
             <dd className="mt-1 text-sm text-base-content/60">
               {IMPACT_LABELS[ticket.impact]}
               {ticket.workStopped ? " · Trabajo detenido" : ""}
@@ -136,9 +132,7 @@ const TicketCreatedPage = () => {
               Registrado
             </dt>
             <dd className="mt-2 font-semibold">
-              <time dateTime={ticket.createdAt}>
-                {dateFormatter.format(new Date(ticket.createdAt))}
-              </time>
+              <DateTimeDisplay value={ticket.createdAt} />
             </dd>
           </div>
           <div className="bg-base-100 p-5 sm:p-6">
@@ -172,8 +166,15 @@ const TicketCreatedPage = () => {
       )}
 
       <div className="mt-5 grid gap-5 xl:grid-cols-2">
-        <TicketResolutionPanel resolution={ticket.resolution} />
-        <TicketAttachments ticketId={ticket.id} attachments={ticket.attachments} />
+        <TicketResolutionPanel
+          resolution={ticket.resolution}
+          status={ticket.status}
+        />
+        <TicketAttachments
+          ticketId={ticket.id}
+          attachments={ticket.attachments}
+          status={ticket.status}
+        />
       </div>
 
       <div className="mt-5">

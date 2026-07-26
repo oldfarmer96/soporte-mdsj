@@ -1,5 +1,8 @@
 const PageSkeleton = () => (
-  <div className="mx-auto w-full max-w-[100rem] px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10" role="status">
+  <div
+    className="mx-auto w-full max-w-[100rem] px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10"
+    role="status"
+  >
     <span className="sr-only">Cargando contenido...</span>
     <div className="skeleton h-4 w-24" />
     <div className="skeleton mt-3 h-9 w-full max-w-sm" />

@@ -79,8 +79,8 @@ export const NAVIGATION_BY_ROLE: Record<RoleT, RoleNavigation> = {
         end: true,
       },
       {
-        label: "Cola de tickets",
-        description: "Consulta las solicitudes pendientes",
+        label: "Lista de tickets",
+        description: "Consulta todas las solicitudes",
         path: "/apoyo/tickets",
         icon: Inbox,
       },

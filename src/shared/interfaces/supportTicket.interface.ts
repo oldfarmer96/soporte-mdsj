@@ -38,6 +38,7 @@ export interface SupportTicketListItem {
 export interface SupportTicketFilters {
   page: number;
   pageSize: number;
+  includeTotal?: boolean;
   search?: string;
   status?: TicketStatus;
   priority?: TicketPriority;

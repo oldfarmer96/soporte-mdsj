@@ -12,6 +12,7 @@ const CATALOG_STALE_TIME = 10 * 60 * 1000;
 
 interface CatalogHookOptions {
   includeInactive?: boolean;
+  enabled?: boolean;
 }
 
 interface ProblemTypeHookOptions extends CatalogHookOptions {
@@ -24,20 +25,24 @@ interface SubareaHookOptions extends CatalogHookOptions {
 
 export const useAreas = ({
   includeInactive = false,
+  enabled = true,
 }: CatalogHookOptions = {}) =>
   useQuery({
     queryKey: catalogKeys.areas(includeInactive),
     queryFn: () => getAreas({ includeInactive }),
+    enabled,
     staleTime: CATALOG_STALE_TIME,
     retry: 2,
   });
 
 export const useCategories = ({
   includeInactive = false,
+  enabled = true,
 }: CatalogHookOptions = {}) =>
   useQuery({
     queryKey: catalogKeys.categories(includeInactive),
     queryFn: () => getCategories({ includeInactive }),
+    enabled,
     staleTime: CATALOG_STALE_TIME,
     retry: 2,
   });
@@ -45,6 +50,7 @@ export const useCategories = ({
 export const useSubareas = ({
   areaId,
   includeInactive = false,
+  enabled = true,
 }: SubareaHookOptions = {}) =>
   useQuery({
     queryKey: catalogKeys.subareas({
@@ -56,7 +62,7 @@ export const useSubareas = ({
         areaId: areaId ?? undefined,
         includeInactive,
       }),
-    enabled: areaId !== null,
+    enabled: enabled && areaId !== null,
     staleTime: CATALOG_STALE_TIME,
     retry: 2,
   });
@@ -64,6 +70,7 @@ export const useSubareas = ({
 export const useProblemTypes = ({
   categoryId,
   includeInactive = false,
+  enabled = true,
 }: ProblemTypeHookOptions = {}) =>
   useQuery({
     queryKey: catalogKeys.problemTypes({
@@ -75,7 +82,7 @@ export const useProblemTypes = ({
         categoryId: categoryId ?? undefined,
         includeInactive,
       }),
-    enabled: categoryId !== null,
+    enabled: enabled && categoryId !== null,
     staleTime: CATALOG_STALE_TIME,
     retry: 2,
   });

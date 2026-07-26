@@ -28,7 +28,10 @@ import {
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useParams } from "react-router-dom";
-import { ProfileRoleBadge, ProfileStatusBadge } from "../components/ProfileBadges";
+import {
+  ProfileRoleBadge,
+  ProfileStatusBadge,
+} from "../components/ProfileBadges";
 import {
   managedProfileSchema,
   type ManagedProfileForm,
@@ -81,7 +84,10 @@ const AdminProfilePage = () => {
   if (profileQuery.isError) {
     return (
       <PageContainer size="narrow">
-        <PageHeader eyebrow="Administración" title="No pudimos abrir el usuario" />
+        <PageHeader
+          eyebrow="Administración"
+          title="No pudimos abrir el usuario"
+        />
         <ErrorState onRetry={() => profileQuery.refetch()} />
         <Link to="/admin/usuarios" className="btn mt-5">
           <ArrowLeft className="size-4" aria-hidden="true" /> Volver a usuarios
@@ -92,8 +98,9 @@ const AdminProfilePage = () => {
 
   const profile = profileQuery.data;
   const isSelf = currentUser?.id === profile.id;
-  const displayName = `${profile.firstName ?? ""} ${profile.lastName ?? ""}`.trim()
-    || "Perfil sin completar";
+  const displayName =
+    `${profile.firstName ?? ""} ${profile.lastName ?? ""}`.trim() ||
+    "Perfil sin completar";
   const localApiAvailable = localApi.isSuccess;
 
   const submit = (values: ManagedProfileForm) => {
@@ -110,7 +117,10 @@ const AdminProfilePage = () => {
   const completeFromDni = () => {
     dniLookup.mutate(profile.dni, {
       onSuccess: (result) => {
-        form.setValue("firstName", result.nombres, { shouldDirty: true, shouldValidate: true });
+        form.setValue("firstName", result.nombres, {
+          shouldDirty: true,
+          shouldValidate: true,
+        });
         form.setValue(
           "lastName",
           `${result.apellido_paterno} ${result.apellido_materno}`.trim(),
@@ -172,9 +182,11 @@ const AdminProfilePage = () => {
               disabled={!localApiAvailable || dniLookup.isPending}
               onClick={completeFromDni}
             >
-              {dniLookup.isPending
-                ? <span className="loading loading-spinner loading-sm" />
-                : <DatabaseZap className="size-4" aria-hidden="true" />}
+              {dniLookup.isPending ? (
+                <span className="loading loading-spinner loading-sm" />
+              ) : (
+                <DatabaseZap className="size-4" aria-hidden="true" />
+              )}
               Completar desde DNI
             </button>
           </div>
@@ -182,29 +194,49 @@ const AdminProfilePage = () => {
           <div className="mt-5 grid gap-x-4 sm:grid-cols-2">
             <fieldset className="fieldset">
               <legend className="fieldset-legend">Nombres</legend>
-              <label className={`input w-full ${form.formState.errors.firstName ? "input-error" : ""}`}>
+              <label
+                className={`input w-full ${form.formState.errors.firstName ? "input-error" : ""}`}
+              >
                 <UserRound className="size-4 opacity-45" aria-hidden="true" />
                 <input {...form.register("firstName")} autoComplete="off" />
               </label>
-              <FieldInfo id="managed-profile-first-name" error={form.formState.errors.firstName} />
+              <FieldInfo
+                id="managed-profile-first-name"
+                error={form.formState.errors.firstName}
+              />
             </fieldset>
 
             <fieldset className="fieldset">
               <legend className="fieldset-legend">Apellidos</legend>
-              <label className={`input w-full ${form.formState.errors.lastName ? "input-error" : ""}`}>
+              <label
+                className={`input w-full ${form.formState.errors.lastName ? "input-error" : ""}`}
+              >
                 <UserRound className="size-4 opacity-45" aria-hidden="true" />
                 <input {...form.register("lastName")} autoComplete="off" />
               </label>
-              <FieldInfo id="managed-profile-last-name" error={form.formState.errors.lastName} />
+              <FieldInfo
+                id="managed-profile-last-name"
+                error={form.formState.errors.lastName}
+              />
             </fieldset>
 
             <fieldset className="fieldset">
               <legend className="fieldset-legend">Teléfono</legend>
-              <label className={`input w-full ${form.formState.errors.phone ? "input-error" : ""}`}>
+              <label
+                className={`input w-full ${form.formState.errors.phone ? "input-error" : ""}`}
+              >
                 <Phone className="size-4 opacity-45" aria-hidden="true" />
-                <input {...form.register("phone")} type="tel" inputMode="tel" autoComplete="off" />
+                <input
+                  {...form.register("phone")}
+                  type="tel"
+                  inputMode="tel"
+                  autoComplete="off"
+                />
               </label>
-              <FieldInfo id="managed-profile-phone" error={form.formState.errors.phone} />
+              <FieldInfo
+                id="managed-profile-phone"
+                error={form.formState.errors.phone}
+              />
             </fieldset>
 
             <fieldset className="fieldset">
@@ -217,29 +249,48 @@ const AdminProfilePage = () => {
 
             <fieldset className="fieldset">
               <legend className="fieldset-legend">Rol</legend>
-              <select {...form.register("role")} className="select w-full" disabled={isSelf}>
+              <select
+                {...form.register("role")}
+                className="select w-full"
+                disabled={isSelf}
+              >
                 {Object.entries(ROLE_LABELS).map(([value, label]) => (
-                  <option key={value} value={value}>{label}</option>
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
                 ))}
               </select>
-              <FieldInfo id="managed-profile-role" error={form.formState.errors.role} />
+              <FieldInfo
+                id="managed-profile-role"
+                error={form.formState.errors.role}
+              />
             </fieldset>
 
             <fieldset className="fieldset">
               <legend className="fieldset-legend">Estado</legend>
-              <select {...form.register("status")} className="select w-full" disabled={isSelf}>
+              <select
+                {...form.register("status")}
+                className="select w-full"
+                disabled={isSelf}
+              >
                 {Object.entries(STATUS_LABELS).map(([value, label]) => (
-                  <option key={value} value={value}>{label}</option>
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
                 ))}
               </select>
-              <FieldInfo id="managed-profile-status" error={form.formState.errors.status} />
+              <FieldInfo
+                id="managed-profile-status"
+                error={form.formState.errors.status}
+              />
             </fieldset>
           </div>
 
           {isSelf && (
             <div className="alert alert-info alert-soft mt-4 text-sm">
               <ShieldCheck className="size-5" aria-hidden="true" />
-              Desde esta página puedes editar tus datos, pero no tu propio rol ni estado.
+              Desde esta página puedes editar tus datos, pero no tu propio rol
+              ni estado.
             </div>
           )}
 
@@ -251,8 +302,13 @@ const AdminProfilePage = () => {
           )}
 
           <div className="mt-6 flex justify-end">
-            <button className="btn btn-primary" disabled={updateProfile.isPending}>
-              {updateProfile.isPending && <span className="loading loading-spinner loading-sm" />}
+            <button
+              className="btn btn-primary"
+              disabled={updateProfile.isPending}
+            >
+              {updateProfile.isPending && (
+                <span className="loading loading-spinner loading-sm" />
+              )}
               Guardar cambios
             </button>
           </div>
@@ -263,13 +319,16 @@ const AdminProfilePage = () => {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="flex items-center gap-2 font-black">
-                  <Server className="size-5" aria-hidden="true" /> Servicio local
+                  <Server className="size-5" aria-hidden="true" /> Servicio
+                  local
                 </h2>
                 <p className="mt-1 text-sm text-base-content/60">
                   Herramientas disponibles en esta computadora.
                 </p>
               </div>
-              <span className={`status ${localApiAvailable ? "status-success" : "status-error"}`}>
+              <span
+                className={`status ${localApiAvailable ? "status-success" : "status-error"}`}
+              >
                 <span className="sr-only">
                   {localApiAvailable ? "Conectado" : "No disponible"}
                 </span>
@@ -288,27 +347,36 @@ const AdminProfilePage = () => {
               disabled={localApi.isFetching}
               onClick={() => localApi.refetch()}
             >
-              {localApi.isFetching
-                ? <span className="loading loading-spinner loading-sm" />
-                : <RefreshCw className="size-4" aria-hidden="true" />}
+              {localApi.isFetching ? (
+                <span className="loading loading-spinner loading-sm" />
+              ) : (
+                <RefreshCw className="size-4" aria-hidden="true" />
+              )}
               Verificar conexión
             </button>
           </section>
 
           <section className="rounded-box border border-warning/35 bg-base-100 p-5 shadow-sm">
             <h2 className="flex items-center gap-2 font-black">
-              <KeyRound className="size-5" aria-hidden="true" /> Contraseña temporal
+              <KeyRound className="size-5" aria-hidden="true" /> Contraseña
+              temporal
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-base-content/65">
-              Al restablecer, la contraseña será nuevamente el DNI <strong>{profile.dni}</strong>.
-              El usuario deberá cambiarla cuanto antes desde su perfil.
+              Al restablecer, la contraseña será nuevamente el DNI{" "}
+              <strong>{profile.dni}</strong>. El usuario deberá cambiarla cuanto
+              antes desde su perfil.
             </p>
 
             {confirmingReset ? (
-              <div role="alert" className="alert alert-warning alert-soft mt-4 items-start">
+              <div
+                role="alert"
+                className="alert alert-warning alert-soft mt-4 items-start"
+              >
                 <AlertTriangle className="size-5 shrink-0" aria-hidden="true" />
                 <div>
-                  <p className="text-sm font-semibold">¿Confirmas el restablecimiento al DNI?</p>
+                  <p className="text-sm font-semibold">
+                    ¿Confirmas el restablecimiento al DNI?
+                  </p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <button
                       type="button"
@@ -324,7 +392,9 @@ const AdminProfilePage = () => {
                       disabled={resetPassword.isPending}
                       onClick={confirmReset}
                     >
-                      {resetPassword.isPending && <span className="loading loading-spinner loading-sm" />}
+                      {resetPassword.isPending && (
+                        <span className="loading loading-spinner loading-sm" />
+                      )}
                       Sí, restablecer
                     </button>
                   </div>
@@ -337,7 +407,8 @@ const AdminProfilePage = () => {
                 disabled={!localApiAvailable}
                 onClick={() => setConfirmingReset(true)}
               >
-                <KeyRound className="size-4" aria-hidden="true" /> Restablecer al DNI
+                <KeyRound className="size-4" aria-hidden="true" /> Restablecer
+                al DNI
               </button>
             )}
           </section>

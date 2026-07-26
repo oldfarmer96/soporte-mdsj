@@ -37,7 +37,9 @@ const CollapsibleFilters = ({
           aria-controls={contentId}
           onClick={() => setIsOpen((current) => !current)}
         >
-          <span className="hidden sm:inline">{isOpen ? "Ocultar" : "Mostrar"}</span>
+          <span className="hidden sm:inline">
+            {isOpen ? "Ocultar" : "Mostrar"}
+          </span>
           <span className="sm:hidden">{isOpen ? "Cerrar" : "Abrir"}</span>
           <ChevronDown
             className={`size-4 transition-transform ${isOpen ? "rotate-180" : ""}`}

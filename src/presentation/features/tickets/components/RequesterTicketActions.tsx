@@ -73,7 +73,10 @@ const RequesterTicketActions = ({ ticket }: { ticket: TicketDetail }) => {
       return (
         <div className="alert alert-error alert-soft items-start" role="alert">
           <AlertTriangle className="size-5 shrink-0" aria-hidden="true" />
-          <p>El ticket figura como resuelto, pero no tiene una solución disponible para confirmar.</p>
+          <p>
+            El ticket figura como resuelto, pero no tiene una solución
+            disponible para confirmar.
+          </p>
         </div>
       );
     }
@@ -81,12 +84,18 @@ const RequesterTicketActions = ({ ticket }: { ticket: TicketDetail }) => {
     return (
       <section className="rounded-box border border-warning/30 bg-warning/10 p-5 sm:p-7">
         <div className="flex items-start gap-3">
-          <AlertTriangle className="mt-0.5 size-6 shrink-0 text-warning" aria-hidden="true" />
+          <AlertTriangle
+            className="mt-0.5 size-6 shrink-0 text-warning"
+            aria-hidden="true"
+          />
           <div className="grow">
-            <h2 className="text-lg font-black">Confirma el resultado de la atención</h2>
+            <h2 className="text-lg font-black">
+              Confirma el resultado de la atención
+            </h2>
             <p className="mt-2 text-sm leading-relaxed text-base-content/70">
-              Revisa la solución registrada. Si el problema terminó, confirma para cerrar el
-              ticket. Si continúa, explica qué sucede para reabrirlo.
+              Revisa la solución registrada. Si el problema terminó, confirma
+              para cerrar el ticket. Si continúa, explica qué sucede para
+              reabrirlo.
             </p>
             <div className="mt-5 flex flex-col gap-2 sm:flex-row">
               <button
@@ -117,11 +126,15 @@ const RequesterTicketActions = ({ ticket }: { ticket: TicketDetail }) => {
               <div>
                 <h2 className="text-xl font-black">Confirmar solución</h2>
                 <p className="mt-2 text-sm leading-relaxed text-base-content/65">
-                  El ticket pasará a cerrado. Podrás reabrirlo si el problema reaparece.
+                  El ticket pasará a cerrado. Podrás reabrirlo si el problema
+                  reaparece.
                 </p>
               </div>
               <form method="dialog">
-                <button className="btn btn-ghost btn-square btn-sm" aria-label="Cerrar">
+                <button
+                  className="btn btn-ghost btn-square btn-sm"
+                  aria-label="Cerrar"
+                >
                   <X className="size-4" aria-hidden="true" />
                 </button>
               </form>
@@ -129,11 +142,17 @@ const RequesterTicketActions = ({ ticket }: { ticket: TicketDetail }) => {
             {confirmMutation.isError && (
               <div className="alert alert-error alert-soft mt-5" role="alert">
                 <AlertTriangle className="size-5" aria-hidden="true" />
-                <span>{getRequesterActionErrorMessage(confirmMutation.error)}</span>
+                <span>
+                  {getRequesterActionErrorMessage(confirmMutation.error)}
+                </span>
               </div>
             )}
             <div className="modal-action">
-              <button type="button" className="btn" onClick={() => getDialog(confirmDialogId)?.close()}>
+              <button
+                type="button"
+                className="btn"
+                onClick={() => getDialog(confirmDialogId)?.close()}
+              >
                 Volver
               </button>
               <button
@@ -142,12 +161,16 @@ const RequesterTicketActions = ({ ticket }: { ticket: TicketDetail }) => {
                 disabled={confirmMutation.isPending}
                 onClick={confirmSolution}
               >
-                {confirmMutation.isPending && <span className="loading loading-spinner loading-sm" />}
+                {confirmMutation.isPending && (
+                  <span className="loading loading-spinner loading-sm" />
+                )}
                 Confirmar y cerrar
               </button>
             </div>
           </div>
-          <form method="dialog" className="modal-backdrop"><button>Cerrar</button></form>
+          <form method="dialog" className="modal-backdrop">
+            <button>Cerrar</button>
+          </form>
         </dialog>
 
         <dialog id={rejectDialogId} className="modal">
@@ -156,18 +179,28 @@ const RequesterTicketActions = ({ ticket }: { ticket: TicketDetail }) => {
               <div>
                 <h2 className="text-xl font-black">El problema continúa</h2>
                 <p className="mt-2 text-sm leading-relaxed text-base-content/65">
-                  El ticket volverá a la cola para que el personal de apoyo continúe la atención.
+                  El ticket volverá a la cola para que el personal de apoyo
+                  continúe la atención.
                 </p>
               </div>
               <form method="dialog">
-                <button className="btn btn-ghost btn-square btn-sm" aria-label="Cerrar">
+                <button
+                  className="btn btn-ghost btn-square btn-sm"
+                  aria-label="Cerrar"
+                >
                   <X className="size-4" aria-hidden="true" />
                 </button>
               </form>
             </div>
-            <form className="mt-5" onSubmit={rejectForm.handleSubmit(rejectSolution)} noValidate>
+            <form
+              className="mt-5"
+              onSubmit={rejectForm.handleSubmit(rejectSolution)}
+              noValidate
+            >
               <fieldset className="fieldset">
-                <legend className="fieldset-legend">¿Qué problema continúa?</legend>
+                <legend className="fieldset-legend">
+                  ¿Qué problema continúa?
+                </legend>
                 <textarea
                   {...rejectForm.register("reason")}
                   className={`textarea min-h-32 w-full ${
@@ -177,7 +210,9 @@ const RequesterTicketActions = ({ ticket }: { ticket: TicketDetail }) => {
                   placeholder="Describe qué sigue fallando o qué resultado esperabas"
                   aria-invalid={Boolean(rejectForm.formState.errors.reason)}
                   aria-describedby={
-                    rejectForm.formState.errors.reason ? "reject-solution-error" : undefined
+                    rejectForm.formState.errors.reason
+                      ? "reject-solution-error"
+                      : undefined
                   }
                 />
                 <FieldInfo
@@ -188,21 +223,35 @@ const RequesterTicketActions = ({ ticket }: { ticket: TicketDetail }) => {
               {confirmMutation.isError && (
                 <div className="alert alert-error alert-soft mt-4" role="alert">
                   <AlertTriangle className="size-5" aria-hidden="true" />
-                  <span>{getRequesterActionErrorMessage(confirmMutation.error)}</span>
+                  <span>
+                    {getRequesterActionErrorMessage(confirmMutation.error)}
+                  </span>
                 </div>
               )}
               <div className="modal-action">
-                <button type="button" className="btn" onClick={() => getDialog(rejectDialogId)?.close()}>
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={() => getDialog(rejectDialogId)?.close()}
+                >
                   Volver
                 </button>
-                <button type="submit" className="btn btn-warning" disabled={confirmMutation.isPending}>
-                  {confirmMutation.isPending && <span className="loading loading-spinner loading-sm" />}
+                <button
+                  type="submit"
+                  className="btn btn-warning"
+                  disabled={confirmMutation.isPending}
+                >
+                  {confirmMutation.isPending && (
+                    <span className="loading loading-spinner loading-sm" />
+                  )}
                   Reabrir atención
                 </button>
               </div>
             </form>
           </div>
-          <form method="dialog" className="modal-backdrop"><button>Cerrar</button></form>
+          <form method="dialog" className="modal-backdrop">
+            <button>Cerrar</button>
+          </form>
         </dialog>
       </section>
     );
@@ -214,8 +263,8 @@ const RequesterTicketActions = ({ ticket }: { ticket: TicketDetail }) => {
         <div>
           <h2 className="text-lg font-black">¿El problema reapareció?</h2>
           <p className="mt-2 max-w-xl text-sm leading-relaxed text-base-content/65">
-            Reabre el ticket únicamente si se trata del mismo problema. Para una incidencia
-            diferente, registra un ticket nuevo.
+            Reabre el ticket únicamente si se trata del mismo problema. Para una
+            incidencia diferente, registra un ticket nuevo.
           </p>
         </div>
         <button
@@ -239,12 +288,19 @@ const RequesterTicketActions = ({ ticket }: { ticket: TicketDetail }) => {
               </p>
             </div>
             <form method="dialog">
-              <button className="btn btn-ghost btn-square btn-sm" aria-label="Cerrar">
+              <button
+                className="btn btn-ghost btn-square btn-sm"
+                aria-label="Cerrar"
+              >
                 <X className="size-4" aria-hidden="true" />
               </button>
             </form>
           </div>
-          <form className="mt-5" onSubmit={reopenForm.handleSubmit(reopenTicket)} noValidate>
+          <form
+            className="mt-5"
+            onSubmit={reopenForm.handleSubmit(reopenTicket)}
+            noValidate
+          >
             <fieldset className="fieldset">
               <legend className="fieldset-legend">Motivo de reapertura</legend>
               <textarea
@@ -256,29 +312,48 @@ const RequesterTicketActions = ({ ticket }: { ticket: TicketDetail }) => {
                 placeholder="Explica cuándo reapareció y qué está ocurriendo"
                 aria-invalid={Boolean(reopenForm.formState.errors.reason)}
                 aria-describedby={
-                  reopenForm.formState.errors.reason ? "reopen-ticket-error" : undefined
+                  reopenForm.formState.errors.reason
+                    ? "reopen-ticket-error"
+                    : undefined
                 }
               />
-              <FieldInfo id="reopen-ticket-error" error={reopenForm.formState.errors.reason} />
+              <FieldInfo
+                id="reopen-ticket-error"
+                error={reopenForm.formState.errors.reason}
+              />
             </fieldset>
             {reopenMutation.isError && (
               <div className="alert alert-error alert-soft mt-4" role="alert">
                 <AlertTriangle className="size-5" aria-hidden="true" />
-                <span>{getRequesterActionErrorMessage(reopenMutation.error)}</span>
+                <span>
+                  {getRequesterActionErrorMessage(reopenMutation.error)}
+                </span>
               </div>
             )}
             <div className="modal-action">
-              <button type="button" className="btn" onClick={() => getDialog(reopenDialogId)?.close()}>
+              <button
+                type="button"
+                className="btn"
+                onClick={() => getDialog(reopenDialogId)?.close()}
+              >
                 Volver
               </button>
-              <button type="submit" className="btn btn-warning" disabled={reopenMutation.isPending}>
-                {reopenMutation.isPending && <span className="loading loading-spinner loading-sm" />}
+              <button
+                type="submit"
+                className="btn btn-warning"
+                disabled={reopenMutation.isPending}
+              >
+                {reopenMutation.isPending && (
+                  <span className="loading loading-spinner loading-sm" />
+                )}
                 Confirmar reapertura
               </button>
             </div>
           </form>
         </div>
-        <form method="dialog" className="modal-backdrop"><button>Cerrar</button></form>
+        <form method="dialog" className="modal-backdrop">
+          <button>Cerrar</button>
+        </form>
       </dialog>
     </section>
   );

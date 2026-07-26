@@ -4,18 +4,21 @@ import PageHeader from "@/presentation/components/PageHeader";
 import { NAVIGATION_BY_ROLE } from "@/presentation/navigation/navigation";
 import type { RoleT } from "@/shared/types/role.types";
 import { ArrowRight, UserRoundPen } from "lucide-react";
+import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 
 interface RoleHomePageProps {
   role: RoleT;
   description: string;
+  children?: ReactNode;
 }
 
-const RoleHomePage = ({ role, description }: RoleHomePageProps) => {
+const RoleHomePage = ({ role, description, children }: RoleHomePageProps) => {
   const user = useAuthStore((state) => state.user);
   const navigation = NAVIGATION_BY_ROLE[role];
   const destinations = navigation.items.filter(
-    (item) => item.path !== navigation.homePath && item.path !== navigation.profilePath,
+    (item) =>
+      item.path !== navigation.homePath && item.path !== navigation.profilePath,
   );
   const profileNeedsAttention =
     !user?.name ||
@@ -32,7 +35,10 @@ const RoleHomePage = ({ role, description }: RoleHomePageProps) => {
       />
 
       {profileNeedsAttention && (
-        <div role="alert" className="alert alert-warning alert-soft mb-6 sm:alert-horizontal">
+        <div
+          role="alert"
+          className="alert alert-warning alert-soft mb-6 sm:alert-horizontal"
+        >
           <UserRoundPen className="size-5" aria-hidden="true" />
           <div className="grow">
             <h2 className="font-bold">Completa tu perfil</h2>
@@ -85,7 +91,9 @@ const RoleHomePage = ({ role, description }: RoleHomePageProps) => {
                 <h3 className="mt-5 font-black">{item.label}</h3>
                 <p
                   className={`mt-1 text-sm leading-relaxed ${
-                    index === 0 ? "text-primary-content/75" : "text-base-content/60"
+                    index === 0
+                      ? "text-primary-content/75"
+                      : "text-base-content/60"
                   }`}
                 >
                   {item.description}
@@ -95,6 +103,8 @@ const RoleHomePage = ({ role, description }: RoleHomePageProps) => {
           })}
         </div>
       </section>
+
+      {children}
     </PageContainer>
   );
 };
