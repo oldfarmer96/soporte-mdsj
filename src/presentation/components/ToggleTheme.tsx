@@ -25,7 +25,7 @@ const isTheme = (value: string | null): value is Theme =>
 
 const getInitialTheme = (): Theme => {
   const currentTheme = document.documentElement.getAttribute("data-theme");
-  return isTheme(currentTheme) ? currentTheme : "light";
+  return isTheme(currentTheme) ? currentTheme : "sunset";
 };
 
 const ToggleTheme = () => {
